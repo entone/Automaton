@@ -1,13 +1,10 @@
-try:    
-    from envy.wsgi import WSGI    
+try:        
+    from envy.wsgi import WSGI
     from urls import urls
     from envy.session import CookieSession
     import logging
-    import settings
-    import models
-    import controllers
-    import gevent
-    import loggers
+    import settings    
+    from loggers import Logger
     from interface import Interface    
 
     logging.basicConfig(format=settings.LOG_FORMAT, level=settings.LOG_LEVEL)
@@ -20,12 +17,9 @@ try:
 
     wsgi = WSGI(urls, server_settings)
 
-    loggers.init()
+    i = Interface(uri="tcp://*:5555")
+    l = Logger()
 
-    i = Interface()
-    i.humidity_event+=loggers.humidity
-    i.ph_event+=loggers.ph
-    gevent.spawn(i.run)
 except Exception as e:
     logging.exception(e)
 
