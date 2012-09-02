@@ -1,0 +1,2 @@
+-e git+https://github.com/entone/envy.git#egg=envy
+-e git+https://github.com/entone/Humongolus.git#egg=Humongolus
