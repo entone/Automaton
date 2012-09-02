@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- idea and code swiped from
+    http://assorted.svn.sourceforge.net/viewvc/assorted/real-time-plotter/trunk/src/rtp.html?view=markup -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>
+    <script src="http://people.iola.dk/olau/flot/jquery.flot.js"></script>
+    <script>
+    var iets = "";
+    window.onload = function() {
+        var data = {};
+        try {
+            var ph = new WebSocket("ws://33.33.33.10:8000/graph/ph/");
+        }
+        catch (e) {
+            var ph = new MozWebSocket("ws://33.33.33.10:8000/graph/ph/");
+        }
+        ph.onopen = function() {
+            console.log("OPEN");
+            ph.send('hi');
+        };
+        var offset = -(new Date().getTimezoneOffset()*60*1000);
+        ph.onmessage = function(e) {
+            var lines = e.data.split('\n');
+
+            for (var i = 0; i < lines.length - 1; i++) {
+                var frame = eval("("+lines[i]+")");
+                x = frame.timestamp+offset;
+                y = frame.value;
+                data[frame.type] = data[frame.type] ? data[frame.type] : [];
+                data[frame.type].push([x,y]);
+            }
+
+            var plots = [];
+            for (var d in data) plots.push({ data: data[d].slice(-100) });
+
+            $.plot($("#ph"), plots, {
+                series: { lines: { show: true, fill: false},},
+                yaxis: { min: 0 },
+                xaxis: {
+                    mode: "time",
+                    timeformat:"%H:%M:%S",
+                    minTickSize: [5, "second"]
+                },
+            });
+            ph.send('');
+        };
+    };
+    </script>
+</head>
+    <body>
+    <h3>PH</h3>
+    <div id="ph" style="width:600px;height:300px"></div>
+    </body>
+</html>
