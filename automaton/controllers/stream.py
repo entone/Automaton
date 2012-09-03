@@ -13,11 +13,16 @@ class Graph(Controller):
     def display(self):
         self.rpc = zmq.Context()
         self.rpc_socket = self.rpc.socket(zmq.REQ)
+        self.rpc_socket.setsockopt(zmq.LINGER, 10)
         self.rpc_socket.connect("tcp://127.0.0.1:6666")
         self.rpc_socket.send(json.dumps(dict(method='get_values')))
-        res = self.rpc_socket.recv()
-        res = json.loads(res)
-        print res
+        res = {}
+        try:
+            res = self.rpc_socket.recv(zmq.NOBLOCK)
+            res = json.loads(res)
+            print res
+        except Exception as e:
+            self.logger.exception(e)
         return Response(self.render("graphs/humidity.html", values=res))
 
     def humidity(self):

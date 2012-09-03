@@ -5,7 +5,6 @@ try:
     import logging
     import settings    
     from loggers import Logger
-    from interface.aquaponics import Aquaponics    
 
     logging.basicConfig(format=settings.LOG_FORMAT, level=settings.LOG_LEVEL)
 

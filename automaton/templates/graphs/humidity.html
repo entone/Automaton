@@ -9,15 +9,31 @@
         var inter = false;
         var offset = -(new Date().getTimezoneOffset()*60*1000);
         var last_x = new Date().getTime()+offset;
-        var ph = ${values.get('ph').get('value')};
-        var temp = ${values.get('temp').get('value')};
-        var humidity = ${values.get('humidity').get('value')};
+        var ph = ${values.get('ph', {}).get('value', 7)};
+        var temp = ${values.get('temp', {}).get('value', 30)};
+        var humidity = ${values.get('humidity', {}).get('value', 50)};
 
         var data = {
             ph:[[last_x, ph]],
             temp:[[last_x, temp]],
             humidity:[[last_x, humidity]],
         };
+
+        var prefs = {
+            ph:{
+                color: "1D8480",
+                decorator: "",
+            },
+            temp:{
+                color: "C53437",
+                decorator: "&deg;C",
+            },
+            humidity:{
+                color: "E25618",
+                decorator: "%",
+            },
+
+        }
 
         var last = {
             ph:ph,
@@ -28,18 +44,28 @@
         function display(){
             var plots = [];
             for (var d in data){
-                plots.push({ data: data[d]});
-                document.getElementById(d+"_header").innerHTML = last[d];  
+                prefs[d].data = data[d];
+                plots.push(prefs[d]);
+                document.getElementById(d+"_header").innerHTML = last[d]+prefs[d].decorator;  
             }
 
             $.plot($("#graph"), plots, {
                 series: { lines: { show: true, fill: false},},
-                yaxis: { min: 0 },
+                yaxis: { 
+                    min: 0,
+                    max: 100,
+                },
                 xaxis: {
                     mode: "time",
                     timeformat:"%H:%M:%S",
                     minTickSize: [5, "second"],
                 },
+                grid:{
+                    color: "ffffff",
+                    backgroundColor: "eeeeee",
+                    borderWidth: 3,
+                    borderColor: "dddddd",
+                }
             });
         }
 
@@ -87,11 +113,66 @@
             start();
         }
     </script>
+    <style>
+        body{
+            font-family: sans-serif;
+        }
+
+        #graph{
+            float:left;
+        }
+        #legend{
+            float:left;
+            margin:0px;
+            padding:0px;
+            list-style-type: none;
+            margin-left: 10px;
+            margin-top: 10px;
+        }
+
+        #legend li{
+            padding: 8px;
+            background-color: #cccccc;
+            margin-bottom: 6px;
+            border-radius: 6px;
+            box-shadow: 2px 2px 5px #888;
+        }
+
+        #legend li span.header{
+            font-weight: bold;
+        }
+
+        #legend li span.info{
+            font-weight: normal;
+            padding-left: 5px;
+        }
+
+        #legend li.ph{
+            background-color: #1D8480;
+        }
+
+        #legend li.temp{
+            background-color: #C53437;
+        }
+
+        #legend li.humidity{
+            background-color: #E25618;
+        }
+
+    </style>
 </head>
-    <body>
-        <span class='header'>PH:<span id='ph_header'></span></span>
-        <span class='header'>Temperature:<span id='temp_header'></span></span>
-        <span class='header'>Humidity:<span id='humidity_header'></span></span>
+    <body>        
         <div id="graph" style="width:600px;height:300px"></div>
+        <ul id='legend'>            
+            <li class='humidity'>
+                <span class='header'>Humidity:<span class='info humidity' id='humidity_header'></span></span>
+            </li>
+            <li class='temp'>
+                <span class='header'>Temperature:<span class='info temp' id='temp_header'></span></span>
+            </li>            
+            <li class='ph'>
+                <span class='header'>PH:<span class='info ph' id='ph_header'></span></span>
+            </li>
+        </ul>
     </body>
 </html>
