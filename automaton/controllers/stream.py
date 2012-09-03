@@ -6,11 +6,19 @@ from envy.response import Response
 from util.jsontools import ComplexEncoder
 from util.subscriber import Subscriber
 import json
+import zmq.green as zmq
 
 class Graph(Controller):
 
     def display(self):
-        return Response(self.render("graphs/humidity.html"))
+        self.rpc = zmq.Context()
+        self.rpc_socket = self.rpc.socket(zmq.REQ)
+        self.rpc_socket.connect("tcp://127.0.0.1:6666")
+        self.rpc_socket.send(json.dumps(dict(method='get_values')))
+        res = self.rpc_socket.recv()
+        res = json.loads(res)
+        print res
+        return Response(self.render("graphs/humidity.html", values=res))
 
     def humidity(self):
         try:
@@ -25,7 +33,9 @@ class Graph(Controller):
     def ph(self):
         try:
             ws = self.request.env['wsgi.websocket']
-            def write_out(ob):   
+            print ws
+            print "IN"
+            def write_out(ob):
                 st = "%s\n" % json.dumps(ob, cls=ComplexEncoder)
                 print "web socket: %s" % st
                 ws.send(st)

@@ -6,50 +6,92 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>
     <script src="http://people.iola.dk/olau/flot/jquery.flot.js"></script>
     <script>
-    var iets = "";
-    window.onload = function() {
-        var data = {};
-        try {
-            var ph = new WebSocket("ws://33.33.33.10:8000/graph/ph/");
-        }
-        catch (e) {
-            var ph = new MozWebSocket("ws://33.33.33.10:8000/graph/ph/");
-        }
-        ph.onopen = function() {
-            console.log("OPEN");
-            ph.send('hi');
-        };
+        var inter = false;
         var offset = -(new Date().getTimezoneOffset()*60*1000);
-        ph.onmessage = function(e) {
-            var lines = e.data.split('\n');
+        var last_x = new Date().getTime()+offset;
+        var ph = ${values.get('ph').get('value')};
+        var temp = ${values.get('temp').get('value')};
+        var humidity = ${values.get('humidity').get('value')};
 
-            for (var i = 0; i < lines.length - 1; i++) {
-                var frame = eval("("+lines[i]+")");
-                x = frame.timestamp+offset;
-                y = frame.value;
-                data[frame.type] = data[frame.type] ? data[frame.type] : [];
-                data[frame.type].push([x,y]);
+        var data = {
+            ph:[[last_x, ph]],
+            temp:[[last_x, temp]],
+            humidity:[[last_x, humidity]],
+        };
+
+        var last = {
+            ph:ph,
+            temp:temp,
+            humidity:humidity,
+        };
+
+        function display(){
+            var plots = [];
+            for (var d in data){
+                plots.push({ data: data[d]});
+                document.getElementById(d+"_header").innerHTML = last[d];  
             }
 
-            var plots = [];
-            for (var d in data) plots.push({ data: data[d].slice(-100) });
-
-            $.plot($("#ph"), plots, {
+            $.plot($("#graph"), plots, {
                 series: { lines: { show: true, fill: false},},
                 yaxis: { min: 0 },
                 xaxis: {
                     mode: "time",
                     timeformat:"%H:%M:%S",
-                    minTickSize: [5, "second"]
+                    minTickSize: [20, "second"],
                 },
             });
-            ph.send('');
+        }
+
+        function start(){
+            inter = setInterval(function(){
+                last_x+=110;
+                console.log(last_x);
+                for(var d in data){
+                    var n = [last_x, last[d]];                        
+                    data[d].push(n);
+                    data[d] = data[d].slice(-300);
+                    console.log(d);
+                    console.log(data[d].length);
+                }
+                display();
+            }, 110);
         };
-    };
+
+        function stop(){
+            clearInterval(inter);
+        }
+        function init(){
+            try {
+                var ph = new WebSocket("ws://192.168.0.118:8000/graph/ph/");
+            }
+            catch (e) {
+                var ph = new MozWebSocket("ws://192.168.0.118:8000/graph/ph/");
+            }
+            ph.onopen = function() {
+                console.log("OPEN");
+                ph.send('hi');
+            };
+            ph.onmessage = function(e) {
+                var lines = e.data.split('\n');
+
+                for (var i = 0; i < lines.length - 1; i++) {
+                    var frame = eval("("+lines[i]+")");
+                    last[frame.type] = frame.value;
+                }
+                this.send('');
+            };
+        }
+        window.onload = function() {
+            init();
+            start();
+        }
     </script>
 </head>
     <body>
-    <h3>PH</h3>
-    <div id="ph" style="width:600px;height:300px"></div>
+        <span class='header'>PH:<span id='ph_header'></span></span>
+        <span class='header'>Temperature:<span id='temp_header'></span></span>
+        <span class='header'>Humidity:<span id='humidity_header'></span></span>
+        <div id="graph" style="width:600px;height:300px"></div>
     </body>
 </html>

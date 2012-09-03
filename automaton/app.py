@@ -5,7 +5,7 @@ try:
     import logging
     import settings    
     from loggers import Logger
-    from interface import Interface    
+    from interface.aquaponics import Aquaponics    
 
     logging.basicConfig(format=settings.LOG_FORMAT, level=settings.LOG_LEVEL)
 
@@ -16,9 +16,6 @@ try:
     )
 
     wsgi = WSGI(urls, server_settings)
-
-    i = Interface(uri="tcp://*:5555")
-    l = Logger()
 
 except Exception as e:
     logging.exception(e)
