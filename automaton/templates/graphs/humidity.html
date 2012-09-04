@@ -12,6 +12,7 @@
         var ph = ${values.get('ph', {}).get('value', 7)};
         var temp = ${values.get('temp', {}).get('value', 30)};
         var humidity = ${values.get('humidity', {}).get('value', 50)};
+        var url = "${url}";
 
         var data = {
             ph:[[last_x, ph]],
@@ -46,10 +47,10 @@
             for (var d in data){
                 prefs[d].data = data[d];
                 plots.push(prefs[d]);
-                document.getElementById(d+"_header").innerHTML = last[d]+prefs[d].decorator;  
+                document.getElementById(d+"_header").innerHTML = last[d].toFixed(2)+prefs[d].decorator;  
             }
 
-            $.plot($("#graph"), plots, {
+            $.plot($("#lettuce"), plots, {
                 series: { lines: { show: true, fill: false},},
                 yaxis: { 
                     min: 0,
@@ -72,13 +73,10 @@
         function start(){
             inter = setInterval(function(){
                 last_x+=110;
-                console.log(last_x);
                 for(var d in data){
                     var n = [last_x, last[d]];                        
                     data[d].push(n);
-                    data[d] = data[d].slice(-300);
-                    console.log(d);
-                    console.log(data[d].length);
+                    data[d] = data[d].slice(-200);
                 }
                 display();
             }, 110);
@@ -89,10 +87,10 @@
         }
         function init(){
             try {
-                var ph = new WebSocket("ws://192.168.0.118:8000/graph/ph/");
+                var ph = new WebSocket("ws://"+url+"/graph/ph/");
             }
             catch (e) {
-                var ph = new MozWebSocket("ws://192.168.0.118:8000/graph/ph/");
+                var ph = new MozWebSocket("ws://"+url+"/graph/ph/");
             }
             ph.onopen = function() {
                 console.log("OPEN");
@@ -111,68 +109,231 @@
         window.onload = function() {
             init();
             start();
+            var light = new toggle('plant_light', 'Plant Light', true);
+            var pump = new toggle('pump', 'Pump', true);
+            var fan = new toggle('fan', 'Fan', true);
         }
+
+        function toggle(id, label, on){
+            this.id = id;
+            this.label = label;
+            this.on = on || false;
+            this.dom = document.getElementById(this.id);
+            this.dom.addEventListener('click', this.toggle);
+            console.log(this.dom.children[0]);
+            this.dom.children[0].innerHTML = this.label;
+            this.dom.obj = this;
+            if(this.on) this.turn_on();
+        }
+
+        toggle.prototype.turn_on = function(){
+            this.dom.children[1].classList.add('on');
+        }
+
+        toggle.prototype.turn_off = function(){
+            this.dom.children[1].classList.remove('on');
+        }        
+
+        toggle.prototype.toggle = function(e){
+            if(this.obj.on){
+                this.obj.on = false;
+                this.obj.turn_off();    
+            }else{
+                this.obj.on = true;
+                this.obj.turn_on();    
+            }
+        }
+
     </script>
     <style>
         body{
             font-family: sans-serif;
         }
 
-        #graph{
-            float:left;
+        .node{
+            width: 625px;
+            background-color: #ffffff;
+            box-shadow: 5px 5px 20px #dddddd; 
         }
-        #legend{
-            float:left;
+
+        div.node > div.header{
+            padding: 10px;
+            padding-left: 20px;
+            font-weight: bold;
+            width: 595px;
+            background-color: #eeeeee;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;            
+            border: 2px solid #cccccc;
+            border-bottom: none;
+            text-shadow: 1px 1px 3px #999999;
+        }
+
+        .graph-holder{            
+            padding-bottom: 10px;
+            border: 2px solid #cccccc;
+            width: 100%;
+        }
+
+        .graph{
+            margin-left: 10px;
+        }
+
+
+        .legend{            
             margin:0px;
             padding:0px;
             list-style-type: none;
-            margin-left: 10px;
+            margin-left: 40px;
             margin-top: 10px;
+            font-size: 11px;
         }
 
-        #legend li{
+        .legend li{
+            float:left;
             padding: 8px;
             background-color: #cccccc;
             margin-bottom: 6px;
             border-radius: 6px;
             box-shadow: 2px 2px 5px #888;
+            margin-right: 10px;
         }
 
-        #legend li span.header{
+        .legend li > span.header{
             font-weight: bold;
         }
 
-        #legend li span.info{
+        .legend li span.info{
             font-weight: normal;
             padding-left: 5px;
         }
 
-        #legend li.ph{
+        .legend li.ph{
             background-color: #1D8480;
         }
 
-        #legend li.temp{
+        .legend li.temp{
             background-color: #C53437;
         }
 
-        #legend li.humidity{
+        .legend li.humidity{
             background-color: #E25618;
         }
 
+        div.controls{
+            width: 100%; 
+            border: 2px solid #cccccc;
+            border-top: none;
+            background-color: #eeeeee;
+        }
+
+        div.toggle{
+            float:left;
+            width: 100px;
+            text-align:center;
+            border-right: 1px solid #dddddd;          
+            background-color: #eeeeee;
+            padding-bottom: 10px;
+        }
+
+        div.btn{
+            width: 50px;
+            height: 50px;
+            border-radius: 50px;            
+            border: none;
+            background-color: #666666;            
+            box-shadow: 2px 2px 3px #666666;            
+            border: 1px solid #333333;            
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        div.toggle div.label{
+            padding: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            border-bottom: 1px solid #dddddd;
+            margin-bottom: 5px;
+            background-color: #cccccc;
+        }
+
+        div.btn span.t{
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        div.btn span.t::after{
+            content:'off';
+        }
+
+        div.btn span.t{
+            line-height: 50px;
+        }
+
+        div.btn.on span.t{
+            color: #80DE03;
+            text-shadow: 0px 0px 5px #80DE03;
+        }
+
+        div.btn.on{
+            background-color: #999999;
+            box-shadow: inset 3px 3px 3px #666666;
+        }
+
+        div.btn.on span.t::after{
+            content:'on';
+        }        
+
+        .clearfix:after {
+            content: ".";
+            display: block;
+            clear: both;
+            visibility: hidden;
+            line-height: 0;
+            height: 0;
+        }
+         
+        .clearfix {
+            display: block;
+        }
+
+
     </style>
 </head>
-    <body>        
-        <div id="graph" style="width:600px;height:300px"></div>
-        <ul id='legend'>            
-            <li class='humidity'>
-                <span class='header'>Humidity:<span class='info humidity' id='humidity_header'></span></span>
-            </li>
-            <li class='temp'>
-                <span class='header'>Temperature:<span class='info temp' id='temp_header'></span></span>
-            </li>            
-            <li class='ph'>
-                <span class='header'>PH:<span class='info ph' id='ph_header'></span></span>
-            </li>
-        </ul>
+    <body>
+        <div id='content'>
+            <div class='node'>
+                <div class='header'>Aquaponics: Lettuce</div>
+                <div class='graph-holder'>
+                    <ul class='legend clearfix'>            
+                        <li class='humidity'>
+                            <span class='header'>Humidity:<span class='info humidity' id='humidity_header'></span></span>
+                        </li>
+                        <li class='temp'>
+                            <span class='header'>Temperature:<span class='info temp' id='temp_header'></span></span>
+                        </li>            
+                        <li class='ph'>
+                            <span class='header'>PH:<span class='info ph' id='ph_header'></span></span>
+                        </li>
+                    </ul>
+                    <div class='graph' id="lettuce" style="width:600px;height:300px"></div>
+                </div>                
+                <div class='controls clearfix'>
+                    <div class='toggle' id='plant_light'>
+                        <div class='label'></div>
+                        <div class='btn'><span class='t'></span></div>
+                    </div>
+                    <div class='toggle' id='pump'>
+                        <div class='label'></div>
+                        <div class='btn'><span class='t'></span></div>
+                    </div>
+                    <div class='toggle' id='fan'>
+                        <div class='label'></div>
+                        <div class='btn'><span class='t'></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </body>
 </html>

@@ -1,12 +1,12 @@
 import gevent
 import random
 import datetime
+import json
+import zmq.green as zmq
 from envy.controller import Controller
 from envy.response import Response
 from util.jsontools import ComplexEncoder
 from util.subscriber import Subscriber
-import json
-import zmq.green as zmq
 
 class Graph(Controller):
 
@@ -16,6 +16,7 @@ class Graph(Controller):
         self.rpc_socket.setsockopt(zmq.LINGER, 10)
         self.rpc_socket.connect("tcp://127.0.0.1:6666")
         self.rpc_socket.send(json.dumps(dict(method='get_values')))
+        home = self.request.env.get('HTTP_HOST')
         res = {}
         try:
             res = self.rpc_socket.recv(zmq.NOBLOCK)
@@ -23,7 +24,7 @@ class Graph(Controller):
             print res
         except Exception as e:
             self.logger.exception(e)
-        return Response(self.render("graphs/humidity.html", values=res))
+        return Response(self.render("graphs/humidity.html", values=res, url=home))
 
     def humidity(self):
         try:
