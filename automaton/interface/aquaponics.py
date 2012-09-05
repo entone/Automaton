@@ -41,6 +41,12 @@ class Aquaponics(Publisher):
                 type='ph'
             ),
         )
+
+        self.outputs = dict(
+            plant_light=dict(
+                index=0
+            )
+        )
         try:
             self.interface_kit = InterfaceKit()
             print "starting: %s" % self.interface_kit
@@ -48,6 +54,12 @@ class Aquaponics(Publisher):
         except RuntimeError as e:
             print("Runtime Exception: %s" % e.details)
             print("Exiting....")
+
+    def toggle_output(self, ob):
+        output = self.outputs.get(ob.get('id'))
+        print "turning %s to %s index: %s" % (ob.get('id'), ob.get('state'), output.get('index'))
+        self.interface_kit.setOutputState(output.get('index'), ob.get('state'))
+        return dict(state=ob.get('state'))
 
     def ph_conversion(self, value):
         #print "ORIG Value: %s" % value

@@ -13,6 +13,8 @@
         var temp = ${values.get('temp', {}).get('value', 30)};
         var humidity = ${values.get('humidity', {}).get('value', 50)};
         var url = "${url}";
+        var graph = false;
+        var rpc = false;
 
         var data = {
             ph:[[last_x, ph]],
@@ -86,17 +88,23 @@
             clearInterval(inter);
         }
         function init(){
-            try {
-                var ph = new WebSocket("ws://"+url+"/graph/ph/");
+            graph = new WebSocket("ws://"+url+"/graph/");
+            rpc = new WebSocket("ws://"+url+"/rpc/");
+
+            rpc.onopen = function(){
+                console.log("RPC Open!");
             }
-            catch (e) {
-                var ph = new MozWebSocket("ws://"+url+"/graph/ph/");
+
+            rpc.onmessage = function(e){
+                console.log(e.data);
             }
-            ph.onopen = function() {
+            
+            graph.onopen = function() {
                 console.log("OPEN");
-                ph.send('hi');
+                graph.send('hi');
             };
-            ph.onmessage = function(e) {
+
+            graph.onmessage = function(e) {
                 var lines = e.data.split('\n');
 
                 for (var i = 0; i < lines.length - 1; i++) {
@@ -106,15 +114,22 @@
                 this.send('');
             };
         }
+
+        function rpc_on_off(obj){
+            obj = {node:'lettuce', id:obj.id, state:obj.on};
+            console.log(obj);
+            res = rpc.send(JSON.stringify(obj));
+        }
+
         window.onload = function() {
             init();
             start();
-            var light = new toggle('plant_light', 'Plant Light', true);
-            var pump = new toggle('pump', 'Pump', true);
-            var fan = new toggle('fan', 'Fan', true);
+            var light = new toggle('plant_light', 'Plant Light', true, rpc_on_off);
+            var pump = new toggle('pump', 'Pump', true, rpc_on_off);
+            var fan = new toggle('fan', 'Fan', true, rpc_on_off);
         }
 
-        function toggle(id, label, on){
+        function toggle(id, label, on, callback){
             this.id = id;
             this.label = label;
             this.on = on || false;
@@ -123,7 +138,16 @@
             console.log(this.dom.children[0]);
             this.dom.children[0].innerHTML = this.label;
             this.dom.obj = this;
+            this.callback = callback;
             if(this.on) this.turn_on();
+        }
+
+        toggle.prototype.set_state = function(state){
+            if(state){
+                this.turn_on();
+            }else{
+                this.turn_off();
+            }
         }
 
         toggle.prototype.turn_on = function(){
@@ -137,11 +161,12 @@
         toggle.prototype.toggle = function(e){
             if(this.obj.on){
                 this.obj.on = false;
-                this.obj.turn_off();    
+                this.obj.turn_off(); 
             }else{
                 this.obj.on = true;
-                this.obj.turn_on();    
+                this.obj.turn_on();
             }
+            this.obj.callback(this.obj);
         }
 
     </script>
