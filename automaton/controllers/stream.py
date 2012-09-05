@@ -12,10 +12,10 @@ class Graph(Controller):
 
     def display(self):
         res = {}
-        self.rpc = RPC(port=6666)
-        res = self.rpc.send(dict(method='get_sensor_values'))
+        self.rpc = RPC(port=5553)
+        res = self.rpc.send(dict(method='get_nodes'))
         home = self.request.env.get('HTTP_HOST')
-        return Response(self.render("graphs/humidity.html", values=res, url=home))
+        return Response(self.render("graphs/humidity.html", values=json.dumps(res), url=home))
 
     def index(self):
         try:
@@ -23,13 +23,13 @@ class Graph(Controller):
             def write_out(ob):
                 st = "%s\n" % json.dumps(ob, cls=ComplexEncoder)
                 ws.send(st)
-            sub = Subscriber(port=5555, callback=write_out, spawn=False)
+            sub = Subscriber(port=5554, callback=write_out, spawn=False)
         except Exception as e:
             self.logger.exception(e)
     
 
     def control(self):
-        self.rpc = RPC(port=6666)
+        self.rpc = RPC(port=5553)
         ws = self.request.env['wsgi.websocket']
         while True:
             mes = ws.receive()

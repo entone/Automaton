@@ -9,18 +9,11 @@
         var inter = false;
         var offset = -(new Date().getTimezoneOffset()*60*1000);
         var last_x = new Date().getTime()+offset;
-        var ph = ${values.get('ph', {}).get('value', 7)};
-        var temp = ${values.get('temp', {}).get('value', 30)};
-        var humidity = ${values.get('humidity', {}).get('value', 50)};
+        var nodes = eval('(${values})');        
+        var node_objs = {};
         var url = "${url}";
         var graph = false;
         var rpc = false;
-
-        var data = {
-            ph:[[last_x, ph]],
-            temp:[[last_x, temp]],
-            humidity:[[last_x, humidity]],
-        };
 
         var prefs = {
             ph:{
@@ -35,21 +28,53 @@
                 color: "E25618",
                 decorator: "%",
             },
-
         }
 
-        var last = {
-            ph:ph,
-            temp:temp,
-            humidity:humidity,
-        };
+        function Node(obj){
+            for(var key in obj){
+                this[key] = obj[key];
+            }
+            var ph = 7;
+            var temp = 30;
+            var humidity = 50;
+            this.data = {};
+            this.last = {}
+            for(var i in this.sensors){
+                var s = this.sensors[i];
+                this.last[s.type] = s.value;
+                this.data[s.type] = [];
+            }
+            for(var o in this.outputs){
+                var out = this.outputs[o];
+                var light = new toggle(out.type, out.display, this.value, this.name, this.rpc_on_off);
+            }
+            console.log(this.sensors);
+            console.log(this.name);
+            console.log(this.last);
+            document.getElementById("lettuce_header").innerHTML = this.name;
+            this.start();
+        }
 
-        function display(){
+        Node.prototype.start = function(){
+            var that = this;
+            inter = setInterval(function(){
+                last_x+=110;
+                for(var d in that.sensors){
+                    var s = that.sensors[d];
+                    var n = [last_x, that.last[s.type]];
+                    that.data[s.type].push(n);
+                    that.data[s.type] = that.data[s.type].slice(-200);
+                }
+                that.display();
+            }, 110);
+        }
+
+        Node.prototype.display = function(){
             var plots = [];
-            for (var d in data){
-                prefs[d].data = data[d];
+            for (var d in this.data){
+                prefs[d].data = this.data[d];
                 plots.push(prefs[d]);
-                document.getElementById(d+"_header").innerHTML = last[d].toFixed(2)+prefs[d].decorator;  
+                document.getElementById(d+"_header").innerHTML = this.last[d].toFixed(2)+prefs[d].decorator;
             }
 
             $.plot($("#lettuce"), plots, {
@@ -72,21 +97,12 @@
             });
         }
 
-        function start(){
-            inter = setInterval(function(){
-                last_x+=110;
-                for(var d in data){
-                    var n = [last_x, last[d]];                        
-                    data[d].push(n);
-                    data[d] = data[d].slice(-200);
-                }
-                display();
-            }, 110);
-        };
-
-        function stop(){
-            clearInterval(inter);
+        Node.prototype.rpc_on_off = function(obj){
+            obj = {node:obj.node, type:obj.type, state:obj.on};
+            console.log(obj);
+            res = rpc.send(JSON.stringify(obj));
         }
+
         function init(){
             graph = new WebSocket("ws://"+url+"/graph/");
             rpc = new WebSocket("ws://"+url+"/rpc/");
@@ -106,32 +122,31 @@
 
             graph.onmessage = function(e) {
                 var lines = e.data.split('\n');
-
                 for (var i = 0; i < lines.length - 1; i++) {
                     var frame = eval("("+lines[i]+")");
-                    last[frame.type] = frame.value;
+                    var node = node_objs[frame.node];
+                    node.last[frame.type] = frame.value;
                 }
                 this.send('');
             };
-        }
 
-        function rpc_on_off(obj){
-            obj = {node:'lettuce', id:obj.id, state:obj.on};
-            console.log(obj);
-            res = rpc.send(JSON.stringify(obj));
+            for(var n in nodes){
+                var node = nodes[n];
+                var new_node = new Node(node);
+                node_objs[new_node.name] = new_node;
+            }
         }
 
         window.onload = function() {
             init();
-            start();
-            var light = new toggle('plant_light', 'Plant Light', true, rpc_on_off);
-            var pump = new toggle('pump', 'Pump', true, rpc_on_off);
-            var fan = new toggle('fan', 'Fan', true, rpc_on_off);
         }
 
-        function toggle(id, label, on, callback){
-            this.id = id;
+        function toggle(type, label, on, node, callback){
+            this.type = type;
+            this.id = this.type;
             this.label = label;
+            this.node = node;
+            console.log(this.node);
             this.on = on || false;
             this.dom = document.getElementById(this.id);
             this.dom.addEventListener('click', this.toggle);
@@ -329,7 +344,7 @@
     <body>
         <div id='content'>
             <div class='node'>
-                <div class='header'>Aquaponics: Lettuce</div>
+                <div class='header' id='lettuce_header'>Aquaponics: Lettuce</div>
                 <div class='graph-holder'>
                     <ul class='legend clearfix'>            
                         <li class='humidity'>

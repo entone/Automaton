@@ -10,18 +10,15 @@ class Trigger(Subscriber):
     _output = None
     _state_change = None
     _current_state = None
-    _rpc = None
-    _range = None
 
-
-    def __init__(self, input, output, min, max, state, current_state, uri):
+    def __init__(self, input, output, min, max, state, current_state, port):
         self._input = input
         self._min = min
         self._max = max
         self._output = output
         self._state = state
         self._current_state = current_state
-        super(Trigger, self).__init__(uri=uri, callback=self.handle_event)
+        super(Trigger, self).__init__(port=port, callback=self.handle_event)
 
 
     def handle_event(self, ob, **kwargs):
@@ -32,7 +29,7 @@ class Trigger(Subscriber):
 
     def test_change(self, ob):
         if not self._input.type == ob.get('type'): return None
-        if not self._input.interface.node == ob.get('node'): return None
+        if not self._input.interface.name == ob.get('node'): return None
 
         val = ob.get('value')
         if (val < self._min or val > self._max) and (self._current_state == self._state):

@@ -5,7 +5,7 @@ from util.jsontools import ComplexEncoder
 
 class Publisher(object):
 
-    def __init__(self, publisher=5555, rpc=6666, node="test"):
+    def __init__(self, publisher=5555, rpc=6666, spawn=True):
         self.publisher = zmq.Context()
         self.publisher_socket = self.publisher.socket(zmq.PUB)
         self.publisher_socket.bind("tcp://*:%s" % publisher)
@@ -13,8 +13,8 @@ class Publisher(object):
         self.rpc = zmq.Context()
         self.rpc_socket = self.rpc.socket(zmq.REP)
         self.rpc_socket.bind("tcp://*:%s" % rpc)
-        
-        self.do_run()
+        if spawn: gevent.spawn(self.do_run)
+        else: self.do_run()
 
     def publish(self, dic):
         st = json.dumps(dic, cls=ComplexEncoder)
@@ -35,4 +35,6 @@ class Publisher(object):
             except Exception as e:
                 print e
             gevent.sleep(.1)
+
+    def run(self):pass
 

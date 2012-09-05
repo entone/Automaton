@@ -15,18 +15,18 @@ except:
 import gevent
 import json
 
-class Interface(Publisher):
+class Node(Publisher):
 
-    node = None
+    name = None
     sensors = []
     outputs = []
     inputs = []
-    interface_kit = None    
+    interface_kit = None
 
-    def __init__(self, *args, **kwargs):
-        self.node = kwargs.get('node')
+    def __init__(self, name, *args, **kwargs):
+        self.name = name
         if LIVE: self.interface_kit = InterfaceKit()
-        super(Interface, self).__init__(*args, **kwargs)
+        super(Node, self).__init__(*args, **kwargs)
 
     def get_sensor(self, index):
         for sensor in self.sensors:
@@ -40,7 +40,7 @@ class Interface(Publisher):
 
         return False
 
-    def get_sensor_values(self):
+    def get_sensor_values(self, ob):
         res = {}
         for sensor in self.sensors:
             res[sensor.type] = sensor.json()
@@ -57,9 +57,17 @@ class Interface(Publisher):
     def set_output_state(self, ob):
         output = self.get_output(ob.get('type'))
         if output:
-            print "turning %s to %s index: %s" % (ob.get('type'), ob.get('state'), output.index)
+            print "%s: turning %s to %s index: %s" % (self.name, ob.get('type'), ob.get('state'), output.index)
             output.set_state(ob.get('state'))
             return dict(state=output.current_state)
+
+    def json(self):
+        return dict(
+            name=self.name,
+            sensors=[s.json() for s in self.sensors],
+            outputs=[o.json() for o in self.outputs],
+            inputs=[i.json() for i in self.inputs],
+        )
 
     def displayDeviceInfo(self):
         print("|------------|----------------------------------|--------------|------------|")

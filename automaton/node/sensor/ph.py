@@ -1,4 +1,4 @@
-from interface.sensor import Sensor
+from node.sensor import Sensor
 
 class PH(Sensor):   
     celcius = 30

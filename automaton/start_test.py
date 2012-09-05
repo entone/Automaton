@@ -1,3 +1,4 @@
-from interface.test import Test
+from node.manager import Manager
+from node.test import Test
 
-aq = Test(publisher=5555, rpc=6666, node="lettuce")
+aq = Manager(nodes=[Test], publisher=5554, rpc=5553)

@@ -6,6 +6,7 @@ class Sensor(object):
     data_rate = 10
     current_value = 0
     interface = None
+    decorator = ""
 
     def __init__(self, index, display, type, interface, change=2, data_rate=10):
         self.index = index
@@ -27,6 +28,7 @@ class Sensor(object):
             index=self.index,
             display=self.display,
             type=self.type,      
-            node=self.interface.node,
-            value=self.current_value
+            node=self.interface.name,
+            value=self.current_value,
+            decorator=self.decorator,
         )

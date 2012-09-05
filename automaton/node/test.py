@@ -1,13 +1,13 @@
 import random
 import gevent
-from interface import Interface
-from interface.sensor.temperature import Temperature
-from interface.sensor.humidity import Humidity
-from interface.sensor.ph import PH
-from interface.output import Output
+from node import Node
+from node.sensor.temperature import Temperature
+from node.sensor.humidity import Humidity
+from node.sensor.ph import PH
+from node.output import Output
 from trigger import Trigger
 
-class Test(Interface):
+class Test(Node):
 
     def __init__(self, *args, **kwargs):
         self.plant_light = Output(0, 'Plant Light', 'plant_light', self)
@@ -20,11 +20,14 @@ class Test(Interface):
         self.ph = PH(2, 'PH', 'ph', self, change=20)
         self.sensors = [self.temp, self.humidity, self.ph,]
 
-        temp = Trigger(input=self.temp, output=self.fan, min=30, max=float('inf'), state=True, current_state=False, uri="tcp://localhost:5555")
+        temp = Trigger(input=self.temp, output=self.fan, min=30, max=float('inf'), state=True, current_state=False, port=kwargs.get("publisher"))
 
         super(Test, self).__init__(*args, **kwargs)
         
     def run(self):
+        gevent.spawn(self.fake_numbers)
+
+    def fake_numbers(self):
         while True:
             self.temp.current_value = random.randint(0, 50)
             self.publish(self.temp.json())
@@ -36,6 +39,7 @@ class Test(Interface):
             self.publish(self.ph.json())
 
             gevent.sleep(1)
+
 
 
 
