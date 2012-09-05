@@ -5,10 +5,10 @@ import gevent
 
 class Subscriber(object):
 
-    def __init__(self, uri, callback, filter="", spawn=True, **kwargs):
+    def __init__(self, callback, port=5555, filter="", spawn=True, **kwargs):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.SUB)
-        self.socket.connect(uri)
+        self.socket.connect("tcp://*:%s" % port)
         self.socket.setsockopt(zmq.SUBSCRIBE, filter)
         self.callback = callback
         self.kwargs = kwargs

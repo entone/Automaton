@@ -11,11 +11,13 @@ except Exception as e:
 
 class RPC(object):
 
-    def __init__(self, uri):
+    port = 6666
+
+    def __init__(self, port=6666):
     	if LIVE:
         	con = zmq.Context()
         	self.socket = con.socket(zmq.REQ)
-        	self.socket.connect(uri)
+        	self.socket.connect("tcp://*:%s" % port)
 
     def send(self, ob):
     	print "Setting: %s" % ob
