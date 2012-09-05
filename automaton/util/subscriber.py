@@ -19,7 +19,6 @@ class Subscriber(object):
         while True:
             st = self.socket.recv()
             ob = json.loads(st)
-            print "Got data: %s" % ob
             ob['timestamp'] = datetime.datetime.utcnow()
             self.callback(ob, **self.kwargs)
             gevent.sleep(.1)

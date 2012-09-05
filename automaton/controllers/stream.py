@@ -11,6 +11,7 @@ from util.rpc import RPC
 class Graph(Controller):
 
     def display(self):
+        res = {}
         self.rpc = RPC("tcp://127.0.0.1:6666")
         res = self.rpc.send(dict(method='get_values'))
         home = self.request.env.get('HTTP_HOST')
@@ -34,7 +35,7 @@ class Graph(Controller):
             mes = ws.receive()
             mes = json.loads(mes)
             print mes
-            mes['method'] = 'toggle_output'
+            mes['method'] = 'set_output_state'
             res = self.rpc.send(mes)
             ws.send("%s\n" % json.dumps(res))
             gevent.sleep(.1)

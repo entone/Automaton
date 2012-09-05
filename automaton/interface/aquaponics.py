@@ -18,7 +18,6 @@ import json
 class Aquaponics(Publisher):
     CURRENT_CELCIUS = 30
     interface_kit = None
-    NODE = 'lettuce'
 
     def __init__(self, *args, **kwargs):        
         self.sensors = dict(
@@ -54,12 +53,6 @@ class Aquaponics(Publisher):
         except RuntimeError as e:
             print("Runtime Exception: %s" % e.details)
             print("Exiting....")
-
-    def toggle_output(self, ob):
-        output = self.outputs.get(ob.get('id'))
-        print "turning %s to %s index: %s" % (ob.get('id'), ob.get('state'), output.get('index'))
-        self.interface_kit.setOutputState(output.get('index'), ob.get('state'))
-        return dict(state=ob.get('state'))
 
     def ph_conversion(self, value):
         #print "ORIG Value: %s" % value
