@@ -47,16 +47,15 @@
                 this.last[s.type] = s.value;
                 this.data[s.type] = [];
             }            
-            console.log(this.sensors);
-            console.log(this.name);
-            console.log(this.last);
-            var output = Mustache.render(node_template, this);
-            document.getElementById('content').innerHTML+= output;            
-            for(var o in this.outputs){
-                this.outputs[o].node = this.name;
-                var out = this.outputs[o];
-                var light = new toggle(out.type, this.name+out.type, out.display, this.value, this.name, rpc_on_off);
-            }
+            var output = Mustache.to_html(node_template, this);
+            document.getElementById('content').innerHTML+= output;
+            var that = this;
+            setTimeout(function(){
+                for(var o in that.outputs){
+                    var out = that.outputs[o];
+                    var light = new toggle(out.type, that.name+out.type, out.display, out.value, that.name, rpc_on_off);
+                }
+            }, 1000);
         }
 
         Node.prototype.update = function(){
@@ -98,6 +97,7 @@
         }
 
         function rpc_on_off(obj){
+            console.log("Setting:");
             obj = {node:obj.node, type:obj.type, state:obj.on};
             console.log(obj);
             res = rpc.send(JSON.stringify(obj));
@@ -113,11 +113,12 @@
             }
 
             rpc.onmessage = function(e){
+                console.log("RPC Result");
                 console.log(e.data);
             }
             
             graph.onopen = function() {
-                console.log("OPEN");
+                console.log("Graph OPEN");
                 graph.send('hi');
             };
 
@@ -133,6 +134,7 @@
 
             for(var n in nodes){
                 var node = nodes[n];
+                console.log("Creating Node:");
                 console.log(node);
                 var new_node = new Node(node);
                 node_objs[new_node.name] = new_node;
@@ -160,10 +162,8 @@
             this.label = label;
             this.node = node;
             this.on = on || false;
-            console.log(this.id);
             this.dom = document.getElementById(this.id);
-            this.dom.addEventListener('click', this.toggle);
-            console.log(this.dom.children[0]);
+            this.dom.onclick = this.toggle;
             this.dom.children[0].innerHTML = this.label;
             this.dom.obj = this;
             this.callback = callback;
@@ -206,7 +206,9 @@
         .node{
             width: 625px;
             background-color: #ffffff;
-            box-shadow: 5px 5px 20px #dddddd; 
+            box-shadow: 5px 5px 20px #dddddd;
+            float:left;
+            margin: 10px;
         }
 
         div.node > div.header{
