@@ -10,7 +10,7 @@ from trigger import Trigger
 class Test(Node):
 
     def __init__(self, *args, **kwargs):
-        self.plant_light = Output(0, 'Plant Light', 'plant_light', self)
+        self.plant_light = Output(0, 'Foilage', 'plant_light', self)
         self.fan = Output(1, 'Fan', 'fan', self)
         self.pump = Output(2, 'Pump', 'pump', self)
         self.outputs = [self.plant_light, self.fan, self.pump,]

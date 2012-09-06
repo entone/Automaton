@@ -5,6 +5,8 @@
     <title>Raspberry Pi and Phidgets</title>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>
     <script src="http://people.iola.dk/olau/flot/jquery.flot.js"></script>
+    <script src="http://${url}/static/mustache.js"></script>
+
     <script>
         var inter = false;
         var offset = -(new Date().getTimezoneOffset()*60*1000);
@@ -14,6 +16,7 @@
         var url = "${url}";
         var graph = false;
         var rpc = false;
+        var node_template = "";        
 
         var prefs = {
             ph:{
@@ -43,30 +46,26 @@
                 var s = this.sensors[i];
                 this.last[s.type] = s.value;
                 this.data[s.type] = [];
-            }
+            }            
+            console.log(this.sensors);
+            console.log(this.name);
+            console.log(this.last);
+            var output = Mustache.render(node_template, this);
+            document.getElementById('content').innerHTML = output;            
             for(var o in this.outputs){
                 var out = this.outputs[o];
                 var light = new toggle(out.type, out.display, this.value, this.name, this.rpc_on_off);
             }
-            console.log(this.sensors);
-            console.log(this.name);
-            console.log(this.last);
-            document.getElementById("lettuce_header").innerHTML = this.name;
-            this.start();
         }
 
-        Node.prototype.start = function(){
-            var that = this;
-            inter = setInterval(function(){
-                last_x+=110;
-                for(var d in that.sensors){
-                    var s = that.sensors[d];
-                    var n = [last_x, that.last[s.type]];
-                    that.data[s.type].push(n);
-                    that.data[s.type] = that.data[s.type].slice(-200);
-                }
-                that.display();
-            }, 110);
+        Node.prototype.update = function(){
+            for(var d in this.sensors){
+                var s = this.sensors[d];
+                var n = [last_x, this.last[s.type]];
+                this.data[s.type].push(n);
+                this.data[s.type] = this.data[s.type].slice(-200);
+            }
+            this.display();
         }
 
         Node.prototype.display = function(){
@@ -106,6 +105,7 @@
         function init(){
             graph = new WebSocket("ws://"+url+"/graph/");
             rpc = new WebSocket("ws://"+url+"/rpc/");
+            node_template = document.getElementById('node_template').innerHTML;
 
             rpc.onopen = function(){
                 console.log("RPC Open!");
@@ -135,6 +135,17 @@
                 var new_node = new Node(node);
                 node_objs[new_node.name] = new_node;
             }
+
+            run();
+        }
+
+        function run(){
+            inter = setInterval(function(){
+                last_x+=110;
+                for(var i in node_objs){
+                    node_objs[i].update();
+                }
+            }, 110);
         }
 
         window.onload = function() {
@@ -342,38 +353,29 @@
     </style>
 </head>
     <body>
-        <div id='content'>
-            <div class='node'>
-                <div class='header' id='lettuce_header'>Aquaponics: Lettuce</div>
-                <div class='graph-holder'>
-                    <ul class='legend clearfix'>            
-                        <li class='humidity'>
-                            <span class='header'>Humidity:<span class='info humidity' id='humidity_header'></span></span>
+        <div id='content'></div>
+    </body>
+    <script type='text/x-mustache' id='node_template'>
+        <div class='node'>
+            <div class='header'>{{name}}</div>
+            <div class='graph-holder'>
+                <ul class='legend clearfix'>
+                    {{#sensors}}
+                        <li class='{{type}}'>
+                            <span class='header'>{{display}}:<span class='info {{type}}' id='{{type}}_header'></span></span>
                         </li>
-                        <li class='temp'>
-                            <span class='header'>Temperature:<span class='info temp' id='temp_header'></span></span>
-                        </li>            
-                        <li class='ph'>
-                            <span class='header'>PH:<span class='info ph' id='ph_header'></span></span>
-                        </li>
-                    </ul>
-                    <div class='graph' id="lettuce" style="width:600px;height:300px"></div>
-                </div>                
-                <div class='controls clearfix'>
-                    <div class='toggle' id='plant_light'>
-                        <div class='label'></div>
-                        <div class='btn'><span class='t'></span></div>
-                    </div>
-                    <div class='toggle' id='pump'>
-                        <div class='label'></div>
-                        <div class='btn'><span class='t'></span></div>
-                    </div>
-                    <div class='toggle' id='fan'>
-                        <div class='label'></div>
-                        <div class='btn'><span class='t'></span></div>
-                    </div>
+                    {{/sensors}}
+                </ul>
+                <div class='graph' id="lettuce" style="width:600px;height:300px"></div>
+            </div>                
+            <div class='controls clearfix'>
+                {{#outputs}}
+                <div class='toggle' id='{{type}}'>
+                    <div class='label'></div>
+                    <div class='btn'><span class='t'></span></div>
                 </div>
+                {{/outputs}}
             </div>
         </div>
-    </body>
+    </script>
 </html>
