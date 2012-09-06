@@ -51,10 +51,11 @@
             console.log(this.name);
             console.log(this.last);
             var output = Mustache.render(node_template, this);
-            document.getElementById('content').innerHTML = output;            
+            document.getElementById('content').innerHTML+= output;            
             for(var o in this.outputs){
+                this.outputs[o].node = this.name;
                 var out = this.outputs[o];
-                var light = new toggle(out.type, out.display, this.value, this.name, this.rpc_on_off);
+                var light = new toggle(out.type, this.name+out.type, out.display, this.value, this.name, rpc_on_off);
             }
         }
 
@@ -73,10 +74,10 @@
             for (var d in this.data){
                 prefs[d].data = this.data[d];
                 plots.push(prefs[d]);
-                document.getElementById(d+"_header").innerHTML = this.last[d].toFixed(2)+prefs[d].decorator;
+                document.getElementById(this.name+d+"_header").innerHTML = this.last[d].toFixed(2)+prefs[d].decorator;
             }
 
-            $.plot($("#lettuce"), plots, {
+            $.plot($("#"+this.name), plots, {
                 series: { lines: { show: true, fill: false},},
                 yaxis: { 
                     min: 0,
@@ -96,7 +97,7 @@
             });
         }
 
-        Node.prototype.rpc_on_off = function(obj){
+        function rpc_on_off(obj){
             obj = {node:obj.node, type:obj.type, state:obj.on};
             console.log(obj);
             res = rpc.send(JSON.stringify(obj));
@@ -132,6 +133,7 @@
 
             for(var n in nodes){
                 var node = nodes[n];
+                console.log(node);
                 var new_node = new Node(node);
                 node_objs[new_node.name] = new_node;
             }
@@ -152,13 +154,13 @@
             init();
         }
 
-        function toggle(type, label, on, node, callback){
+        function toggle(type, id, label, on, node, callback){
             this.type = type;
-            this.id = this.type;
+            this.id = id;
             this.label = label;
             this.node = node;
-            console.log(this.node);
             this.on = on || false;
+            console.log(this.id);
             this.dom = document.getElementById(this.id);
             this.dom.addEventListener('click', this.toggle);
             console.log(this.dom.children[0]);
@@ -362,15 +364,15 @@
                 <ul class='legend clearfix'>
                     {{#sensors}}
                         <li class='{{type}}'>
-                            <span class='header'>{{display}}:<span class='info {{type}}' id='{{type}}_header'></span></span>
+                            <span class='header'>{{display}}:<span class='info {{type}}' id='{{node}}{{type}}_header'></span></span>
                         </li>
                     {{/sensors}}
                 </ul>
-                <div class='graph' id="lettuce" style="width:600px;height:300px"></div>
+                <div class='graph' id="{{name}}" style="width:600px;height:300px"></div>
             </div>                
             <div class='controls clearfix'>
                 {{#outputs}}
-                <div class='toggle' id='{{type}}'>
+                <div class='toggle' id='{{node}}{{type}}'>
                     <div class='label'></div>
                     <div class='btn'><span class='t'></span></div>
                 </div>

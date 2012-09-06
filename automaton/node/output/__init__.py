@@ -30,4 +30,5 @@ class Output(object):
             display=self.display,
             type=self.type,
             state=self.current_state,
+            node=self.interface.name,
         )

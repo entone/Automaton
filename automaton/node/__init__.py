@@ -100,14 +100,13 @@ class Node(Publisher):
         print("InterfaceKit %i: Input %i: %s" % (source.getSerialNum(), e.index, e.state))
 
     def interfaceKitSensorChanged(self, e):
-        try:
-            sensor = self.get_sensor(e.index)
-        except: return
+        sensor = self.get_sensor(e.index)
+        if not sensor: return
         val = sensor.do_conversion(float(e.value)) if sensor else 0
         source = e.device
-        ob = dict(node=self.NODE, type=sensor.type, value=val)
+        ob = dict(node=self.name, type=sensor.type, value=val)
         self.publish(ob)
-        print("%s Sensor: %s" % (name, val))
+        print("%s Sensor: %s" % (sensor.display, val))
 
     def interfaceKitOutputChanged(self, e):
         source = e.device
