@@ -5,16 +5,17 @@ from util.jsontools import ComplexEncoder
 
 class Publisher(object):
 
-    def __init__(self, publisher=5555, rpc=6666, spawn=True):
-        self.publisher = zmq.Context()
-        self.publisher_socket = self.publisher.socket(zmq.PUB)
-        self.publisher_socket.bind("tcp://*:%s" % publisher)
+    def __init__(self, publisher=5555, rpc=6666, spawn=True, connect=True):
+        if connect:
+            self.publisher = zmq.Context()
+            self.publisher_socket = self.publisher.socket(zmq.PUB)
+            self.publisher_socket.bind("tcp://*:%s" % publisher)
 
-        self.rpc = zmq.Context()
-        self.rpc_socket = self.rpc.socket(zmq.REP)
-        self.rpc_socket.bind("tcp://*:%s" % rpc)
-        if spawn: gevent.spawn(self.do_run)
-        else: self.do_run()
+            self.rpc = zmq.Context()
+            self.rpc_socket = self.rpc.socket(zmq.REP)
+            self.rpc_socket.bind("tcp://*:%s" % rpc)
+            if spawn: gevent.spawn(self.do_run)
+            else: self.do_run()
 
     def publish(self, dic):
         st = json.dumps(dic, cls=ComplexEncoder)

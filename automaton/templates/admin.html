@@ -1,0 +1,276 @@
+<html>
+    <head>
+        <title>Admin</title>
+        <style>
+            body{
+                font-family: sans-serif;
+                font-size: 13px;
+            }
+            fieldset{
+                background-color: #dddddd;                                
+                border: 1px solid #cccccc;
+                margin-bottom: 15px;
+            }
+
+            fieldset.multiple{
+                background-color: #eeeeee;                
+                box-shadow: 2px 2px 10px #999999;
+                border-radius: 5px;
+            }
+
+            legend{
+                font-weight: bold;
+                color: #666666;
+                border: 5px solid white; 
+                box-shadow: 
+                  inset 0 0 8px  rgba(0,0,0,0.1),
+                        0 0 16px rgba(0,0,0,0.1); 
+                padding: 3px;
+                background: rgba(255,255,255,0.5);
+                margin: 0 0 10px 0;
+            }
+
+            fieldset.multiple > legend{
+                font-weight: bold;
+                border-radius: 5px;
+                font-size: 16px;
+                color: #666666;
+                border: 5px solid white;
+                padding: 5px;
+                padding-top: 0px;
+                background: rgba(168,188,182,0.5);
+                margin: 0 0 10px 0;
+            }
+
+            legend > a{
+                font-size: 25px;
+                color: #FFFFFF;
+                font-weight: bold;
+                margin-left: 8px;
+                cursor:pointer;
+                text-shadow: 1px 1px 5px #999999;
+
+            }
+
+            input:not([type=submit]):not([type=file]) {
+                border: 2px solid white; 
+                box-shadow: 
+                  inset 0 0 8px  rgba(0,0,0,0.1),
+                        0 0 16px rgba(0,0,0,0.1); 
+                background: rgba(255,255,255,0.5);
+                margin: 0 0 10px 0;
+            }
+
+            .node_name{
+                font-size: 18px;
+                font-weight: bold;
+                color: #666666;
+                border: 5px solid white; 
+                box-shadow: 
+                  inset 0 0 8px  rgba(0,0,0,0.1),
+                        0 0 16px rgba(0,0,0,0.1); 
+                padding: 15px;
+                background: rgba(255,255,255,0.5);
+                margin: 0 0 10px 0;
+            }
+
+        </style>
+        <script src="http://${url}/static/mustache.js"></script>
+        <script type='text/javascript' language='javascript'>
+
+            window.onload = function(){
+                init();
+            }
+            var counts = {sensors:0, outputs:0, inputs:0, triggers:0}
+
+            function get_inputs(element){
+                var res = [];
+                for(var e in element.children){
+                    var ch = element.children[e];                    
+                    if(ch.tagName == 'INPUT'){
+                        console.log(ch);
+                        res.push(ch);         
+                    }else if(ch.tagName){
+                        r = get_inputs(ch);
+                        for(var i in r){
+                            res.push(r[i]);
+                        }
+                    } 
+                }
+                return res;
+            }
+
+            function add_node(e){
+                var p_name = e.target.parentNode.parentNode.name;
+                var name = "node_form_"+p_name
+                var template = document.getElementById(name).innerHTML;
+                var output = Mustache.render(template, {id:counts[p_name]});
+                var fs = document.createElement('fieldset');
+                fs.innerHTML = output;
+                document.getElementById(p_name).appendChild(fs);
+                counts[p_name]++;
+                update_listeners();
+            }
+
+            function slugify(text) {
+                text = text.replace(/[^-a-zA-Z0-9,&\s_]+/ig, '');
+                text = text.replace(/-/gi, "_");
+                text = text.replace(/\s/gi, "_");
+                return text;
+            }
+
+
+            var dropdowns = {sensors:[], outputs:[]};
+
+            function update_listeners(){ 
+                console.log("Update Listeners");
+                var slugs = document.getElementsByClassName('name');
+                for(var s in slugs){
+                    var slug = slugs[s];                    
+                    slug.oninput = function(e){                        
+                        e.target.value = slugify(e.target.value);
+                        e.target.parentNode.getElementsByTagName('legend')[0].innerHTML = e.target.value;
+                    }
+                }
+                update_slugs('sensorname', 'sensors', 'trigger_sensor');
+                update_dropdown('trigger_sensor', 'sensors');
+                update_slugs('outputname', 'outputs', 'trigger_output');
+                update_dropdown('trigger_output', 'outputs');
+            }
+
+            function update_slugs(cls, arr, drop_cls){
+                console.log("Update Slugs");
+                var sensor_names = document.getElementsByClassName(cls);
+                for(var s in sensor_names){
+                    var slug = sensor_names[s];
+                    slug.onchange = function(e){
+                        dropdowns[arr] = [];
+                        var names = document.getElementsByClassName(cls);
+                        for(var s in names){
+                            try{
+                                var slug = names[s];
+                                var id = slug.name.split("_")[1];
+                                if(id){
+                                    dropdowns[arr].push({id:slug.value, name:slug.value});
+                                }
+                            }catch(e){
+                                continue;
+                            }
+                        }                     
+                        update_dropdown(drop_cls, arr);
+                    }
+                }                
+            }
+
+            function update_dropdown(cls, arr){
+                console.log("Update Dropdown!");
+                console.log(dropdowns[arr]);
+                var tss = document.getElementsByClassName(cls)
+                for(var ts in tss){
+                    try{
+                        var trss = tss[ts];
+                        console.log(trss);
+                        trss.options.length = 0;
+                        for(var s in dropdowns[arr]){
+                            var sen = dropdowns[arr][s];
+                            var o = new Option(sen.name, sen.id);
+                            trss.options.add(o);
+                        }
+                    }catch(e){
+                        continue;
+                    }
+                }
+            }
+
+            function init(){
+                var template = document.getElementById('node_form').innerHTML;
+                var output = Mustache.render(template);
+                document.getElementById('content').innerHTML = output;
+                var fss = document.getElementsByClassName('multiple');
+                for(var f in fss){
+                    try{
+                        var a = document.createElement('a');
+                        a.onclick = add_node;
+                        a.innerHTML = "+";
+                        console.log(fss[f]);
+                        fss[f].getElementsByTagName('legend')[0].appendChild(a);
+                    }catch(e){
+                        continue;
+                    }
+                }
+
+                document.getElementById('sensor').onsubmit = function(e){
+                    res = get_inputs(e.target);
+                    for(var r in res){
+                        el = res[r];
+                        console.log(el.name+": "+el.value);
+                    }
+                    return false;
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div id='content'></div>
+    </body>
+    <script type='text/x-mustache' id='node_form'>
+        <form id='sensor'>
+            <input type='text' name='name' class='node_name' placeholder='Name'/>
+            <fieldset name='sensors' class='sensor multiple' id='sensors'>         
+                <legend>Sensors</legend>
+            </fieldset>
+            <fieldset name='outputs' class='output multiple' id='outputs'>
+                <legend>Outputs</legend>
+            </fieldset>
+            <fieldset name='inputs' class='input multiple' id='inputs'>
+                <legend>Inputs</legend>
+            </fieldset>
+            <fieldset name='triggers' class='trigger multiple' id='triggers'>
+                <legend>Triggers</legend>
+            </fieldset>
+            <input type='submit' value='Add'/>
+        </form>
+
+    </script>
+    <script type='text/x-mustache' id='node_form_sensors'>
+        <legend>Sensor</legend>
+        <label for='sensor_{{id}}_name'>Name</label>
+        <input type='text' name='sensor_{{id}}_name' class='name sensorname'/>
+        <label for='sensor_{{id}}_input'>Input</label>
+        <input type='number' value='0' step='1' min='0' max='7' name='sensor_{{id}}_input'/>
+        <label for='sensor_{{id}}_type'>Sensor</label>
+        <select name='sensor_{{id}}_type'>
+            <option value='temp'>Temperature</option>
+            <option value='ph'>PH</option>
+            <option value='humidity'>Humidity</option>
+        </select>
+    </script>
+    <script type='text/x-mustache' id='node_form_outputs'>
+        <legend>Output</legend>
+        <label for='output_{{id}}_name'>Name</label>
+        <input type='text' name='output_{{id}}_name' class='name outputname'/>
+        <label for='output_{{id}}_input'>Input</label>
+        <input type='number' value='0' step='1' min='0' max='7' name='output_{{id}}_input'/>
+    </script>
+    <script type='text/x-mustache' id='node_form_inputs'>
+        <legend>Output</legend>
+        <label for='input_{{id}}_name'>Name</label>
+        <input type='text' name='input_{{id}}_name' class='name'/>
+        <label for='input_{{id}}_input'>Input</label>
+        <input type='number' value='0' step='1' min='0' max='7' name='input_{{id}}_input'/>
+    </script>
+    <script type='text/x-mustache' id='node_form_triggers'>
+        <label for='trigger_{{id}}_input'>When</label>
+        <select name='trigger_{{id}}_input' class='trigger_sensor'></select>
+        <label for='trigger_{{id}}_min'>is between</label>
+        <input type='number' value='0' step='1' min='0' max='1000' name='trigger_{{id}}_min'/>
+        <label for='trigger_{{id}}_max'>and</label>
+        <input type='number' value='0' step='1' min='0' max='1000' name='trigger_{{id}}_min'/>
+        <label for='trigger_{{id}}_output'>turn</label>
+        <select name='trigger_{{id}}_output' class='trigger_output'></select>
+        <select name='trigger_{{id}}_state'>
+            <option value='True'>on</option>
+            <option value='False'>off</option>
+        </select>.                
+    </script>
+</html>

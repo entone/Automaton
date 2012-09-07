@@ -5,7 +5,7 @@ from node.sensor.temperature import Temperature
 from node.sensor.humidity import Humidity
 from node.sensor.ph import PH
 from node.output import Output
-from trigger import Trigger
+from node.trigger import Trigger
 
 class Test(Node):
 
@@ -20,7 +20,8 @@ class Test(Node):
         self.ph = PH(2, 'PH', 'ph', self, change=20)
         self.sensors = [self.temp, self.humidity, self.ph,]
 
-        temp = Trigger(input=self.temp, output=self.fan, min=30, max=float('inf'), state=True, current_state=False, port=kwargs.get("publisher"))
+        trig = Trigger(input=self.temp, output=self.fan, min=30, max=float('inf'), state=True, current_state=False, port=kwargs.get("publisher"))
+        self.triggers = [trig]
 
         super(Test, self).__init__(*args, **kwargs)
         

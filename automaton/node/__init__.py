@@ -2,7 +2,8 @@ from ctypes import *
 import sys
 import random
 import logging
-from util.publisher import Publisher 
+from util.publisher import Publisher
+from util.jsontools import ComplexEncoder
 #Phidget specific imports
 LIVE = True
 try:
@@ -21,6 +22,7 @@ class Node(Publisher):
     sensors = []
     outputs = []
     inputs = []
+    triggers = []
     interface_kit = None
 
     def __init__(self, name, *args, **kwargs):
@@ -67,7 +69,11 @@ class Node(Publisher):
             sensors=[s.json() for s in self.sensors],
             outputs=[o.json() for o in self.outputs],
             inputs=[i.json() for i in self.inputs],
+            triggers=[t.json() for t in self.triggers],
         )
+
+    def __conform__(self, protocol):
+        return json.dumps(self.json(), cls=ComplexEncoder)
 
     def displayDeviceInfo(self):
         print("|------------|----------------------------------|--------------|------------|")

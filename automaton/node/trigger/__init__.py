@@ -39,3 +39,11 @@ class Trigger(Subscriber):
 
         return None
 
+    def json(self):
+        return dict(
+            input=self._input.type,
+            min=self._min,
+            max=self._max,
+            output=self._output.type,
+            state_change=self._state_change,
+        )
