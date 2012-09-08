@@ -1,4 +1,5 @@
 import datetime
+import gevent
 import json
 import sqlite3
 from envy.controller import Controller
@@ -40,9 +41,34 @@ class Admin(Controller):
         drainage_pump = Output(4, 'Drainage Pump', 'drainage_pump', n)
         n.outputs = [fan, pump, plant_light, aqua_light, drainage_pump]
 
-        cur.execute("INSERT into nodes VALUES (?)", (n,))
+        #cur.execute("INSERT into nodes VALUES (?)", (n,))
         con.commit()
         res = {}
         return Response(self.render("admin.html", values=json.dumps(res), url=home))
+
+    def save(self):
+        ws = self.request.env['wsgi.websocket']
+        while True:
+            mes = ws.receive()
+            mes = json.loads(mes)
+            objs = dict()
+            print mes
+            res = dict(name=mes.get('name'), sensors=[], outputs=[], inputs=[], triggers=[])
+            for k,v in mes.iteritems():
+                try:
+                    type, index, key = k.split('_')
+                except: continue                
+                ob = objs.get('%ss_%s'%(type, index), {})
+                ob[key] = v
+                objs['%ss_%s'%(type, index)] = ob
+
+            print objs
+            for k,v in objs.iteritems():
+                name, i = k.split("_")
+                res.get(name).append(v)
+
+            print res
+            ws.send('');
+            gevent.sleep(.1)
 
 

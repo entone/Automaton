@@ -13,7 +13,13 @@ class Test(Node):
         self.plant_light = Output(0, 'Foilage', 'plant_light', self)
         self.fan = Output(1, 'Fan', 'fan', self)
         self.pump = Output(2, 'Pump', 'pump', self)
-        self.outputs = [self.plant_light, self.fan, self.pump,]
+        self.pump1 = Output(2, 'Pump1', 'pump1', self)
+        self.pump2 = Output(2, 'Pump2', 'pump2', self)
+        self.pump3 = Output(2, 'Pump3', 'pump3', self)
+        self.pump4 = Output(2, 'Pump4', 'pump4', self)
+        self.pump5 = Output(2, 'Pump5', 'pump5', self)
+        self.pump6 = Output(2, 'Pump6', 'pump6', self)
+        self.outputs = [self.plant_light, self.fan, self.pump,self.pump1,self.pump2,self.pump3,self.pump4,self.pump5,self.pump6,]
 
         self.temp = Temperature(0, 'Temperature', 'temp', self, change=2)
         self.humidity = Humidity(1, 'Humidity', 'humidity', self, change=10)

@@ -78,6 +78,9 @@
         <script src="http://${url}/static/mustache.js"></script>
         <script type='text/javascript' language='javascript'>
 
+            var url = "${url}";
+            var socket = false;
+
             window.onload = function(){
                 init();
             }
@@ -87,7 +90,7 @@
                 var res = [];
                 for(var e in element.children){
                     var ch = element.children[e];                    
-                    if(ch.tagName == 'INPUT'){
+                    if(ch.tagName == 'INPUT' || ch.tagName == 'SELECT'){
                         console.log(ch);
                         res.push(ch);         
                     }else if(ch.tagName){
@@ -150,6 +153,9 @@
                             try{
                                 var slug = names[s];
                                 var id = slug.name.split("_")[1];
+                                try{
+                                    document.getElementById(slug.name+"_id").value = slug.value;
+                                }catch(e){}
                                 if(id){
                                     dropdowns[arr].push({id:slug.value, name:slug.value});
                                 }
@@ -183,6 +189,7 @@
             }
 
             function init(){
+                socket = new WebSocket("ws://"+url+"/admin/save/");
                 var template = document.getElementById('node_form').innerHTML;
                 var output = Mustache.render(template);
                 document.getElementById('content').innerHTML = output;
@@ -201,10 +208,13 @@
 
                 document.getElementById('sensor').onsubmit = function(e){
                     res = get_inputs(e.target);
-                    for(var r in res){
+                    var d = {}
+                    for(var r in res){                        
                         el = res[r];
-                        console.log(el.name+": "+el.value);
+                        d[el.name] = el.value;                        
                     }
+                    console.log(d);
+                    socket.send(JSON.stringify(d));
                     return false;
                 }
             }
@@ -236,6 +246,7 @@
         <legend>Sensor</legend>
         <label for='sensor_{{id}}_name'>Name</label>
         <input type='text' name='sensor_{{id}}_name' class='name sensorname'/>
+        <input type='hidden' name='sensor_{{id}}_id' id='sensor_{{id}}_name_id'/>
         <label for='sensor_{{id}}_input'>Input</label>
         <input type='number' value='0' step='1' min='0' max='7' name='sensor_{{id}}_input'/>
         <label for='sensor_{{id}}_type'>Sensor</label>
@@ -265,7 +276,7 @@
         <label for='trigger_{{id}}_min'>is between</label>
         <input type='number' value='0' step='1' min='0' max='1000' name='trigger_{{id}}_min'/>
         <label for='trigger_{{id}}_max'>and</label>
-        <input type='number' value='0' step='1' min='0' max='1000' name='trigger_{{id}}_min'/>
+        <input type='number' value='0' step='1' min='0' max='1000' name='trigger_{{id}}_max'/>
         <label for='trigger_{{id}}_output'>turn</label>
         <select name='trigger_{{id}}_output' class='trigger_output'></select>
         <select name='trigger_{{id}}_state'>

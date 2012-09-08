@@ -7,7 +7,10 @@ TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), '../templates/')
 class Static(Controller):
 
     def index(self, file):
-        path = os.path.join(TEMPLATE_DIR, file)
-        print "PATH: %s" % path
-        f = open(path).read()
-        return Response(f)
+    	try:
+        	path = os.path.join(TEMPLATE_DIR, file)
+        	print "PATH: %s" % path
+        	f = open(path).read()
+        	return Response(f)
+        except Exception as e:
+        	print e

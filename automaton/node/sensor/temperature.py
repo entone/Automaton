@@ -2,6 +2,7 @@ from node.sensor import Sensor
 
 class Temperature(Sensor):
     decorator = "&deg;C"
+    type="temperature"
 
     def conversion(self, value):
         base = float(5000)/1000

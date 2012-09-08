@@ -3,6 +3,7 @@ from node.sensor import Sensor
 class Humidity(Sensor):
     celcius = 30
     decorator = "%"
+    type="humidity"
 
     def conversion(self, value):
         val = ((.0004*float(self.celcius)+.149)*float(value))-(.0617*float(self.celcius)+ 24.436)

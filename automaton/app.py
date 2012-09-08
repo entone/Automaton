@@ -4,6 +4,7 @@ try:
     from envy.session import CookieSession
     import logging
     import settings    
+    import signal
     from loggers import Logger
 
     logging.basicConfig(format=settings.LOG_FORMAT, level=settings.LOG_LEVEL)
@@ -18,6 +19,18 @@ try:
 
 except Exception as e:
     logging.exception(e)
+
+def log_request(self):
+    log = self.server.log
+    if log:
+        if hasattr(log, "info"):
+            log.info(self.format_request())
+        else:
+            log.write(self.format_request())
+
+import gevent
+gevent.pywsgi.WSGIHandler.log_request = log_request
+gevent.signal(signal.SIGQUIT, gevent.shutdown)
 
 def serve(env, start_response):
     try:
