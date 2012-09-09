@@ -20,7 +20,10 @@ class Aquaponics(Node):
 
         plant_light = Output(0, 'Plant Light', 'plant_light', self)
         fan = Output(1, 'Cooling Fan', 'cooling_fan', self)
-        self.outputs = [plant_light,fan]
+        pump = Output(2, 'Fish Pump', 'fish_pump', self)
+        aqua_light = Output(3, 'Aqua Light', 'aqualight', self)
+        drainage = Output(4, 'Drainage', 'drainage', self)
+        self.outputs = [plant_light,fan,pump,aqua_light, drainage]
 
         trig = Trigger(input=temp, output=fan, min=30, max=float('inf'), state=True, current_state=False, port=kwargs.get("publisher"))
         trig2 = Trigger(input=light, output=plant_light, min=0, max=60, state=True, current_state=False, port=kwargs.get("publisher"))

@@ -8,7 +8,6 @@ class Logger(object):
         self.node = node
         self.db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)
         try:
-            self.db.execute("DROP TABLE logs")
             self.db.execute('''CREATE TABLE logs (timestamp timestamp, node text, sensor text, value real, type text)''')
         except Exception as e:
             print e
