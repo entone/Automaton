@@ -5,6 +5,7 @@ from controllers.admin import Admin
 
 urls = (
     URL(r'^graph/?$', Graph.index),
+    URL(r'^graph/historical/(?P<name>[-\w.]+)/?$', Graph.historical),
     URL(r'^rpc/?$', Graph.control),
     URL(r'^display/?$', Graph.display),
     URL(r'^static/(?P<file>[-\w.]+)/?$', Static.index),

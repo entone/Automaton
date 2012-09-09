@@ -4,6 +4,7 @@ import random
 import logging
 from util.publisher import Publisher
 from util.jsontools import ComplexEncoder
+from loggers import Logger
 #Phidget specific imports
 LIVE = True
 try:
@@ -14,7 +15,7 @@ except:
     LIVE = False
 
 import gevent
-import json
+import simplejson as json
 
 class Node(Publisher):
 
@@ -23,6 +24,7 @@ class Node(Publisher):
     outputs = []
     inputs = []
     triggers = []
+    clocks = []
     interface_kit = None
 
     def __init__(self, name, *args, **kwargs):
@@ -36,9 +38,9 @@ class Node(Publisher):
 
         return False
 
-    def get_output(self, type):
+    def get_output(self, index):
         for output in self.outputs:
-            if output.type == type: return output
+            if output.index == index: return output
 
         return False
 
@@ -57,7 +59,7 @@ class Node(Publisher):
         return res    
 
     def set_output_state(self, ob):
-        output = self.get_output(ob.get('type'))
+        output = self.get_output(ob.get('index'))
         if output:
             print "%s: turning %s to %s index: %s" % (self.name, ob.get('type'), ob.get('state'), output.index)
             output.set_state(ob.get('state'))
@@ -110,13 +112,17 @@ class Node(Publisher):
         if not sensor: return
         val = sensor.do_conversion(float(e.value)) if sensor else 0
         source = e.device
-        ob = dict(node=self.name, type=sensor.type, value=val)
+        ob = sensor.json()
         self.publish(ob)
         print("%s Sensor: %s" % (sensor.display, val))
 
     def interfaceKitOutputChanged(self, e):
+        output = self.get_output(e.index)
+        if not output: return
+        output.current_state = e.state
+        self.publish(output.json())
         source = e.device
-        print("InterfaceKit %i: Output %i: %s" % (source.getSerialNum(), e.index, e.state))
+        print("%s Output: %s" % (output.display, output.current_state))
 
 
     def run(self):
@@ -158,11 +164,14 @@ class Node(Publisher):
         print("Setting the data rate for each sensor index to 10ms....")
         for i in range(self.interface_kit.getSensorCount()):
             try:
-                try:
-                    name, sensor = self.get_sensor(i)
-                except: continue
-                print "Setting Up: %s" % name
-                self.interface_kit.setSensorChangeTrigger(i, sensor.get("change"))
-                self.interface_kit.setDataRate(i, 4)
+                sensor = self.get_sensor(i)
+                if sensor:
+                    print "Setting Up: %s" % sensor.display
+                    print "Change: %s" % sensor.change
+                    print "Data Rate: %s" % sensor.data_rate
+                    self.interface_kit.setSensorChangeTrigger(i, sensor.change)
+                    self.interface_kit.setDataRate(i, 4)
             except PhidgetException as e:
                 print("Phidget Exception %i: %s" % (e.code, e.details))
+
+        self.logger = Logger(node=self)

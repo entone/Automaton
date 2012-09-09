@@ -1,6 +1,6 @@
 import gevent
 import zmq.green as zmq
-import json
+import simplejson as json
 from util.jsontools import ComplexEncoder
 
 class Publisher(object):

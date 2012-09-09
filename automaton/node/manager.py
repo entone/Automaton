@@ -1,5 +1,6 @@
 from util.publisher import Publisher
 from util.subscriber import Subscriber
+import sqlite3
 
 class Manager(Publisher):
     base_port = 5555
@@ -9,9 +10,9 @@ class Manager(Publisher):
         for node in nodes:
             pub = self.base_port+1
             rpc = self.base_port+2
-            name = "Test-%s" % pub
+            name = node[1]
             print "Starting Node: %s" % name
-            n = node(name, publisher=pub, rpc=rpc)
+            n = node[0](name, publisher=pub, rpc=rpc)
             n.subscriber = Subscriber(self.handle_message, port=pub)
             self.nodes.append(n)
             self.base_port = rpc
@@ -20,7 +21,6 @@ class Manager(Publisher):
 
     def get_nodes(self, ob):
         return [n.json() for n in self.nodes]
-
 
     def get_node(self, name):
         for n in self.nodes:

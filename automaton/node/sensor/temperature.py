@@ -15,7 +15,7 @@ class Temperature(Sensor):
         return Tc
 
     def set_temp(self, val):
-    	for sensor in self.interface.sensors:
-    		try:
-    			sensor.set_temp(val)
-    		except: pass
+        for sensor in self.interface.sensors:
+            try:
+                sensor.set_temp(val)
+            except: pass
