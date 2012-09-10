@@ -11,7 +11,7 @@ from node.sensor.ph import PH
 from node.output import Output
 
 SENSORS = dict(
-    temp=Temperature,
+    temperature=Temperature,
     ph=PH,
     humidity=Humidity,
 )
