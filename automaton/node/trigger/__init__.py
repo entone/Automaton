@@ -1,5 +1,29 @@
 from util.subscriber import Subscriber
 from util.rpc import RPC
+import gevent
+import datetime
+
+class Clock(object):
+    time = None
+    output = None
+    state_change = None
+
+    def __init__(self, time, output, state):
+        self.time = time
+        self.output = output
+        self.state_change = state
+        gevent.spawn(self.run)
+
+    def run(self):
+        while True:
+            now = datetime.datetime.utcnow()
+            print "Now: %s" % now
+            print self.time
+            if now.hour == self.time[0] and now.minute == self.time[1]:
+                self.output.set_state(self.state_change)
+
+            gevent.sleep(60)
+
 
 
 class Trigger(Subscriber):

@@ -1,6 +1,6 @@
 import datetime
 import zmq.green as zmq
-import json
+import simplejson as json
 import gevent
 
 class Subscriber(object):

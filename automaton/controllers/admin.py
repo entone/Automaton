@@ -1,6 +1,6 @@
 import datetime
 import gevent
-import json
+import simplejson as json
 import sqlite3
 from envy.controller import Controller
 from envy.response import Response
@@ -41,8 +41,6 @@ class Admin(Controller):
         drainage_pump = Output(4, 'Drainage Pump', 'drainage_pump', n)
         n.outputs = [fan, pump, plant_light, aqua_light, drainage_pump]
 
-        #cur.execute("INSERT into nodes VALUES (?)", (n,))
-        con.commit()
         res = {}
         return Response(self.render("admin.html", values=json.dumps(res), url=home))
 

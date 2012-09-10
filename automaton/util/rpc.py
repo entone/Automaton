@@ -1,4 +1,4 @@
-import json
+import simplejson as json
 import zmq.green as zmq
 from util.jsontools import ComplexEncoder
 

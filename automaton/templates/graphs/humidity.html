@@ -3,9 +3,9 @@
 <head>
 
     <title>Raspberry Pi and Phidgets</title>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>
-    <script src="http://people.iola.dk/olau/flot/jquery.flot.js"></script>
-    <script src="http://${url}/static/mustache.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/flot/0.7/jquery.flot.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.5.0-dev/mustache.min.js"></script>
 
     <script>
         var inter = false;
@@ -31,6 +31,10 @@
                 color: "E25618",
                 decorator: "%",
             },
+            light:{
+                color: "6FDDFC",
+                decorator:"%",
+            }
         }
 
         function Node(obj){
@@ -40,12 +44,13 @@
             var ph = 7;
             var temp = 30;
             var humidity = 50;
+            var light = 50;
             this.data = {};
             this.last = {}
             for(var i in this.sensors){
                 var s = this.sensors[i];
-                this.last[s.type] = s.value;
-                this.data[s.type] = [];
+                this.last[s.id] = s.value;
+                this.data[s.id] = [];
             }            
             var output = Mustache.to_html(node_template, this);
             document.getElementById('content').innerHTML+= output;
@@ -53,17 +58,113 @@
             setTimeout(function(){
                 for(var o in that.outputs){
                     var out = that.outputs[o];
-                    var light = new toggle(out.type, that.name+out.type, out.display, out.value, that.name, rpc_on_off);
+                    var light = new toggle(out.type, that.name+out.type, out.index, out.display, out.state, that.name, rpc_on_off);
                 }
             }, 1000);
+            this.display_historical();
+            var that = this;
+            setInterval(function(){
+                $.get("//"+url+"/graph/historical/"+that.name, function(data){
+                    that.historical = eval("("+data+")");
+                    that.display_historical();
+                });
+            }, 60000);
+        }
+
+        Node.prototype.display_historical = function(){
+            var h_data = {ph:{data:[]}, temp:{data:[]}, humidity:{data:[]}, light:{data:[]}};
+            var oldest = 999999999999999999999999999;
+            var newest = 0;
+            for(var h in this.historical){
+                try{
+                    var n = this.historical[h];
+                    if(n[3]){
+                        var da = new Date(n[0]).getTime()+offset;
+                        oldest = da < oldest ? da : oldest;
+                        newest = da > newest ? da : newest;
+                        h_data[n[4]].data.push([da, n[3]]);
+                        h_data[n[4]].color = prefs[n[4]].color;
+                    }
+                }catch(e){
+                    continue;
+                }
+            }
+            var plots = [];
+            for(var i in h_data){
+                var p = h_data[i].data;
+                try{
+                    p.push([newest, p[p.length-1][1]]);
+                    p.unshift([oldest, p[0][1]]);
+                }catch(e){
+                    console.log(e);
+                }
+                plots.push(h_data[i]);
+            }
+            $.plot($("#historical_"+this.name), plots, {
+                series: { lines: { show: true, fill: false},points:{show:true}},
+                yaxis: { 
+                    min: 0,
+                    max: 100,
+                },
+                xaxis: {
+                    mode: "time",
+                    timeformat:"%H:%M:%S",
+                    minTickSize: [10, "minute"],
+                },
+                grid:{
+                    hoverable:true,
+                    color: "ffffff",
+                    backgroundColor: "eeeeee",
+                    borderWidth: 3,
+                    borderColor: "dddddd",
+                }
+            });
+            this.enable_rollover();
+        }
+
+        function showTooltip(x, y, contents) {
+            $('<div id="tooltip">' + contents + '</div>').css( {
+                position: 'absolute',
+                display: 'none',
+                top: y + 5,
+                left: x + 5,
+                border: '1px solid #fdd',
+                padding: '2px',
+                'background-color': '#fee',
+                opacity: 0.80
+            }).appendTo("body").fadeIn(200);
+        }
+
+        Node.prototype.enable_rollover = function(){
+            var previousPoint = null;
+            $("#historical_"+this.name).bind("plothover", function (event, pos, item) {
+                $("#x").text(pos.x.toFixed(2));
+                $("#y").text(pos.y.toFixed(2));
+
+                if (item) {
+                    if (previousPoint != item.dataIndex) {
+                        previousPoint = item.dataIndex;
+                        
+                        $("#tooltip").remove();
+                        var x = item.datapoint[0].toFixed(2),
+                            y = item.datapoint[1].toFixed(2);
+                        
+                        showTooltip(item.pageX, item.pageY, y);
+                    }
+                }
+                else {
+                    $("#tooltip").remove();
+                    previousPoint = null;            
+                }
+            });
         }
 
         Node.prototype.update = function(){
             for(var d in this.sensors){
                 var s = this.sensors[d];
-                var n = [last_x, this.last[s.type]];
-                this.data[s.type].push(n);
-                this.data[s.type] = this.data[s.type].slice(-200);
+                var n = [last_x, this.last[s.id]];
+                this.data[s.id].push(n);
+                this.data[s.id] = this.data[s.id].slice(-200);
             }
             this.display();
         }
@@ -98,9 +199,14 @@
 
         function rpc_on_off(obj){
             console.log("Setting:");
-            obj = {node:obj.node, type:obj.type, state:obj.on};
+            obj = {node:obj.node, index:obj.index, state:obj.on};
             console.log(obj);
             res = rpc.send(JSON.stringify(obj));
+        }
+
+        function update_toggle(frame){
+            var tog = document.getElementById(frame.node+frame.type);
+            tog.obj.set_state(frame.state);
         }
 
         function init(){
@@ -126,8 +232,12 @@
                 var lines = e.data.split('\n');
                 for (var i = 0; i < lines.length - 1; i++) {
                     var frame = eval("("+lines[i]+")");
-                    var node = node_objs[frame.node];
-                    node.last[frame.type] = frame.value;
+                    if(frame.state != undefined){
+                        update_toggle(frame);
+                    }else{
+                        var node = node_objs[frame.node];
+                        node.last[frame.id] = frame.value;
+                    }
                 }
                 this.send('');
             };
@@ -156,9 +266,10 @@
             init();
         }
 
-        function toggle(type, id, label, on, node, callback){
+        function toggle(type, id, index, label, on, node, callback){
             this.type = type;
             this.id = id;
+            this.index = index;
             this.label = label;
             this.node = node;
             this.on = on || false;
@@ -171,7 +282,7 @@
         }
 
         toggle.prototype.set_state = function(state){
-            if(state){
+            if(state == true){
                 this.turn_on();
             }else{
                 this.turn_off();
@@ -234,6 +345,10 @@
             margin-left: 10px;
         }
 
+        .historical_graph{
+            margin-left: 10px;
+        }
+
 
         .legend{            
             margin:0px;
@@ -273,6 +388,10 @@
 
         .legend li.humidity{
             background-color: #E25618;
+        }
+
+        .legend li.light{
+            background-color: #6FDDFC;
         }
 
         div.controls{
@@ -365,12 +484,13 @@
             <div class='graph-holder'>
                 <ul class='legend clearfix'>
                     {{#sensors}}
-                        <li class='{{type}}'>
-                            <span class='header'>{{display}}:<span class='info {{type}}' id='{{node}}{{type}}_header'></span></span>
+                        <li class='{{id}}'>
+                            <span class='header'>{{display}}:<span class='info {{id}}' id='{{node}}{{id}}_header'></span></span>
                         </li>
                     {{/sensors}}
                 </ul>
                 <div class='graph' id="{{name}}" style="width:575px;height:300px"></div>
+                <div class='historical_graph' id="historical_{{name}}" style="width:575px;height:100px"></div>
             </div>                
             <div class='controls clearfix'>
                 {{#outputs}}
