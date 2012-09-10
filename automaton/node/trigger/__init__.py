@@ -2,6 +2,7 @@ from util.subscriber import Subscriber
 from util.rpc import RPC
 import gevent
 import datetime
+import settings
 
 class Clock(object):
     time = None
@@ -12,13 +13,14 @@ class Clock(object):
         self.time = time
         self.output = output
         self.state_change = state
+        self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         gevent.spawn(self.run)
 
     def run(self):
         while True:
             now = datetime.datetime.utcnow()
-            print "Now: %s" % now
-            print self.time
+            self.logger.debug("Now: %s" % now)
+            self.logger.debug(self.time)
             if now.hour == self.time[0] and now.minute == self.time[1]:
                 self.output.set_state(self.state_change)
 
@@ -42,6 +44,7 @@ class Trigger(Subscriber):
         self._output = output
         self._state = state
         self._current_state = current_state
+        self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         super(Trigger, self).__init__(port=port, callback=self.handle_event)
 
 

@@ -58,10 +58,10 @@
             setTimeout(function(){
                 for(var o in that.outputs){
                     var out = that.outputs[o];
-                    var light = new toggle(out.type, that.name+out.type, out.index, out.display, out.state, that.name, rpc_on_off);
+                    var light = new toggle(out.type, that.name+out.type, out.index, out.display, out.state, that.name, rpc_on_off);                    
                 }
-            }, 1000);
-            this.display_historical();
+                that.display_historical();
+            }, 1000);            
             var that = this;
             setInterval(function(){
                 $.get("//"+url+"/graph/historical/"+that.name, function(data){

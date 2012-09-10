@@ -1,17 +1,19 @@
 from util.publisher import Publisher
 from util.subscriber import Subscriber
 import sqlite3
+import settings
 
 class Manager(Publisher):
     base_port = 5555
     nodes = []
 
     def __init__(self, nodes, *args, **kwargs):
+        self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         for node in nodes:
             pub = self.base_port+1
             rpc = self.base_port+2
             name = node[1]
-            print "Starting Node: %s" % name
+            self.logger.info("Starting Node: %s" % name)
             n = node[0](name, publisher=pub, rpc=rpc)
             n.subscriber = Subscriber(self.handle_message, port=pub)
             self.nodes.append(n)

@@ -2,6 +2,7 @@ import gevent
 import zmq.green as zmq
 import simplejson as json
 from util.jsontools import ComplexEncoder
+import settings
 
 class Publisher(object):
 
@@ -10,7 +11,7 @@ class Publisher(object):
             self.publisher = zmq.Context()
             self.publisher_socket = self.publisher.socket(zmq.PUB)
             self.publisher_socket.bind("tcp://*:%s" % publisher)
-
+            self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
             self.rpc = zmq.Context()
             self.rpc_socket = self.rpc.socket(zmq.REP)
             self.rpc_socket.bind("tcp://*:%s" % rpc)
@@ -34,7 +35,7 @@ class Publisher(object):
                 res = getattr(self, ob.get("method"))(ob)
                 self.send(res)
             except Exception as e:
-                print e
+                self.logger.exception(e)
             gevent.sleep(.1)
 
     def run(self):pass

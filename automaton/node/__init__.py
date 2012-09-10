@@ -5,6 +5,7 @@ import logging
 from util.publisher import Publisher
 from util.jsontools import ComplexEncoder
 from loggers import Logger
+import settings
 #Phidget specific imports
 LIVE = True
 try:
@@ -31,6 +32,8 @@ class Node(Publisher):
         self.name = name
         if LIVE: self.interface_kit = InterfaceKit()
         super(Node, self).__init__(*args, **kwargs)
+        self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.data_logger = Logger(node=self)
 
     def get_sensor(self, index):
         for sensor in self.sensors:
@@ -61,7 +64,7 @@ class Node(Publisher):
     def set_output_state(self, ob):
         output = self.get_output(ob.get('index'))
         if output:
-            print "%s: turning %s to %s index: %s" % (self.name, ob.get('type'), ob.get('state'), output.index)
+            self.logger.info("%s: turning %s to %s index: %s" % (self.name, ob.get('type'), ob.get('state'), output.index))
             output.set_state(ob.get('state'))
             return dict(state=output.current_state)
 
@@ -77,35 +80,27 @@ class Node(Publisher):
     def __conform__(self, protocol):
         return json.dumps(self.json(), cls=ComplexEncoder)
 
-    def displayDeviceInfo(self):
-        print("|------------|----------------------------------|--------------|------------|")
-        print("|- Attached -|-              Type              -|- Serial No. -|-  Version -|")
-        print("|------------|----------------------------------|--------------|------------|")
-        print("|- %8s -|- %30s -|- %10d -|- %8d -|" % (self.interface_kit.isAttached(), self.interface_kit.getDeviceName(), self.interface_kit.getSerialNum(), self.interface_kit.getDeviceVersion()))
-        print("|------------|----------------------------------|--------------|------------|")
-        print("Number of Digital Inputs: %i" % (self.interface_kit.getInputCount()))
-        print("Number of Digital Outputs: %i" % (self.interface_kit.getOutputCount()))
-        print("Number of Sensor Inputs: %i" % (self.interface_kit.getSensorCount()))
-
+    def displayDeviceInfo(self):pass
+        
     #Event Handler Callback Functions
     def inferfaceKitAttached(self, e):
         attached = e.device
-        print("InterfaceKit %i Attached!" % (attached.getSerialNum()))
+        self.logger.info("InterfaceKit %i Attached!" % (attached.getSerialNum()))
 
     def interfaceKitDetached(self, e):
         detached = e.device
-        print("InterfaceKit %i Detached!" % (detached.getSerialNum()))
+        self.logger.info("InterfaceKit %i Detached!" % (detached.getSerialNum()))
 
     def interfaceKitError(self, e):
         try:
             source = e.device
-            print("InterfaceKit %i: Phidget Error %i: %s" % (source.getSerialNum(), e.eCode, e.description))
+            self.logger.info("InterfaceKit %i: Phidget Error %i: %s" % (source.getSerialNum(), e.eCode, e.description))
         except PhidgetException as e:
-            print("Phidget Exception %i: %s" % (e.code, e.details))
+            self.logger.exception(e)
 
     def interfaceKitInputChanged(self, e):
         source = e.device
-        print("InterfaceKit %i: Input %i: %s" % (source.getSerialNum(), e.index, e.state))
+        self.logger.info("InterfaceKit %i: Input %i: %s" % (source.getSerialNum(), e.index, e.state))
 
     def interfaceKitSensorChanged(self, e):
         sensor = self.get_sensor(e.index)
@@ -114,7 +109,7 @@ class Node(Publisher):
         source = e.device
         ob = sensor.json()
         self.publish(ob)
-        print("%s Sensor: %s" % (sensor.display, val))
+        self.logger.info("%s Sensor: %s" % (sensor.display, val))
 
     def interfaceKitOutputChanged(self, e):
         output = self.get_output(e.index)
@@ -122,7 +117,7 @@ class Node(Publisher):
         output.current_state = e.state
         self.publish(output.json())
         source = e.device
-        print("%s Output: %s" % (output.display, output.current_state))
+        self.logger.info("%s Output: %s" % (output.display, output.current_state))
 
 
     def run(self):
@@ -134,44 +129,40 @@ class Node(Publisher):
             self.interface_kit.setOnOutputChangeHandler(self.interfaceKitOutputChanged)
             self.interface_kit.setOnSensorChangeHandler(self.interfaceKitSensorChanged)
         except PhidgetException as e:
-            print("Phidget Exception %i: %s" % (e.code, e.details))
-            print("Exiting....")
-
-        print("Opening phidget object....")
+            self.logger.exception(e)
+            
+        self.logger.info("Opening phidget object....")
 
         try:
             self.interface_kit.openPhidget()
         except PhidgetException as e:
-            print("Phidget Exception %i: %s" % (e.code, e.details))
-            print("Exiting....")
-
-        print("Waiting for attach....")
+            self.logger.exception(e)
+            
+        self.logger.info("Waiting for attach....")
 
         try:
             self.interface_kit.waitForAttach(10000)
         except PhidgetException as e:
-            print("Phidget Exception %i: %s" % (e.code, e.details))
+            self.logger.exception(e)
             try:
                 self.interface_kit.closePhidget()
             except PhidgetException as e:
-                print("Phidget Exception %i: %s" % (e.code, e.details))
-                print("Exiting....")
+                self.logger.exception(e)
+                self.logger.info("Exiting....")
                 exit(1)
-            print("Exiting....")
+            self.logger.info("Exiting....")
         else:
             self.displayDeviceInfo()
 
-        print("Setting the data rate for each sensor index to 10ms....")
+        self.logger.info("Initializing Sensors")
         for i in range(self.interface_kit.getSensorCount()):
             try:
                 sensor = self.get_sensor(i)
                 if sensor:
-                    print "Setting Up: %s" % sensor.display
-                    print "Change: %s" % sensor.change
-                    print "Data Rate: %s" % sensor.data_rate
+                    self.logger.info("Setting Up: %s" % sensor.display)
+                    self.logger.info("Change: %s" % sensor.change)
+                    self.logger.info("Data Rate: %s" % sensor.data_rate)
                     self.interface_kit.setSensorChangeTrigger(i, sensor.change)
                     self.interface_kit.setDataRate(i, 4)
             except PhidgetException as e:
-                print("Phidget Exception %i: %s" % (e.code, e.details))
-
-        self.logger = Logger(node=self)
+                self.logger.exception(e)

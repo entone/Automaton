@@ -1,15 +1,17 @@
 import simplejson as json
 import zmq.green as zmq
 from util.jsontools import ComplexEncoder
+import settings
 
 class RPC(object):
 
     port = 6666
 
     def __init__(self, port=6666):
+        self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         con = zmq.Context()
         self.socket = con.socket(zmq.REQ)
-        self.socket.connect("tcp://*:%s" % port)
+        self.socket.connect("tcp://*:%s" % port)        
 
     def send(self, ob):
         print "Calling: %s" % ob

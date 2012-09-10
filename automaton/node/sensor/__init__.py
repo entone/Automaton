@@ -1,3 +1,5 @@
+import settings
+
 class Sensor(object):
     index = ""
     display = ""
@@ -16,6 +18,7 @@ class Sensor(object):
         self.change = change
         self.data_rate = data_rate
         self.interface = interface
+        self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
 
     def do_conversion(self, val): 
         self.current_value = self.conversion(float(val))

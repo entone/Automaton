@@ -3,11 +3,14 @@ import random
 import datetime
 import simplejson as json
 import sqlite3
+import settings
 from envy.controller import Controller
 from envy.response import Response
 from util.jsontools import ComplexEncoder
 from util.subscriber import Subscriber
 from util.rpc import RPC
+
+logger = settings.get_logger(__name__)
 
 class Graph(Controller):
 
@@ -22,7 +25,7 @@ class Graph(Controller):
         for n in res:
             n['historical'] = cur.execute('SELECT * FROM logs WHERE node=? AND timestamp > ? LIMIT 20', (n.get('name'),q_t)).fetchall()
         
-        print "Got nodes: %s" % res
+        self.logger.debug("Got Nodes: %s" % res)
         return Response(self.render("graphs/humidity.html", values=json.dumps(res, cls=ComplexEncoder), url=home))
 
     def historical(self, name):
@@ -30,7 +33,7 @@ class Graph(Controller):
         cur = db.cursor()
         q_t = datetime.datetime.utcnow()-datetime.timedelta(hours=1)
         res = cur.execute('SELECT * FROM logs WHERE node=? AND timestamp > ?', (name,q_t)).fetchall()
-        print res
+        self.logger.debug(res)
         return Response(json.dumps(res, cls=ComplexEncoder))
 
     def index(self):
@@ -38,7 +41,7 @@ class Graph(Controller):
             ws = self.request.env['wsgi.websocket']
             def write_out(ob):
                 st = "%s\n" % json.dumps(ob, cls=ComplexEncoder)
-                print "Message: %s" % st
+                self.logger.debug("Message: %s" % st)
                 ws.send(st)
             sub = Subscriber(port=5554, callback=write_out, spawn=False)
         except Exception as e:
