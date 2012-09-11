@@ -41,5 +41,6 @@ class Manager(Publisher):
 
     def handle_message(self, ob):
         self.publish(ob)
+        return True
 
 

@@ -12,6 +12,7 @@ class Publisher(object):
             self.publisher_socket = self.publisher.socket(zmq.PUB)
             self.publisher_socket.bind("tcp://*:%s" % publisher)
             self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+            self.logger.info("Publishing on: %s" % publisher)
             self.rpc = zmq.Context()
             self.rpc_socket = self.rpc.socket(zmq.REP)
             self.rpc_socket.bind("tcp://*:%s" % rpc)
@@ -20,6 +21,7 @@ class Publisher(object):
 
     def publish(self, dic):
         st = json.dumps(dic, cls=ComplexEncoder)
+        self.logger.debug("Publishing")
         self.publisher_socket.send(st)
 
     def send(self, res):

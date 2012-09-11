@@ -26,6 +26,7 @@ class Node(Publisher):
     inputs = []
     triggers = []
     clocks = []
+    repeaters = []
     interface_kit = None
 
     def __init__(self, name, *args, **kwargs):
@@ -75,6 +76,8 @@ class Node(Publisher):
             outputs=[o.json() for o in self.outputs],
             inputs=[i.json() for i in self.inputs],
             triggers=[t.json() for t in self.triggers],
+            repeaters=[r.json() for r in self.repeaters],
+            clocks=[c.json() for c in self.clocks],
         )
 
     def __conform__(self, protocol):

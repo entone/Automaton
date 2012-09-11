@@ -6,6 +6,8 @@ from node.sensor.humidity import Humidity
 from node.sensor.ph import PH
 from node.output import Output
 from node.trigger import Trigger
+from node.trigger import Repeater
+from node.trigger import Clock
 
 class Test(Node):
 
@@ -21,6 +23,15 @@ class Test(Node):
         self.humidity = Humidity(1, 'Humidity', 'humidity', self, change=10)
         self.ph = PH(2, 'PH', 'ph', self, change=20)
         self.sensors = [self.temp, self.humidity, self.ph,]
+
+        #pump_repeater = Repeater(self.pump, run_for=15, every=60, state=True)
+        #subpump_repeater = Repeater(self.pump, run_for=15, every=60, state=True, padding=2)
+
+        #self.repeaters = [pump_repeater, subpump_repeater]
+
+        light_on = Clock(time=(12,0), output=self.plant_light, state=True) 
+        light_off = Clock(time=(0,0), output=self.plant_light, state=False) 
+        self.clocks = [light_on, light_off]
 
         trig = Trigger(input=self.temp, output=self.fan, min=30, max=float('inf'), state=True, current_state=False, port=kwargs.get("publisher"))
         self.triggers = [trig]
@@ -41,7 +52,7 @@ class Test(Node):
             self.ph.current_value = random.randint(0, 14)
             self.publish(self.ph.json())
 
-            gevent.sleep(20)
+            gevent.sleep(5)
 
 
 

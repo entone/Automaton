@@ -37,15 +37,18 @@ class Graph(Controller):
         return Response(json.dumps(res, cls=ComplexEncoder))
 
     def index(self):
-        try:
-            ws = self.request.env['wsgi.websocket']
-            def write_out(ob):
+        ws = self.request.env['wsgi.websocket']
+        def write_out(ob):
+            try:
                 st = "%s\n" % json.dumps(ob, cls=ComplexEncoder)
                 self.logger.debug("Message: %s" % st)
                 ws.send(st)
-            sub = Subscriber(port=5554, callback=write_out, spawn=False)
-        except Exception as e:
-            self.logger.exception(e)
+                return True
+            except Exception as e:
+                self.logger.info("Connection Closed: %s" % ws)
+                return False
+        sub = Subscriber(port=5554, callback=write_out, spawn=False)
+        return Response('')
     
 
     def control(self):

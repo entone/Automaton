@@ -1,3 +1,6 @@
+from node.manager import Manager
+from node.test import Test
 from node.aquaponics import Aquaponics
 
-aq = Aquaponics(publisher=5555, rpc=6666, node='lettuce')
+
+aq = Manager(nodes=[[Aquaponics, 'Lettuce'], [Test, 'Basil']], publisher=5554, rpc=5553)

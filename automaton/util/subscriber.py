@@ -6,6 +6,8 @@ import settings
 
 class Subscriber(object):
 
+    running = True
+
     def __init__(self, callback, port=5555, filter="", spawn=True, **kwargs):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.SUB)
@@ -18,9 +20,14 @@ class Subscriber(object):
     	else: self.run()
 
     def run(self):
-        while True:
+        while self.running:
             st = self.socket.recv()
             ob = json.loads(st)
             ob['timestamp'] = datetime.datetime.utcnow()
-            self.callback(ob, **self.kwargs)
+            if not self.callback(ob, **self.kwargs): self.stop()
             gevent.sleep(.1)
+
+        return
+
+    def stop(self):
+        self.running = False
