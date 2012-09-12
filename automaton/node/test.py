@@ -24,14 +24,18 @@ class Test(Node):
         self.ph = PH(2, 'PH', 'ph', self, change=20)
         self.sensors = [self.temp, self.humidity, self.ph,]
 
-        #pump_repeater = Repeater(self.pump, run_for=15, every=60, state=True)
-        #subpump_repeater = Repeater(self.pump, run_for=15, every=60, state=True, padding=2)
+        pump_repeater = Repeater(self.pump, run_for=15, every=60, state=True)
+        subpump_repeater = Repeater(self.pump, run_for=15, every=60, state=True, padding=2)
 
-        #self.repeaters = [pump_repeater, subpump_repeater]
+        self.repeaters = [pump_repeater, subpump_repeater]
 
         light_on = Clock(time=(12,0), output=self.plant_light, state=True) 
         light_off = Clock(time=(0,0), output=self.plant_light, state=False) 
-        self.clocks = [light_on, light_off]
+
+        pump2_on = Clock(time=(10,0), output=self.pump2, state=True) 
+        pump2_off = Clock(time=(20,0), output=self.pump2, state=False) 
+
+        self.clocks = [light_on, light_off, pump2_on, pump2_off]
 
         trig = Trigger(input=self.temp, output=self.fan, min=30, max=float('inf'), state=True, current_state=False, port=kwargs.get("publisher"))
         self.triggers = [trig]

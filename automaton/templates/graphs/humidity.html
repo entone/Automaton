@@ -61,6 +61,7 @@
                     var light = new toggle(out.type, that.name+out.type, out.index, out.display, out.state, that.name, rpc_on_off);                    
                 }
                 that.display_historical();
+                that.display_day();
             }, 1000);            
             var that = this;
             setInterval(function(){
@@ -69,6 +70,97 @@
                     that.display_historical();
                 });
             }, 60000);
+        }
+
+        Node.prototype.display_day = function(){
+            var that = this;
+            var c = document.createElement("canvas");
+            var total_wid = document.getElementById("day_"+that.name).style.width;                
+            c.width = 573;
+            c.height = 40;            
+            var wid = parseInt(total_wid)/1440;
+            var on_colors = ["#80DE03", "#C53437", "#6FDDFC", "#1D8480"];
+            function draw(){
+                var rows = 0;
+                var cxt =  c.getContext("2d");
+                cxt.clearRect(0, 0, 575, 40);
+                for(var re in that.repeaters){                    
+                    var r = that.repeaters[re];
+                    var pad = r.padding*wid;
+                    var p = c.getContext("2d");
+                    p.fillStyle = "#dddddd";
+                    p.fillRect(0, 0, pad, 5);
+                    var cur_wid=pad;
+                    for(var i=0; i<1440; i+=r.every){                        
+                        var on = c.getContext("2d");
+                        on.fillStyle = on_colors[rows];
+                        var w = wid*r.run_for;
+                        on.fillRect(cur_wid, rows*5, w, 5);
+                        cur_wid+=w;
+                        var off = c.getContext("2d");
+                        off.fillStyle = "#dddddd";
+                        var o_w = (r.every-r.run_for)*wid;
+                        off.fillRect(cur_wid, rows*5, o_w, 5);
+                        cur_wid+=o_w;                        
+                    }
+                    rows++;
+                }
+                var ons = {};
+                var ends = {};
+                for(var cl in that.clocks){
+                    var clock = that.clocks[cl];
+                    if(clock.state_change == true){
+                        var t = clock.time[0]*60+clock.time[1];
+                        var cur = t+(offset/1000/60);
+                        cur = cur < 0 ? 1440+cur : cur;
+                        ons[clock.output] = cur
+                    }else if(clock.state_change == false){
+                        var t = clock.time[0]*60+clock.time[1];
+                        var cur = t+(offset/1000/60);
+                        cur = cur < 0 ? 1440+cur : cur;
+                        ends[clock.output] = cur;
+                    }                    
+                }
+
+                for(var tt in ons){
+                    var o = ons[tt];
+                    var of = ends[tt];
+                    var on = c.getContext("2d");
+                    var off = c.getContext("2d");
+                    var off2 = c.getContext("2d");
+                    var w_on = wid*o;
+                    var w_off = wid*of;
+
+                    off.fillStyle = "#dddddd";
+                    off.fillRect(0, rows*5, wid*o, 5);
+                    
+                    on.fillStyle = on_colors[rows];
+                    on.fillRect(w_on, rows*5, w_off-w_on, 5);
+                    
+                    off2.fillStyle = "#dddddd";
+                    off2.fillRect(w_off, rows*5, 575-w_off, 5);
+
+                    rows++;
+                }
+                var now = new Date()
+                var sec = now.getSeconds() ? (now.getSeconds()/60) : 0;
+                now = (now.getHours()*60)+now.getMinutes()+sec;
+                time = c.getContext("2d");
+                time.fillStyle = "#333333";
+                time.beginPath();
+                time.moveTo((now*wid)-5, 0);
+                time.lineTo((now*wid)+5, 0);
+                time.lineTo((now*wid), 10);
+                time.lineTo((now*wid)-5, 0);
+                time.fill();
+                time.closePath();
+                time.shadowColor = "#999999";
+                time.shadowBlur = 5;
+                time.shadowOffsetX = 2;
+                time.shadowOffsetY = 2;
+                document.getElementById("day_"+that.name).appendChild(c);
+            }
+            setInterval(draw, 1000);
         }
 
         Node.prototype.display_historical = function(){
@@ -96,7 +188,7 @@
                     p.push([newest, p[p.length-1][1]]);
                     p.unshift([oldest, p[0][1]]);
                 }catch(e){
-                    console.log(e);
+                    continue;
                 }
                 plots.push(h_data[i]);
             }
@@ -255,15 +347,27 @@
 
         function run(){
             inter = setInterval(function(){
-                last_x+=110;
+                last_x = new Date().getTime()+offset;
                 for(var i in node_objs){
                     node_objs[i].update();
                 }
-            }, 110);
+            }, 333);
+        }
+
+        function stop(){
+            clearInterval(inter);
         }
 
         window.onload = function() {
             init();
+        }
+
+        window.onfocus = function(){
+            run();
+        }
+
+        window.onblur = function(){
+            stop();
         }
 
         function toggle(type, id, index, label, on, node, callback){
@@ -347,6 +451,11 @@
 
         .historical_graph{
             margin-left: 10px;
+        }
+
+        .day_graph{
+            margin-left: 10px;
+            margin-top: 10px;
         }
 
 
@@ -491,6 +600,7 @@
                 </ul>
                 <div class='graph' id="{{name}}" style="width:575px;height:300px"></div>
                 <div class='historical_graph' id="historical_{{name}}" style="width:575px;height:100px"></div>
+                <div class='day_graph' id="day_{{name}}" style="width:575px;height:40px"></div>
             </div>                
             <div class='controls clearfix'>
                 {{#outputs}}
