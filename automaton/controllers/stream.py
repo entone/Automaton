@@ -16,7 +16,7 @@ class Graph(Controller):
 
     def display(self):
         res = {}
-        self.rpc = RPC(port=5553)
+        self.rpc = RPC(port=settings.RPC_PORT)
         res = self.rpc.send(dict(method='get_nodes'))
         home = self.request.env.get('HTTP_HOST')
         db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)
@@ -26,6 +26,8 @@ class Graph(Controller):
             n['historical'] = cur.execute('SELECT * FROM logs WHERE node=? AND timestamp > ? LIMIT 20', (n.get('name'),q_t)).fetchall()
         
         self.logger.debug("Got Nodes: %s" % res)
+        self.rpc.done()
+        db.close()
         return Response(self.render("graphs/humidity.html", values=json.dumps(res, cls=ComplexEncoder), url=home))
 
     def historical(self, name):
@@ -37,7 +39,7 @@ class Graph(Controller):
         return Response(json.dumps(res, cls=ComplexEncoder))
 
     def index(self):
-        ws = self.request.env['wsgi.websocket']
+        ws = self.request.env['wsgi.websocket']        
         def write_out(ob):
             try:
                 st = "%s\n" % json.dumps(ob, cls=ComplexEncoder)
@@ -47,20 +49,16 @@ class Graph(Controller):
             except Exception as e:
                 self.logger.info("Connection Closed: %s" % ws)
                 return False
-        sub = Subscriber(port=5554, callback=write_out, spawn=False)
+        sub = Subscriber(port=settings.SUBSCRIBER_PORT, callback=write_out, spawn=False)
         return Response('')
     
 
     def control(self):
-        self.rpc = RPC(port=5553)
-        ws = self.request.env['wsgi.websocket']
-        while True:
-            try:
-                mes = ws.receive()
-                mes = json.loads(mes)
-                mes['method'] = 'set_output_state'
-                res = self.rpc.send(mes)
-                ws.send("%s\n" % json.dumps(res))
-            except Exception as e: pass
-            gevent.sleep(.1)
+        rpc = RPC(port=settings.RPC_PORT)
+        mes = self.request.env.get('wsgi.input').read()
+        mes = json.loads(mes)
+        mes['method'] = 'set_output_state'
+        res = rpc.send(mes)
+        rpc.done()
+        return Response(json.dumps(res, cls=ComplexEncoder))
 

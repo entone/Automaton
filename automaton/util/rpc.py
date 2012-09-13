@@ -9,8 +9,8 @@ class RPC(object):
 
     def __init__(self, port=6666):
         self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
-        con = zmq.Context()
-        self.socket = con.socket(zmq.REQ)
+        self.context = zmq.Context()
+        self.socket = self.context.socket(zmq.REQ)
         self.socket.connect("tcp://*:%s" % port)        
 
     def send(self, ob):
@@ -19,4 +19,8 @@ class RPC(object):
         self.socket.send(st)
         res = self.socket.recv()
         return json.loads(res)
+
+    def done(self):
+        self.context.destroy()
+
     

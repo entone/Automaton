@@ -13,6 +13,10 @@ LOG_LEVEL = logging.DEBUG
 
 logging.basicConfig(format=LOG_FORMAT, level=LOG_LEVEL)
 
+RPC_PORT = 5553
+SUBSCRIBER_PORT = 5554
+PUBLISHER_PORT = SUBSCRIBER_PORT
+
 def get_logger(name):
 	logger = logging.getLogger(name)
 	handler = SysLogHandler(address='/dev/log')

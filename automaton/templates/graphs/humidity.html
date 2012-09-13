@@ -335,7 +335,9 @@
             console.log("Setting:");
             obj = {node:obj.node, index:obj.index, state:obj.on};
             console.log(obj);
-            res = rpc.send(JSON.stringify(obj));
+            $.post("//"+url+"/rpc/", JSON.stringify(obj), function(res){
+                console.log(eval("("+res+")"));
+            });
         }
 
         function update_toggle(frame){
@@ -345,17 +347,7 @@
 
         function init(){
             graph = new WebSocket("ws://"+url+"/graph/");
-            rpc = new WebSocket("ws://"+url+"/rpc/");
             node_template = document.getElementById('node_template').innerHTML;
-
-            rpc.onopen = function(){
-                console.log("RPC Open!");
-            }
-
-            rpc.onmessage = function(e){
-                console.log("RPC Result");
-                console.log(e.data);
-            }
             
             graph.onopen = function() {
                 console.log("Graph OPEN");

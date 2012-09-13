@@ -27,7 +27,9 @@ class Subscriber(object):
             if not self.callback(ob, **self.kwargs): self.stop()
             gevent.sleep(.1)
 
+        self.context.destroy()
         return
+
 
     def stop(self):
         self.running = False
