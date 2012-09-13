@@ -15,8 +15,9 @@
         var node_objs = {};
         var url = "${url}";
         var graph = false;
-        var rpc = false;
-        var node_template = "";        
+        var node_template = "";
+        var on_colors = ["#80DE03", "#C53437", "#6FDDFC", "#1D8480"];
+        var daynode_height = 10;    
 
         var prefs = {
             ph:{
@@ -35,6 +36,28 @@
                 color: "6FDDFC",
                 decorator:"%",
             }
+        }
+
+        function DayNode(x, y, width, height, color, obj){
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.color = color;
+            this.obj = obj;
+        }
+
+        DayNode.prototype.draw = function(canvas){
+            var ctx = canvas.getContext("2d");
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+
+        DayNode.prototype.hit_test = function(x, y){
+            if((x > this.x && x < (this.x+this.width)) && (y > this.y && y < (this.y+this.height))){
+                return true;
+            }
+            return false;
         }
 
         function Node(obj){
@@ -72,27 +95,6 @@
             }, 60000);
         }
 
-        function DayNode(x, y, width, height, color, obj){
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
-            this.color = color;
-            this.obj = obj;
-        }
-
-        DayNode.prototype.draw = function(canvas){
-            var ctx = canvas.getContext("2d");
-            ctx.fillStyle = this.color;
-            ctx.fillRect(this.x, this.y, this.width, this.height);
-        }
-
-        DayNode.prototype.hit_test = function(x, y){
-            if((x > this.x && x < (this.x+this.width)) && (y > this.y && y < (this.y+this.height))){
-                return true;
-            }
-            return false;
-        }
         function zeroFill(number, width){
             width -= number.toString().length;
             if (width > 0){
@@ -124,10 +126,9 @@
                 }
             })
             var total_wid = document.getElementById("day_"+that.name).style.width;                
-            c.width = 573;
+            c.width = parseInt(total_wid);
             c.height = 40;            
-            var wid = parseInt(total_wid)/1440;
-            var on_colors = ["#80DE03", "#C53437", "#6FDDFC", "#1D8480"];
+            var wid = parseInt(total_wid)/1440;            
             function draw(){
                 that.nodes = [];
                 var rows = 0;
@@ -136,17 +137,17 @@
                 for(var re in that.repeaters){                    
                     var r = that.repeaters[re];
                     var pad = r.padding*wid;
-                    var p = new DayNode(0, 0, pad, 5, "#dddddd");
+                    var p = new DayNode(0, 0, pad, daynode_height, "#dddddd");
                     p.draw(c);
                     var cur_wid=pad;
                     for(var i=0; i<1440; i+=r.every){                        
                         var w = wid*r.run_for;
-                        var on = new DayNode(cur_wid, rows*5, w, 5, on_colors[rows], {name:r.output, start:i+r.padding, end:(i+r.padding)+r.run_for});
+                        var on = new DayNode(cur_wid, rows*daynode_height, w, daynode_height, on_colors[rows], {name:r.output, start:i+r.padding, end:(i+r.padding)+r.run_for});
                         on.draw(c);
                         that.nodes.push(on);
                         cur_wid+=w;
                         var o_w = (r.every-r.run_for)*wid;
-                        var off = new DayNode(cur_wid, rows*5, o_w, 5, "#dddddd");
+                        var off = new DayNode(cur_wid, rows*daynode_height, o_w, daynode_height, "#dddddd");
                         off.draw(c);
                         cur_wid+=o_w;                        
                     }
@@ -175,12 +176,12 @@
                     var w_on = wid*o;
                     var w_off = wid*of;
                     ob = {name:ons[tt][1], start:o, end:of};
-                    var on = new DayNode(w_on, rows*5, w_off-w_on, 5, on_colors[rows], ob);
+                    var on = new DayNode(w_on, rows*daynode_height, w_off-w_on, daynode_height, on_colors[rows], ob);
                     on.draw(c);
                     that.nodes.push(on);
-                    var off = new DayNode(0, rows*5, wid*o, 5, "#dddddd");
+                    var off = new DayNode(0, rows*daynode_height, wid*o, daynode_height, "#dddddd");
                     off.draw(c);
-                    var off2 = new DayNode(w_off, rows*5, 575-w_off, 5, "#dddddd");
+                    var off2 = new DayNode(w_off, rows*daynode_height, 575-w_off, daynode_height, "#dddddd");
                     off2.draw(c);
                     rows++;
                 }
@@ -190,14 +191,14 @@
                 time = c.getContext("2d");
                 time.fillStyle = "#333333";
                 time.beginPath();
-                time.moveTo((now*wid)-5, 0);
-                time.lineTo((now*wid)+5, 0);
-                time.lineTo((now*wid), 10);
-                time.lineTo((now*wid)-5, 0);
+                time.moveTo((now*wid)-daynode_height, 0);
+                time.lineTo((now*wid)+daynode_height, 0);
+                time.lineTo((now*wid), daynode_height*2);
+                time.lineTo((now*wid)-daynode_height, 0);
                 time.fill();
                 time.closePath();
-                time.shadowColor = "#999999";
-                time.shadowBlur = 5;
+                time.shadowColor = "#666666";
+                time.shadowBlur = daynode_height/2;
                 time.shadowOffsetX = 2;
                 time.shadowOffsetY = 2;
                 document.getElementById("day_"+that.name).appendChild(c);
@@ -209,6 +210,7 @@
             var h_data = {ph:{data:[]}, temp:{data:[]}, humidity:{data:[]}, light:{data:[]}};
             var oldest = 999999999999999999999999999;
             var newest = 0;
+            console.log(this.historical);
             for(var h in this.historical){
                 try{
                     var n = this.historical[h];
@@ -234,6 +236,7 @@
                 }
                 plots.push(h_data[i]);
             }
+            console.log(plots);
             $.plot($("#historical_"+this.name), plots, {
                 series: { lines: { show: true, fill: false},points:{show:true}},
                 yaxis: { 
@@ -272,9 +275,6 @@
         Node.prototype.enable_rollover = function(){
             var previousPoint = null;
             $("#historical_"+this.name).bind("plothover", function (event, pos, item) {
-                $("#x").text(pos.x.toFixed(2));
-                $("#y").text(pos.y.toFixed(2));
-
                 if (item) {
                     if (previousPoint != item.dataIndex) {
                         previousPoint = item.dataIndex;
@@ -490,6 +490,7 @@
         .day_graph{
             margin-left: 10px;
             margin-top: 10px;
+            border: 2px solid #cccccc;
         }
 
 
