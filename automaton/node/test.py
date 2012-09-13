@@ -25,7 +25,7 @@ class Test(Node):
         self.sensors = [self.temp, self.humidity, self.ph,]
 
         pump_repeater = Repeater(self.pump, run_for=15, every=60, state=True)
-        subpump_repeater = Repeater(self.pump, run_for=15, every=60, state=True, padding=2)
+        subpump_repeater = Repeater(self.pump2, run_for=15, every=60, state=True, padding=2)
 
         self.repeaters = [pump_repeater, subpump_repeater]
 

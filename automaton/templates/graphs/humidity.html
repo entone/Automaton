@@ -72,35 +72,82 @@
             }, 60000);
         }
 
-        Node.prototype.display_day = function(){
+        function DayNode(x, y, width, height, color, obj){
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.color = color;
+            this.obj = obj;
+        }
+
+        DayNode.prototype.draw = function(canvas){
+            var ctx = canvas.getContext("2d");
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+
+        DayNode.prototype.hit_test = function(x, y){
+            if((x > this.x && x < (this.x+this.width)) && (y > this.y && y < (this.y+this.height))){
+                return true;
+            }
+            return false;
+        }
+        function zeroFill(number, width){
+            width -= number.toString().length;
+            if (width > 0){
+                return new Array( width + (/\./.test( number ) ? 2 : 1) ).join( '0' ) + number;
+            }
+            return number + ""; // always return a string
+        }
+
+        Node.prototype.display_day = function(){            
             var that = this;
             var c = document.createElement("canvas");
+            var prev = null;
+            c.addEventListener('mousemove', function(e){                
+                for(var i in that.nodes){
+                    var n = that.nodes[i];
+                    if(n.hit_test(e.offsetX, e.offsetY)){
+                        prev = n;
+                        $("#tooltip").remove();
+                        var start = parseInt(n.obj.start/60);
+                        var start_min = parseInt(n.obj.start%60);
+                        var end =  parseInt(n.obj.end/60);
+                        var end_min =  parseInt(n.obj.end%60);
+                        var st = n.obj.name+" "+zeroFill(start, 2)+":"+zeroFill(start_min, 2)+" - "+zeroFill(end, 2)+":"+zeroFill(end_min, 2);
+                        showTooltip(e.x, e.y, st);
+                        return;
+                    }else{
+                        $("#tooltip").remove();
+                    }
+                }
+            })
             var total_wid = document.getElementById("day_"+that.name).style.width;                
             c.width = 573;
             c.height = 40;            
             var wid = parseInt(total_wid)/1440;
             var on_colors = ["#80DE03", "#C53437", "#6FDDFC", "#1D8480"];
             function draw(){
+                that.nodes = [];
                 var rows = 0;
                 var cxt =  c.getContext("2d");
                 cxt.clearRect(0, 0, 575, 40);
                 for(var re in that.repeaters){                    
                     var r = that.repeaters[re];
                     var pad = r.padding*wid;
-                    var p = c.getContext("2d");
-                    p.fillStyle = "#dddddd";
-                    p.fillRect(0, 0, pad, 5);
+                    var p = new DayNode(0, 0, pad, 5, "#dddddd");
+                    p.draw(c);
                     var cur_wid=pad;
                     for(var i=0; i<1440; i+=r.every){                        
-                        var on = c.getContext("2d");
-                        on.fillStyle = on_colors[rows];
                         var w = wid*r.run_for;
-                        on.fillRect(cur_wid, rows*5, w, 5);
+                        var on = new DayNode(cur_wid, rows*5, w, 5, on_colors[rows], {name:r.output, start:i+r.padding, end:(i+r.padding)+r.run_for});
+                        on.draw(c);
+                        that.nodes.push(on);
                         cur_wid+=w;
-                        var off = c.getContext("2d");
-                        off.fillStyle = "#dddddd";
                         var o_w = (r.every-r.run_for)*wid;
-                        off.fillRect(cur_wid, rows*5, o_w, 5);
+                        var off = new DayNode(cur_wid, rows*5, o_w, 5, "#dddddd");
+                        off.draw(c);
                         cur_wid+=o_w;                        
                     }
                     rows++;
@@ -113,33 +160,28 @@
                         var t = clock.time[0]*60+clock.time[1];
                         var cur = t+(offset/1000/60);
                         cur = cur < 0 ? 1440+cur : cur;
-                        ons[clock.output] = cur
+                        ons[clock.output] = [cur, clock.output]
                     }else if(clock.state_change == false){
                         var t = clock.time[0]*60+clock.time[1];
                         var cur = t+(offset/1000/60);
                         cur = cur < 0 ? 1440+cur : cur;
-                        ends[clock.output] = cur;
+                        ends[clock.output] = [cur, clock.output];
                     }                    
                 }
 
                 for(var tt in ons){
-                    var o = ons[tt];
-                    var of = ends[tt];
-                    var on = c.getContext("2d");
-                    var off = c.getContext("2d");
-                    var off2 = c.getContext("2d");
+                    var o = ons[tt][0];
+                    var of = ends[tt][0];                    
                     var w_on = wid*o;
                     var w_off = wid*of;
-
-                    off.fillStyle = "#dddddd";
-                    off.fillRect(0, rows*5, wid*o, 5);
-                    
-                    on.fillStyle = on_colors[rows];
-                    on.fillRect(w_on, rows*5, w_off-w_on, 5);
-                    
-                    off2.fillStyle = "#dddddd";
-                    off2.fillRect(w_off, rows*5, 575-w_off, 5);
-
+                    ob = {name:ons[tt][1], start:o, end:of};
+                    var on = new DayNode(w_on, rows*5, w_off-w_on, 5, on_colors[rows], ob);
+                    on.draw(c);
+                    that.nodes.push(on);
+                    var off = new DayNode(0, rows*5, wid*o, 5, "#dddddd");
+                    off.draw(c);
+                    var off2 = new DayNode(w_off, rows*5, 575-w_off, 5, "#dddddd");
+                    off2.draw(c);
                     rows++;
                 }
                 var now = new Date()
@@ -351,7 +393,7 @@
                 for(var i in node_objs){
                     node_objs[i].update();
                 }
-            }, 333);
+            }, 150);
         }
 
         function stop(){
