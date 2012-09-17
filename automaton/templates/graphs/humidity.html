@@ -125,7 +125,7 @@
                     }
                 }
             })
-            var total_wid = document.getElementById("day_"+that.name).style.width;                
+            var total_wid = $("#day_"+that.name).width();
             c.width = parseInt(total_wid);
             c.height = 40;            
             var wid = parseInt(total_wid)/1440;            
@@ -458,7 +458,7 @@
             box-shadow: 5px 5px 20px #dddddd;
             float:left;
             margin: 10px;
-        }
+        }        
 
         div.node > div.header{
             padding: 10px;
@@ -471,6 +471,16 @@
             border: 2px solid #cccccc;
             border-bottom: none;
             text-shadow: 1px 1px 3px #999999;
+        }
+
+        @media screen and (max-device-width: 480px) {
+            .node{
+                width: 450px;
+            }
+
+            div.node > div.header{
+                width:420px;
+            }
         }
 
         .graph-holder{            
@@ -633,9 +643,9 @@
                         </li>
                     {{/sensors}}
                 </ul>
-                <div class='graph' id="{{name}}" style="width:575px;height:300px"></div>
-                <div class='historical_graph' id="historical_{{name}}" style="width:575px;height:100px"></div>
-                <div class='day_graph' id="day_{{name}}" style="width:575px;height:40px"></div>
+                <div class='graph' id="{{name}}" style="width:90%;height:300px"></div>
+                <div class='historical_graph' id="historical_{{name}}" style="width:90%;height:100px"></div>
+                <div class='day_graph' id="day_{{name}}" style="width:90%;height:40px"></div>
             </div>                
             <div class='controls clearfix'>
                 {{#outputs}}
