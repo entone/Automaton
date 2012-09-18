@@ -74,7 +74,11 @@
                 var s = this.sensors[i];
                 this.last[s.id] = s.value;
                 this.data[s.id] = [];
-            }            
+            }
+            this.inputs = [
+                {node:this.name, type:'sub_pump_switch', display:'Sub Switch'},
+                {node:this.name, type:'motion_detector', display:'Motion'},
+            ];
             var output = Mustache.to_html(node_template, this);
             document.getElementById('content').innerHTML+= output;
             var that = this;
@@ -190,13 +194,7 @@
                 now = (now.getHours()*60)+now.getMinutes()+sec;
                 time = c.getContext("2d");
                 time.fillStyle = "#333333";
-                time.beginPath();
-                time.moveTo((now*wid)-daynode_height, 0);
-                time.lineTo((now*wid)+daynode_height, 0);
-                time.lineTo((now*wid), daynode_height*2);
-                time.lineTo((now*wid)-daynode_height, 0);
-                time.fill();
-                time.closePath();
+                time.fillRect((now*wid), 0, 3, daynode_height*4);
                 time.shadowColor = "#666666";
                 time.shadowBlur = daynode_height/2;
                 time.shadowOffsetX = 2;
@@ -380,6 +378,11 @@
         }
 
         function run(){
+            for(var i in node_objs){
+                for(var d in node_objs[i].data){
+                    node_objs[i].data[d] = [];
+                }                    
+            }
             inter = setInterval(function(){
                 last_x = new Date().getTime()+offset;
                 for(var i in node_objs){
@@ -498,11 +501,19 @@
         }
 
         .day_graph{
-            margin-left: 10px;
-            margin-top: 10px;
+            margin-left: 35px;
             border: 2px solid #cccccc;
         }
 
+        h3{
+            color: #333333;
+            font-size: 13px;
+            margin:0px;
+            padding: 0px;
+            margin-left: 35px;
+            margin-top: 7px;
+            text-shadow: 1px 1px 3px #999999;   
+        }
 
         .legend{            
             margin:0px;
@@ -546,6 +557,46 @@
 
         .legend li.light{
             background-color: #6FDDFC;
+        }
+
+        div.inputs{
+            width: 100%; 
+            border: 2px solid #cccccc;
+            border-top: none;
+            background-color: #eeeeee;
+        }
+
+        div.input{
+            float:left;
+            text-align:center;
+            border-right: 1px solid #dddddd;
+            background-color: #eeeeee;            
+            padding-bottom: 5px;
+        }
+
+        div.input_label{
+            padding: 2px;
+            padding-left: 6px;
+            padding-right: 6px;
+            font-size: 9px;
+            font-weight: bold;
+            border-bottom: 1px solid #dddddd;
+            margin-bottom: 5px;
+            background-color: #cccccc;
+        }
+
+        div.input_btn{
+            width: 15px;
+            height: 15px;
+            border-radius: 15px;
+            background: -webkit-radial-gradient(center, ellipse cover, #cedce7 0%,#596a72 100%); /* Chrome10+,Safari5.1+ */
+            box-shadow: 1px 1px 2px #999999;
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        div.input_btn.on{
+            background: -webkit-radial-gradient(center, ellipse cover, #97fc00 41%,#1ee200 100%); /* Chrome10+,Safari5.1+ */
         }
 
         div.controls{
@@ -644,9 +695,19 @@
                     {{/sensors}}
                 </ul>
                 <div class='graph' id="{{name}}" style="width:90%;height:300px"></div>
+                <h3>Historical</h3>
                 <div class='historical_graph' id="historical_{{name}}" style="width:90%;height:100px"></div>
-                <div class='day_graph' id="day_{{name}}" style="width:90%;height:40px"></div>
-            </div>                
+                <h3>Timers</h3>
+                <div class='day_graph' id="day_{{name}}" style="width:85%;height:40px"></div>
+            </div>
+            <div class='inputs clearfix'>
+                {{#inputs}}
+                <div class='input' id='{{node}}{{type}}'>
+                    <div class='input_label'>{{display}}</div>
+                    <div class='input_btn'></div>
+                </div>
+                {{/inputs}}
+            </div>  
             <div class='controls clearfix'>
                 {{#outputs}}
                 <div class='toggle' id='{{node}}{{type}}'>
