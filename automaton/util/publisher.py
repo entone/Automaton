@@ -21,6 +21,7 @@ class Publisher(object):
 
     def publish(self, dic):
         st = json.dumps(dic, cls=ComplexEncoder)
+        self.logger.info("Publishing: %s" % st)
         self.publisher_socket.send(st)
 
     def send(self, res):

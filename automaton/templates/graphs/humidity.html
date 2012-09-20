@@ -75,10 +75,6 @@
                 this.last[s.id] = s.value;
                 this.data[s.id] = [];
             }
-            this.inputs = [
-                {node:this.name, type:'sub_pump_switch', display:'Sub Switch'},
-                {node:this.name, type:'motion_detector', display:'Motion'},
-            ];
             var output = Mustache.to_html(node_template, this);
             document.getElementById('content').innerHTML+= output;
             var that = this;
@@ -343,6 +339,16 @@
             tog.obj.set_state(frame.state);
         }
 
+        function update_input(frame){
+            console.log(frame);
+            var tog = document.getElementById(frame.node+frame.type);
+            if(frame.value){
+                tog.children[1].classList.add('on');
+            }else{
+                tog.children[1].classList.remove('on');
+            }
+        }
+
         function init(){
             graph = new WebSocket("ws://"+url+"/graph/");
             node_template = document.getElementById('node_template').innerHTML;
@@ -356,11 +362,17 @@
                 var lines = e.data.split('\n');
                 for (var i = 0; i < lines.length - 1; i++) {
                     var frame = eval("("+lines[i]+")");
-                    if(frame.state != undefined){
-                        update_toggle(frame);
-                    }else{
-                        var node = node_objs[frame.node];
-                        node.last[frame.id] = frame.value;
+                    switch(frame.cls){
+                        case 'Output':
+                            update_toggle(frame);
+                            break;
+                        case 'Input':
+                            update_input(frame);
+                            break;
+                        default:
+                            var node = node_objs[frame.node];
+                            node.last[frame.id] = frame.value;
+                            break;
                     }
                 }
                 this.send('');

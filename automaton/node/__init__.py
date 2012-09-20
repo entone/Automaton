@@ -48,6 +48,12 @@ class Node(Publisher):
 
         return False
 
+    def get_input(self, index):
+        for input in self.inputs:
+            if input.index == index: return input
+
+        return False
+
     def get_sensor_values(self, ob):
         res = {}
         for sensor in self.sensors:
@@ -78,6 +84,7 @@ class Node(Publisher):
             triggers=[t.json() for t in self.triggers],
             repeaters=[r.json() for r in self.repeaters],
             clocks=[c.json() for c in self.clocks],
+            cls=self.__class__.__name__
         )
 
     def __conform__(self, protocol):
@@ -102,14 +109,17 @@ class Node(Publisher):
             self.logger.exception(e)
 
     def interfaceKitInputChanged(self, e):
-        source = e.device
-        self.logger.info("InterfaceKit %i: Input %i: %s" % (source.getSerialNum(), e.index, e.state))
+        input = self.get_input(e.index)
+        if not input: return
+        val = input.do_conversion(e.value)
+        ob = input.json()
+        self.publish(ob)
+        self.logger.info("%s Input: %s" % (input.display, val))
 
     def interfaceKitSensorChanged(self, e):
         sensor = self.get_sensor(e.index)
         if not sensor: return
         val = sensor.do_conversion(float(e.value)) if sensor else 0
-        source = e.device
         ob = sensor.json()
         self.publish(ob)
         self.logger.info("%s Sensor: %s" % (sensor.display, val))
@@ -119,7 +129,6 @@ class Node(Publisher):
         if not output: return
         output.current_state = e.state
         self.publish(output.json())
-        source = e.device
         self.logger.info("%s Output: %s" % (output.display, output.current_state))
 
 

@@ -1,5 +1,10 @@
 import settings
 
+class MockEvent(object):
+    def __init__(self, index, state):
+        self.index = index
+        self.state = state
+
 class Output(object):
     index = ""
     display = ""
@@ -20,7 +25,8 @@ class Output(object):
             self.interface.interface_kit.setOutputState(self.index, state)
             self.current_state = state
         except Exception as e:
-            self.logger.warning("No interface kit connected. Test Node?")
+            self.interface.interfaceKitOutputChanged(MockEvent(self.index, state))
+            self.logger.warning("Mock Event")
         return
 
     def get_state(self):
@@ -33,4 +39,5 @@ class Output(object):
             type=self.type,
             state=self.current_state,
             node=self.interface.name,
+            cls=self.__class__.__name__
         )

@@ -31,6 +31,7 @@ class Clock(object):
             time=self.time,
             output=self.output.type,
             state_change=self.state_change,
+            cls=self.__class__.__name__
         )
 
 class Repeater(object):
@@ -78,6 +79,7 @@ class Repeater(object):
             output=self.output.type,
             padding=self.padding,
             state_change=self.state_change,
+            cls=self.__class__.__name__
         )
 
 
@@ -112,8 +114,14 @@ class Trigger(Subscriber):
     def test_change(self, ob):
         if not self.input.type == ob.get('type'): return None
         if not self.input.interface.name == ob.get('node'): return None
-
+        #check if this is an input or sensor
         val = ob.get('value')
+        if isinstance(val, bool):
+            if val == self.min and self.current_state == self.state:
+                return not self.state
+            elif val == self.min:
+                return self.state
+
         if (val < self.min or val > self.max) and (self.current_state == self.state):
             return not self.state
         elif self.min <= ob.get('value') < self.max and not self.current_state == self.state:
@@ -128,4 +136,5 @@ class Trigger(Subscriber):
             max=self.max,
             output=self.output.type,
             state_change=self.state_change,
+            cls=self.__class__.__name__
         )

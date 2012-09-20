@@ -38,4 +38,5 @@ class Sensor(object):
             change=self.change,
             data_rate=self.data_rate,
             decorator=self.decorator,
+            cls=self.__class__.__name__
         )
