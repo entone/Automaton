@@ -1,46 +1,17 @@
-from util.publisher import Publisher
-from util.subscriber import Subscriber
-import sqlite3
+from util.pubsub import PubSub
 import settings
 
-class Manager(Publisher):
-    base_port = 5555
-    nodes = []
+class Manager(object):
+    node_filters = []
 
-    def __init__(self, nodes, *args, **kwargs):
+    def __init__(self):
+        self.node_filters = []
+        self.nodes = PubSub(self, pub_port=settings.NODE_SUB, sub_port=settings.NODE_PUB)
+        self.clients = PubSub(self, pub_port=settings.CLIENT_SUB, sub_port=settings.CLIENT_PUB)
         self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
-        for node in nodes:
-            pub = self.base_port+1
-            rpc = self.base_port+2
-            name = node[1]
-            self.logger.info("Starting Node: %s" % name)
-            n = node[0](name, publisher=pub, rpc=rpc)
-            n.subscriber = Subscriber(self.handle_message, port=pub)
-            self.nodes.append(n)
-            self.base_port = rpc
 
-        super(Manager, self).__init__(*args, spawn=False, **kwargs)
-
-    def get_nodes(self, ob):
-        return [n.json() for n in self.nodes]
-
-    def get_node(self, name):
-        for n in self.nodes:
-            if n.name == name: return n
-
-    def __getattr__(self, key):
-        def func(ob):
-            node = self.get_node(ob.get('node'))
-            if node:
-                try:
-                    getattr(node, ob.get('method'))(ob)
-                except Exception as e:
-                    print e
-
-        return func
-
-    def handle_message(self, ob):
-        self.publish(ob)
+    def add_node(self, obj):
+        self.node_filters.append(obj.get('name'))
         return True
 
 

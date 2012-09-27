@@ -2,7 +2,7 @@ from ctypes import *
 import sys
 import random
 import logging
-from util.publisher import Publisher
+from util.pubsub import PubSub
 from util.jsontools import ComplexEncoder
 from loggers import Logger
 import settings
@@ -18,7 +18,7 @@ except:
 import gevent
 import simplejson as json
 
-class Node(Publisher):
+class Node(object):
 
     name = None
     sensors = []
@@ -32,9 +32,12 @@ class Node(Publisher):
     def __init__(self, name, *args, **kwargs):
         self.name = name
         if LIVE: self.interface_kit = InterfaceKit()
-        super(Node, self).__init__(*args, **kwargs)
+        self.manager = PubSub(self, pub_port=settings.NODE_PUB, sub_port=settings.NODE_SUB)
         self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
-        self.data_logger = Logger(node=self)
+        json = self.json()
+        json['method']=  'add_node'
+        self.manager.publish(json)
+        self.run()
 
     def get_sensor(self, index):
         for sensor in self.sensors:
@@ -133,6 +136,10 @@ class Node(Publisher):
 
 
     def run(self):
+        if LIVE: self.init_kit()
+        while True: gevent.sleep(.1)
+
+    def init_kit(self):
         try:
             self.interface_kit.setOnAttachHandler(self.inferfaceKitAttached)
             self.interface_kit.setOnDetachHandler(self.interfaceKitDetached)

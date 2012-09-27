@@ -4,4 +4,4 @@ from node.aquaponics import Aquaponics
 import settings
 
 
-aq = Manager(nodes=[[Test, 'Aquaponics'],], publisher=settings.PUBLISHER_PORT, rpc=settings.RPC_PORT)
+aq = Manager(nodes=[[Test, 'Aquaponics'], [Test, 'Lettuce']], publisher=settings.PUBLISHER_PORT, rpc=settings.RPC_PORT)
