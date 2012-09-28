@@ -12,7 +12,7 @@ from node.trigger import Clock
 
 class Test(Node):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, name, *args, **kwargs):
         #Output
         self.plant_light = Output(0, 'Foilage', 'plant_light', self)
         self.fan = Output(1, 'Fan', 'fan', self)
@@ -45,12 +45,9 @@ class Test(Node):
 
         self.triggers = [trig, motion]
 
-        super(Test, self).__init__(*args, **kwargs)
+        super(Test, self).__init__(name, *args, **kwargs)
         
     def run(self):
-        gevent.spawn(self.fake_numbers)
-
-    def fake_numbers(self):
         while True:
             self.temp.current_value = random.randint(0, 50)
             self.publish(self.temp.json())
@@ -65,6 +62,7 @@ class Test(Node):
             self.publish(self.motion.json())
 
             gevent.sleep(5)
+        
 
 
 

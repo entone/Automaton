@@ -4,19 +4,20 @@ import datetime
 import simplejson as json
 import sqlite3
 import settings
+import util
 from envy.controller import Controller
 from envy.response import Response
 from util.jsontools import ComplexEncoder
 from util.subscriber import Subscriber
 from util.rpc import RPC
 
-logger = settings.get_logger(__name__)
+logger = util.get_logger(__name__)
 
 class Graph(Controller):
 
     def display(self):
         res = {}
-        self.rpc = RPC(port=settings.RPC_PORT)
+        self.rpc = RPC(port=settings.CLIENT_RPC)
         res = self.rpc.send(dict(method='get_nodes'))
         home = self.request.env.get('HTTP_HOST')
         db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)
@@ -39,7 +40,7 @@ class Graph(Controller):
         return Response(json.dumps(res, cls=ComplexEncoder))
 
     def index(self):
-        ws = self.request.env['wsgi.websocket']        
+        ws = self.request.env['wsgi.websocket']
         def write_out(ob):
             try:
                 st = "%s\n" % json.dumps(ob, cls=ComplexEncoder)
@@ -49,12 +50,12 @@ class Graph(Controller):
             except Exception as e:
                 self.logger.info("Connection Closed: %s" % ws)
                 return False
-        sub = Subscriber(port=settings.SUBSCRIBER_PORT, callback=write_out, spawn=False)
+        sub = Subscriber(callback=write_out, port=settings.CLIENT_SUB, broadcast=False, spawn=False)
         return Response('')
     
 
     def control(self):
-        rpc = RPC(port=settings.RPC_PORT)
+        rpc = RPC(port=settings.CLIENT_RPC)
         mes = self.request.env.get('wsgi.input').read()
         mes = json.loads(mes)
         mes['method'] = 'set_output_state'

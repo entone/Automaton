@@ -1,4 +1,5 @@
 import settings
+import util
 
 class MockEvent(object):
     def __init__(self, index, state):
@@ -13,7 +14,7 @@ class Output(object):
     current_state = False
 
     def __init__(self, index, display, type, interface):
-        self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         self.index = index
         self.display = display
         self.type = type

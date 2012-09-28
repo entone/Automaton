@@ -2,8 +2,9 @@ import os
 from envy.controller import Controller
 from envy.response import Response
 import settings
+import util
 
-logger = settings.get_logger(__name__)
+logger = util.get_logger(__name__)
 
 class Static(Controller):
 

@@ -1,3 +1,6 @@
 from node import Node
+from util import get_interface_option
 
-n = Node("Test")
+get_interface_option()
+
+n = Node("Test3")

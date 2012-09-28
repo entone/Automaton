@@ -2,10 +2,14 @@ from ctypes import *
 import sys
 import random
 import logging
+import zmq.green as zmq
 from util.pubsub import PubSub
 from util.jsontools import ComplexEncoder
 from loggers import Logger
 import settings
+import gevent
+import simplejson as json
+import util
 #Phidget specific imports
 LIVE = True
 try:
@@ -14,9 +18,6 @@ try:
     from Phidgets.Devices.InterfaceKit import InterfaceKit
 except:
     LIVE = False
-
-import gevent
-import simplejson as json
 
 class Node(object):
 
@@ -31,13 +32,43 @@ class Node(object):
 
     def __init__(self, name, *args, **kwargs):
         self.name = name
+        self.initializing = True
         if LIVE: self.interface_kit = InterfaceKit()
-        self.manager = PubSub(self, pub_port=settings.NODE_PUB, sub_port=settings.NODE_SUB)
-        self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.manager = PubSub(self, pub_port=settings.NODE_PUB, sub_port=settings.NODE_SUB, sub_filter=self.name)
+        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         json = self.json()
         json['method']=  'add_node'
-        self.manager.publish(json)
+        self.publish(json)
         self.run()
+
+    def publish(self, message):
+        message['name'] = self.name
+        message['method'] = message.get('method', 'node_change')
+        self.manager.publish(json.dumps(message, cls=ComplexEncoder))
+
+    def initialize_rpc(self, obj, **kwargs):
+        rpc = zmq.Context()
+        rpc_socket = rpc.socket(zmq.REP)
+        rpc_socket.bind("tcp://*:%s" % obj.get('port'))
+        self.logger.info("RPC listening on: %s" % obj.get('port'))
+        self.logger.info("%s Initialized" % self.name)        
+        while True:                    
+            if self.initializing:
+                self.initializing = False
+                self.publish(dict(method='initialized'))
+
+            message = rpc_socket.recv()
+            ob = json.loads(message)
+            try:
+                res = getattr(self, ob.get("method"))(ob)
+                st = json.dumps(res, cls=ComplexEncoder)
+                rpc_socket.send(st)
+            except Exception as e:
+                self.logger.exception(e)
+            gevent.sleep(.1)
+
+    def hello(self, obj):
+        return dict(response='hi')
 
     def get_sensor(self, index):
         for sensor in self.sensors:
@@ -131,7 +162,8 @@ class Node(object):
         output = self.get_output(e.index)
         if not output: return
         output.current_state = e.state
-        self.publish(output.json())
+        ob = output.json()
+        self.publish(ob)
         self.logger.info("%s Output: %s" % (output.display, output.current_state))
 
 

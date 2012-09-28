@@ -1,35 +1,37 @@
 import gevent
 import zmq.green as zmq
-import simplejson as json
-from util.jsontools import ComplexEncoder
 from util.subscriber import Subscriber
 import settings
+import util
 
 class PubSub(object):
 
-    def __init__(self, owner, pub_port, sub_port, sub_filter="", spawn=True):
+    def __init__(self, owner, pub_port, sub_port, sub_filter="", broadcast=True, spawn=True):
         self.pc = zmq.Context()
         self.pub = self.pc.socket(zmq.PUB)
-        self.pub.bind("epgm://33.33.33.10;225.0.0.1:%s" % pub_port)
-        self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        if broadcast:
+            self.pub.bind("epgm://%s;225.0.0.1:%s" % (settings.IP_ADDRESS, pub_port))
+        else:
+            self.pub.bind("tcp://*:%s" % pub_port)
+        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         self.logger.info("Publishing on: %s" % pub_port)
         self.sub_filter = sub_filter
         self.owner = owner
-        self.sub = Subscriber(self.callback, port=sub_port, filter=sub_filter, spawn=spawn)
+        self.sub = Subscriber(self.callback, port=sub_port, filter=sub_filter, broadcast=broadcast, spawn=spawn)
 
     def callback(self, obj, **kwargs):
-        self.logger.info("Calling: %s" % obj)        
         try:           
             res = getattr(self.owner, obj.get("method"))(obj, **kwargs)
-            self.publish(res)
+            return res
         except Exception as e:
             self.logger.exception(e)
 
-    def publish(self, obj):        
-        st = json.dumps(obj, cls=ComplexEncoder)        
+        return True
+
+
+    def publish(self, st):
         try:
-            self.pub.send(st)
             self.logger.info("Publishing: %s" % st)
-            self.logger.info(self.pub)
+            self.pub.send(st)
         except Exception as e:
             self.logger.exception(e)

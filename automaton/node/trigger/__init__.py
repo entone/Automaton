@@ -3,6 +3,7 @@ from util.rpc import RPC
 import gevent
 import datetime
 import settings
+import util
 
 class Clock(object):
     time = None
@@ -13,7 +14,7 @@ class Clock(object):
         self.time = time
         self.output = output
         self.state_change = state
-        self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         gevent.spawn(self.run)
 
     def run(self):
@@ -47,7 +48,7 @@ class Repeater(object):
         self.output = output
         self.state = state
         self.padding = padding
-        self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         self.times = {}
         for t in xrange(0, 1440, self.every):
             h_on = t/60 if t else 0
@@ -99,7 +100,7 @@ class Trigger(Subscriber):
         self.output = output
         self.state = state
         self.current_state = current_state
-        self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         super(Trigger, self).__init__(port=port, callback=self.handle_event)
 
 

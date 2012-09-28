@@ -1,7 +1,6 @@
-from node.manager import Manager
 from node.test import Test
-from node.aquaponics import Aquaponics
-import settings
+from util import get_interface_option
 
+get_interface_option()
 
-aq = Manager(nodes=[[Test, 'Aquaponics'], [Test, 'Lettuce']], publisher=settings.PUBLISHER_PORT, rpc=settings.RPC_PORT)
+aq = Test(name='Lettuce')
