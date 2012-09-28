@@ -11,8 +11,8 @@ class Subscriber(object):
     def __init__(self, callback, port, filter="", spawn=True, **kwargs):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.SUB)
-        self.socket.connect("tcp://*:%s" % port)
-        self.socket.setsockopt(zmq.SUBSCRIBE, filter)        
+        self.socket.connect("epgm://33.33.33.10;225.0.0.1:%s" % port)
+        self.socket.setsockopt(zmq.SUBSCRIBE, filter)  
         self.filter = filter
         self.callback = callback
         self.kwargs = kwargs

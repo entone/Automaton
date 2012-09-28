@@ -10,7 +10,7 @@ class PubSub(object):
     def __init__(self, owner, pub_port, sub_port, sub_filter="", spawn=True):
         self.pc = zmq.Context()
         self.pub = self.pc.socket(zmq.PUB)
-        self.pub.bind("tcp://0.0.0.0:%s" % pub_port)
+        self.pub.bind("epgm://33.33.33.10;225.0.0.1:%s" % pub_port)
         self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         self.logger.info("Publishing on: %s" % pub_port)
         self.sub_filter = sub_filter
