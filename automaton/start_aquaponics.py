@@ -1,6 +1,6 @@
-from node.manager import Manager
-from node.test import Test
 from node.aquaponics import Aquaponics
+from util import get_interface_option
 
+get_interface_option()
 
-aq = Manager(nodes=[[Aquaponics, 'Lettuce'], [Test, 'Basil']], publisher=5554, rpc=5553)
+aq = Aquaponics(name='Lettuce')

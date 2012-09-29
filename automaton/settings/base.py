@@ -1,4 +1,4 @@
-import os 
+import os
 import sys
 import logging
 
@@ -22,6 +22,10 @@ NODE_RPC = 6000
 
 IP_ADDRESS = '*'
 NETWORK_INTERFACE = 'eth0'
+
+LOG_INTERVAL = 10*60#seconds
+
+HISTORICAL_DISPLAY = 24#hours
 
 
 

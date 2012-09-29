@@ -2,7 +2,7 @@ from node.sensor import Sensor
 
 class PH(Sensor):   
     celcius = 30
-    ph="ph"
+    type="ph"
 
     def conversion(self, value):
         val = float(value)/200

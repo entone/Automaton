@@ -22,7 +22,7 @@ class Graph(Controller):
         home = self.request.env.get('HTTP_HOST')
         db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)
         cur = db.cursor()
-        q_t = datetime.datetime.utcnow()-datetime.timedelta(hours=8)
+        q_t = datetime.datetime.utcnow()-datetime.timedelta(hours=settings.HISTORICAL_DISPLAY)
         for n in res:
             n['historical'] = cur.execute('SELECT * FROM logs WHERE node=? AND timestamp > ? LIMIT 20', (n.get('name'),q_t)).fetchall()
         
@@ -34,7 +34,7 @@ class Graph(Controller):
     def historical(self, name):
         db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)
         cur = db.cursor()
-        q_t = datetime.datetime.utcnow()-datetime.timedelta(hours=8)
+        q_t = datetime.datetime.utcnow()-datetime.timedelta(hours=settings.HISTORICAL_DISPLAY)
         res = cur.execute('SELECT * FROM logs WHERE node=? AND timestamp > ?', (name,q_t)).fetchall()
         self.logger.debug(res)
         return Response(json.dumps(res, cls=ComplexEncoder))

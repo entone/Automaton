@@ -10,7 +10,7 @@ from node.trigger import Clock
 
 class Aquaponics(Node):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, name, *args, **kwargs):
         temp = Temperature(0, 'Temperature', 'temp', self, change=10)
         humidity = Humidity(1, 'Humidity', 'humidity', self, change=10)
         ph = PH(2, 'PH', 'ph', self, change=20)
@@ -25,8 +25,8 @@ class Aquaponics(Node):
         drainage = Output(4, 'Drainage', 'drainage', self)
         self.outputs = [plant_light,fan,pump,aqua_light, drainage]
 
-        trig = Trigger(input=temp, output=fan, min=30, max=float('inf'), state=True, current_state=False, port=kwargs.get("publisher"))
-        trig2 = Trigger(input=light, output=plant_light, min=0, max=60, state=True, current_state=False, port=kwargs.get("publisher"))
+        trig = Trigger(input=temp, output=fan, min=30, max=float('inf'), state=True, current_state=False, port=settings.NODE_PUB)
+        trig2 = Trigger(input=light, output=plant_light, min=0, max=60, state=True, current_state=False, port=settings.NODE_PUB)
         self.triggers = [trig, trig2]
 
         light_on = Clock((12,00), plant_light, True)

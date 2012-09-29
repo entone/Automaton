@@ -1,11 +1,13 @@
 import gevent
 import zmq.green as zmq
-from util.pubsub import PubSub
-from util.rpc import RPC
 import settings
 import simplejson as json
-from util.jsontools import ComplexEncoder
 import util
+from util.pubsub import PubSub
+from util.rpc import RPC
+from util.jsontools import ComplexEncoder
+from loggers import Logger
+
 
 class Manager(object):
     nodes = dict()
@@ -15,6 +17,7 @@ class Manager(object):
         self.clients_pubsub = PubSub(self, pub_port=settings.CLIENT_SUB, sub_port=settings.CLIENT_PUB, broadcast=False)
         self.nodes_pubsub = PubSub(self, pub_port=settings.NODE_SUB, sub_port=settings.NODE_PUB)
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        Logger(self)
         self.run()
 
     def add_node(self, obj, **kwargs):
@@ -50,6 +53,13 @@ class Manager(object):
 
     def get_nodes(self, obj):
         return [n.obj for k,n in self.nodes.iteritems()]
+
+    def get_sensor_values(self):
+        res = dict()
+        for k, n in self.nodes.iteritems():
+            res[k] = n.call('get_sensor_values')
+
+        return res
 
     def node_change(self, obj):
         self.clients_pubsub.publish(json.dumps(obj, cls=ComplexEncoder))
