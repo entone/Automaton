@@ -38,7 +38,7 @@ class Subscriber(object):
     def handle_message(self, message, address):
         if self.filter and message.startswith(self.filter): message = message[len(self.filter):]
         ob = json.loads(message)
-        ob['address'] = address
+        ob['address'] = address[0]
         ob['timestamp'] = datetime.datetime.utcnow()
         if not self.callback(ob, **self.kwargs): self.stop()
 
