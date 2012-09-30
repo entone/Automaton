@@ -22,7 +22,7 @@ class Manager(object):
 
     def add_node(self, obj, **kwargs):
         rpc_port = settings.NODE_RPC+len(self.nodes.keys())
-        n = Node(obj, rpc_port, self.nodes_pubsub)
+        n = Node(obj, obj.get('address'), rpc_port, self.nodes_pubsub)
         self.nodes[n.name] = n
         n.publish(method='initialize_rpc', message=dict(port=rpc_port))
         return True
@@ -73,8 +73,9 @@ class Manager(object):
 
 class Node(object):
 
-    def __init__(self, obj, port, pubsub):
+    def __init__(self, obj, address, port, pubsub):
         self.port = port
+        self.address = address
         self.pubsub = pubsub
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         self.obj = obj
@@ -88,7 +89,7 @@ class Node(object):
         return True
 
     def call(self, method, message=None):
-        r = RPC(port=self.port)
+        r = RPC(address=self.address, port=self.port)
         message = message if message else {}
         message['name'] = self.name
         message['method']=  method

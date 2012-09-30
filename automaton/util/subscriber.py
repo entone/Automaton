@@ -35,9 +35,10 @@ class Subscriber(object):
         if spawn: gevent.spawn(runner)
         else: runner()
 
-    def handle_message(self, message):
+    def handle_message(self, message, address):
         if self.filter and message.startswith(self.filter): message = message[len(self.filter):]
-        ob = json.loads(message)            
+        ob = json.loads(message)
+        ob['address'] = address
         ob['timestamp'] = datetime.datetime.utcnow()
         if not self.callback(ob, **self.kwargs): self.stop()
 
@@ -45,8 +46,8 @@ class Subscriber(object):
         while self.running:
             self.logger.info("Waiting for message")
             result = select.select([self.sock],[],[])
-            msg = result[0][0].recv(1048576) 
-            self.handle_message(msg)
+            msg, address = result[0][0].recvfrom(1048576) 
+            self.handle_message(msg, address)
             gevent.sleep(.1)
 
         self.sock.close()
