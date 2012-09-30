@@ -6,8 +6,8 @@ import util
 import settings
 import select
 import socket
-from gevent.monkey import patch_all
-patch_all()
+from gevent.monkey import patch_socket
+patch_socket()
 
 class Subscriber(object):
 

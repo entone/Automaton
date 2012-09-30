@@ -6,13 +6,13 @@ class Sensor(object):
     display = ""
     id = ""
     change = 2
-    data_rate = 10
+    data_rate = 16
     current_value = 0
     interface = None
     decorator = ""
     type = ""
 
-    def __init__(self, index, display, id, interface, change=2, data_rate=10):
+    def __init__(self, index, display, id, interface, change=2, data_rate=16):
         self.index = index
         self.display = display
         self.id = id
