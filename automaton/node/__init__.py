@@ -114,7 +114,7 @@ class Node(object):
             output.set_state(ob.get('state'))
             return dict(state=output.current_state)
 
-    def json(self):
+    def json(self, ob=None):
         return dict(
             name=self.name,
             sensors=[s.json() for s in self.sensors],
