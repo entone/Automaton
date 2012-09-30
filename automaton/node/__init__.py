@@ -43,8 +43,13 @@ class Node(object):
 
     def publish(self, message):
         message['name'] = self.name
-        message['method'] = message.get('method', 'node_change')
+        message['method'] = message.get('method', 'node_change') 
         self.manager.publish(json.dumps(message, cls=ComplexEncoder))
+        self.test_triggers(message)
+
+    def test_triggers(self, message):
+        for t in self.triggers:
+            t.handle_event(message)
 
     def initialize_rpc(self, obj, **kwargs):
         rpc = zmq.Context()

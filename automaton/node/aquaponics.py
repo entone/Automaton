@@ -7,6 +7,7 @@ from node.sensor.light import Light
 from node.output import Output
 from node.trigger import Trigger
 from node.trigger import Clock
+import settings
 
 class Aquaponics(Node):
 

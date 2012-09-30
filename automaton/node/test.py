@@ -41,8 +41,8 @@ class Test(Node):
         pump2_off = Clock(time=(20,0), output=self.subpump, state=False) 
         self.clocks = [light_on, light_off, pump2_on, pump2_off]
         #Triggers
-        trig = Trigger(input=self.temp, output=self.fan, min=30, max=float('inf'), state=True, current_state=False, port=settings.NODE_PUB)
-        motion = Trigger(input=self.motion, output=self.laser, min=True, max=None, state=True, current_state=False, port=settings.NODE_PUB)
+        trig = Trigger(input=self.temp, output=self.fan, min=30, max=float('inf'), state=True, current_state=False)
+        motion = Trigger(input=self.motion, output=self.laser, min=True, max=None, state=True, current_state=False)
 
         self.triggers = [trig, motion]
 

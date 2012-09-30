@@ -84,7 +84,7 @@ class Repeater(object):
         )
 
 
-class Trigger(Subscriber):
+class Trigger(object):
     
     input = None
     min = None
@@ -93,7 +93,7 @@ class Trigger(Subscriber):
     state_change = None
     current_state = None
 
-    def __init__(self, input, output, min, max, state, current_state, port):
+    def __init__(self, input, output, min, max, state, current_state):
         self.input = input
         self.min = min
         self.max = max
@@ -101,8 +101,6 @@ class Trigger(Subscriber):
         self.state = state
         self.current_state = current_state
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
-        super(Trigger, self).__init__(port=port, callback=self.handle_event)
-
 
     def handle_event(self, ob, **kwargs):
         state_change = self.test_change(ob)

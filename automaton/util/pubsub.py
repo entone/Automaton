@@ -1,17 +1,18 @@
 import gevent
 import zmq.green as zmq
 from util.subscriber import Subscriber
+from util.broadcast import Client
 import settings
 import util
 
 class PubSub(object):
 
     def __init__(self, owner, pub_port, sub_port, sub_filter="", broadcast=True, spawn=True):
-        self.pc = zmq.Context()
-        self.pub = self.pc.socket(zmq.PUB)
         if broadcast:
-            self.pub.bind("epgm://%s;225.0.0.1:%s" % (settings.IP_ADDRESS, pub_port))
+            self.pub = Client(pub_port)
         else:
+            self.pc = zmq.Context()
+            self.pub = self.pc.socket(zmq.PUB)
             self.pub.bind("tcp://*:%s" % pub_port)
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         self.logger.info("Publishing on: %s" % pub_port)
