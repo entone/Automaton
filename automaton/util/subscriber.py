@@ -35,7 +35,7 @@ class Subscriber(object):
         if spawn: gevent.spawn(runner)
         else: runner()
 
-    def handle_message(self, message, address):
+    def handle_message(self, message, address=['*']):
         if self.filter and message.startswith(self.filter): message = message[len(self.filter):]
         ob = json.loads(message)
         ob['address'] = address[0]
