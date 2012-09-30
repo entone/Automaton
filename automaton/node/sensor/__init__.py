@@ -5,7 +5,7 @@ class Sensor(object):
     display = ""
     id = ""
     change = 2
-    data_rate = 10
+    data_rate = 16
     current_value = 0
     interface = None
     decorator = ""

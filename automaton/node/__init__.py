@@ -175,6 +175,6 @@ class Node(Publisher):
                     self.logger.info("Change: %s" % sensor.change)
                     self.logger.info("Data Rate: %s" % sensor.data_rate)
                     self.interface_kit.setSensorChangeTrigger(i, sensor.change)
-                    self.interface_kit.setDataRate(i, 4)
+                    self.interface_kit.setDataRate(i, sensor.data_rate)
             except PhidgetException as e:
                 self.logger.exception(e)
