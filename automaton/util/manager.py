@@ -52,7 +52,7 @@ class Manager(object):
         if node: return node.call(method='hello')
 
     def get_nodes(self, obj):
-        return [n.obj for k,n in self.nodes.iteritems()]
+        return [n.call('json') for k,n in self.nodes.iteritems()]
 
     def get_sensor_values(self):
         res = dict()
