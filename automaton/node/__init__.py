@@ -2,10 +2,16 @@ from ctypes import *
 import sys
 import random
 import logging
-from util.publisher import Publisher
+import base64
+import zmq.green as zmq
+from util.pubsub import PubSub
 from util.jsontools import ComplexEncoder
+from util import aes
 from loggers import Logger
 import settings
+import gevent
+import simplejson as json
+import util
 #Phidget specific imports
 LIVE = True
 try:
@@ -15,10 +21,7 @@ try:
 except:
     LIVE = False
 
-import gevent
-import simplejson as json
-
-class Node(Publisher):
+class Node(object):
 
     name = None
     sensors = []
@@ -31,10 +34,49 @@ class Node(Publisher):
 
     def __init__(self, name, *args, **kwargs):
         self.name = name
+        self.initializing = True
         if LIVE: self.interface_kit = InterfaceKit()
-        super(Node, self).__init__(*args, **kwargs)
-        self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
-        self.data_logger = Logger(node=self)
+        self.manager = PubSub(self, pub_port=settings.NODE_PUB, sub_port=settings.NODE_SUB, sub_filter=self.name)
+        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        json = self.json()
+        json['method']=  'add_node'
+        self.publish(json)
+        self.run()
+
+    def publish(self, message):
+        message['name'] = self.name
+        message['method'] = message.get('method', 'node_change')
+        self.manager.publish(aes.encrypt(json.dumps(message, cls=ComplexEncoder), settings.KEY))
+        self.test_triggers(message)
+
+    def test_triggers(self, message):
+        for t in self.triggers:
+            t.handle_event(message)
+
+    def initialize_rpc(self, obj, **kwargs):
+        rpc = zmq.Context()
+        rpc_socket = rpc.socket(zmq.REP)
+        rpc_socket.bind("tcp://*:%s" % obj.get('port'))
+        self.logger.info("RPC listening on: %s" % obj.get('port'))
+        settings.KEY = base64.urlsafe_b64decode(str(obj.get('key')))
+        self.logger.info("%s Initialized" % self.name)        
+        while True:                    
+            if self.initializing:
+                self.initializing = False
+                self.publish(dict(method='initialized'))
+
+            message = aes.decrypt(rpc_socket.recv(), settings.KEY)
+            ob = json.loads(message)
+            try:
+                res = getattr(self, ob.get("method"))(ob)
+                st = json.dumps(res, cls=ComplexEncoder)
+                rpc_socket.send(aes.encrypt(st, settings.KEY))
+            except Exception as e:
+                self.logger.exception(e)
+            gevent.sleep(.1)
+
+    def hello(self, obj):
+        return dict(response='hi')
 
     def get_sensor(self, index):
         for sensor in self.sensors:
@@ -75,7 +117,7 @@ class Node(Publisher):
             output.set_state(ob.get('state'))
             return dict(state=output.current_state)
 
-    def json(self):
+    def json(self, ob=None):
         return dict(
             name=self.name,
             sensors=[s.json() for s in self.sensors],
@@ -128,11 +170,16 @@ class Node(Publisher):
         output = self.get_output(e.index)
         if not output: return
         output.current_state = e.state
-        self.publish(output.json())
+        ob = output.json()
+        self.publish(ob)
         self.logger.info("%s Output: %s" % (output.display, output.current_state))
 
 
     def run(self):
+        if LIVE: self.init_kit()
+        while True: gevent.sleep(.1)
+
+    def init_kit(self):
         try:
             self.interface_kit.setOnAttachHandler(self.inferfaceKitAttached)
             self.interface_kit.setOnDetachHandler(self.interfaceKitDetached)

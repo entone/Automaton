@@ -1,5 +1,6 @@
 import random
 import gevent
+import settings
 from node import Node
 from node.sensor.temperature import Temperature
 from node.sensor.humidity import Humidity
@@ -12,7 +13,7 @@ from node.trigger import Clock
 
 class Test(Node):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, name, *args, **kwargs):
         #Output
         self.plant_light = Output(0, 'Foilage', 'plant_light', self)
         self.fan = Output(1, 'Fan', 'fan', self)
@@ -34,24 +35,22 @@ class Test(Node):
         subpump_repeater = Repeater(self.subpump, run_for=15, every=60, state=True, padding=2)
         self.repeaters = [pump_repeater, subpump_repeater]
         #Clocks
-        light_on = Clock(time=(12,0), output=self.plant_light, state=True) 
+        light_on = Clock(time=(12,0), output=self.plant_light, state=True)
         light_off = Clock(time=(0,0), output=self.plant_light, state=False)         
         pump2_on = Clock(time=(10,0), output=self.subpump, state=True) 
         pump2_off = Clock(time=(20,0), output=self.subpump, state=False) 
         self.clocks = [light_on, light_off, pump2_on, pump2_off]
         #Triggers
-        trig = Trigger(input=self.temp, output=self.fan, min=30, max=float('inf'), state=True, current_state=False, port=kwargs.get("publisher"))
-        motion = Trigger(input=self.motion, output=self.laser, min=True, max=None, state=True, current_state=False, port=kwargs.get("publisher"))
+        trig = Trigger(input=self.temp, output=self.fan, min=30, max=float('inf'), state=True, current_state=False)
+        motion = Trigger(input=self.motion, output=self.laser, min=True, max=None, state=True, current_state=False)
 
         self.triggers = [trig, motion]
 
-        super(Test, self).__init__(*args, **kwargs)
+        super(Test, self).__init__(name, *args, **kwargs)
         
     def run(self):
-        gevent.spawn(self.fake_numbers)
-
-    def fake_numbers(self):
         while True:
+            gevent.sleep(5)
             self.temp.current_value = random.randint(0, 50)
             self.publish(self.temp.json())
             
@@ -62,9 +61,8 @@ class Test(Node):
             self.publish(self.ph.json())
 
             self.motion.current_value = not self.motion.current_value
-            self.publish(self.motion.json())
-
-            gevent.sleep(5)
+            self.publish(self.motion.json())            
+        
 
 
 

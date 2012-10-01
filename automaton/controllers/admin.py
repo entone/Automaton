@@ -10,8 +10,9 @@ from node.sensor.humidity import Humidity
 from node.sensor.ph import PH
 from node.output import Output
 import settings
+import util
 
-logger = settings.get_logger(__name__)
+logger = util.get_logger(__name__)
 
 SENSORS = dict(
     temperature=Temperature,

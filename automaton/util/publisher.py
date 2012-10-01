@@ -3,6 +3,7 @@ import zmq.green as zmq
 import simplejson as json
 from util.jsontools import ComplexEncoder
 import settings
+import util
 
 class Publisher(object):
 
@@ -11,7 +12,7 @@ class Publisher(object):
             self.publisher = zmq.Context()
             self.publisher_socket = self.publisher.socket(zmq.PUB)
             self.publisher_socket.bind("tcp://*:%s" % publisher)
-            self.logger = settings.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+            self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
             self.logger.info("Publishing on: %s" % publisher)
             self.rpc = zmq.Context()
             self.rpc_socket = self.rpc.socket(zmq.REP)

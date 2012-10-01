@@ -2,3 +2,4 @@
 -e git+https://github.com/entone/Humongolus.git#egg=Humongolus
 pyzmq
 simplejson
+pycrypto==2.6
