@@ -1,0 +1,228 @@
+body{
+    font-family: sans-serif;
+}
+
+.node{
+    width: 606px;
+    background-color: #ffffff;
+    box-shadow: 5px 5px 20px #dddddd;
+    float:left;
+    margin: 10px;
+}        
+
+div.node > div.header{
+    padding: 10px;
+    padding-left: 20px;
+    font-weight: bold;
+    width: 576px;
+    background-color: #eeeeee;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;            
+    border: 2px solid #cccccc;
+    border-bottom: none;
+    text-shadow: 1px 1px 3px #999999;
+}
+
+@media screen and (max-device-width: 480px) {
+    .node{
+        width: 450px;
+    }
+
+    div.node > div.header{
+        width:420px;
+    }
+}
+
+.graph-holder{            
+    padding-bottom: 10px;
+    border: 2px solid #cccccc;
+    width: 100%;
+}
+
+.graph{
+    margin-left: 10px;
+}
+
+.historical_graph{
+    margin-left: 10px;
+}
+
+.day_graph{
+    margin-left: 35px;
+    border: 2px solid #cccccc;
+}
+
+h3{
+    color: #333333;
+    font-size: 13px;
+    margin:0px;
+    padding: 0px;
+    margin-left: 35px;
+    margin-top: 7px;
+    text-shadow: 1px 1px 3px #999999;   
+}
+
+.legend{            
+    margin:0px;
+    padding:0px;
+    list-style-type: none;
+    margin-left: 40px;
+    margin-top: 10px;
+    font-size: 11px;
+}
+
+.legend li{
+    float:left;
+    padding: 8px;
+    background-color: #cccccc;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    box-shadow: 2px 2px 5px #888;
+    margin-right: 10px;
+}
+
+.legend li > span.header{
+    font-weight: bold;
+}
+
+.legend li span.info{
+    font-weight: normal;
+    padding-left: 5px;
+}
+
+.legend li.ph{
+    background-color: #1D8480;
+}
+
+.legend li.temp{
+    background-color: #C53437;
+}
+
+.legend li.humidity{
+    background-color: #E25618;
+}
+
+.legend li.light{
+    background-color: #6FDDFC;
+}
+
+div.inputs{
+    width: 100%; 
+    border: 2px solid #cccccc;
+    border-top: none;
+    background-color: #eeeeee;
+}
+
+div.input{
+    float:left;
+    text-align:center;
+    border-right: 1px solid #dddddd;
+    background-color: #eeeeee;            
+    padding-bottom: 5px;
+}
+
+div.input_label{
+    padding: 2px;
+    padding-left: 6px;
+    padding-right: 6px;
+    font-size: 9px;
+    font-weight: bold;
+    border-bottom: 1px solid #dddddd;
+    margin-bottom: 5px;
+    background-color: #cccccc;
+}
+
+div.input_btn{
+    width: 15px;
+    height: 15px;
+    border-radius: 15px;
+    background: -webkit-radial-gradient(center, ellipse cover, #cedce7 0%,#596a72 100%); /* Chrome10+,Safari5.1+ */
+    box-shadow: 0px 0px 5px #999999;
+    text-align: center;
+    margin: 0 auto;
+}
+
+div.input_btn.on{
+    background: -webkit-radial-gradient(center, ellipse cover, #97fc00 41%,#1ee200 100%); /* Chrome10+,Safari5.1+ */
+    box-shadow: 0px 0px 5px #97fc00;
+}
+
+div.controls{
+    width: 100%; 
+    border: 2px solid #cccccc;
+    border-top: none;
+    background-color: #eeeeee;
+}
+
+div.toggle{
+    float:left;
+    width: 100px;
+    height:75px;
+    text-align:center;
+    border-right: 1px solid #cccccc;          
+    background-color: #dddddd;
+    padding-bottom: 10px;
+}
+
+div.btn{
+    width: 50px;
+    height: 50px;
+    border-radius: 50px;            
+    border: none;
+    background-color: #666666;            
+    box-shadow: 2px 2px 3px #666666;            
+    border: 1px solid #333333;            
+    text-align: center;
+    margin: 0 auto;
+}
+
+div.toggle div.label{
+    padding: 3px;
+    font-size: 11px;
+    font-weight: bold;
+    border-bottom: 1px solid #dddddd;
+    margin-bottom: 5px;
+    background-color: #cccccc;
+}
+
+div.btn span.t{
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+div.btn span.t::after{
+    content:'off';
+}
+
+div.btn span.t{
+    line-height: 50px;
+}
+
+div.btn.on span.t{
+    color: #80DE03;
+    text-shadow: 0px 0px 5px #80DE03;
+}
+
+div.btn.on{
+    background-color: #666666;
+    border: 2px solid #80DE03;
+    box-shadow: 0px 0px 5px #80DE03;
+}
+
+div.btn.on span.t::after{
+    content:'on';
+}        
+
+.clearfix:after {
+    content: ".";
+    display: block;
+    clear: both;
+    visibility: hidden;
+    line-height: 0;
+    height: 0;
+}
+ 
+.clearfix {
+    display: block;
+}
