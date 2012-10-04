@@ -50,7 +50,7 @@ class Test(Node):
         
     def run(self):
         while True:
-            gevent.sleep(5)
+            gevent.sleep(20)
             self.temp.current_value = random.randint(0, 50)
             self.publish(self.temp.json())
             

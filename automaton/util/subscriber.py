@@ -49,21 +49,32 @@ class Subscriber(object):
 
     def run_udp(self):
         while self.running:
-            self.logger.info("Waiting for message")
-            result = select.select([self.sock],[],[])
-            msg, address = result[0][0].recvfrom(1048576) 
-            self.handle_message(msg, address)
-            gevent.sleep(.1)
+            try:
+                self.logger.info("Waiting for message")
+                result = select.select([self.sock],[],[])
+                msg, address = result[0][0].recvfrom(1048576) 
+                self.handle_message(msg, address)
+                gevent.sleep(.1)
+            except select.error:
+                self.running = False
+            except Exception as e:
+                self.logger.info(e.__class__)
+                self.logger.exception(e)
 
         self.sock.close()
+        return
 
     def run(self):
         while self.running:
-            self.logger.info("Waiting for message")
-            st = self.socket.recv()
-            self.handle_message(st)
-            gevent.sleep(.1)
+            try:
+                self.logger.info("Waiting for message")
+                st = self.socket.recv()
+                self.handle_message(st)
+                gevent.sleep(.1)
+            except Exception as e:
+                self.logger.exception(e)
 
+        self.socket.close()
         self.context.destroy()
         return
 

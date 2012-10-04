@@ -31,23 +31,27 @@ class Manager(object):
         return True
 
     def run(self):
-        while True:
-            rpc = zmq.Context()
-            rpc_socket = rpc.socket(zmq.REP)
-            rpc_socket.bind("tcp://*:%s" % settings.CLIENT_RPC)
-            self.logger.info("RPC listening on: %s" % settings.CLIENT_RPC)
-            while True:
+        rpc = zmq.Context()
+        rpc_socket = rpc.socket(zmq.REP)
+        rpc_socket.bind("tcp://127.0.0.1:%s" % settings.CLIENT_RPC)
+        self.logger.info("RPC listening on: %s" % settings.CLIENT_RPC)
+        while True: 
+            try:       
                 message = rpc_socket.recv()
+                self.logger.info("RPC Got: %s" % message)
                 message = aes.decrypt(message, settings.KEY)
                 ob = json.loads(message)
-                try:
-                    res = getattr(self, ob.get("method"))(ob)
-                    st = json.dumps(res, cls=ComplexEncoder)
-                    st = aes.encrypt(st, settings.KEY)
-                    rpc_socket.send(st)
-                except Exception as e:
-                    self.logger.exception(e)
-                gevent.sleep(.1)
+                res = getattr(self, ob.get("method"))(ob)
+                self.logger.info("Result: %s" % res)
+                st = json.dumps(res, cls=ComplexEncoder)
+                st = aes.encrypt(st, settings.KEY)
+                self.logger.info("Result: %s" % st)
+                rpc_socket.send(st)
+            except Exception as e:
+                rpc_socket.send("{'error':true}")
+                self.logger.exception(e)
+            gevent.sleep(.1)
+
 
     def get_node(self, name):
         return self.nodes.get(name)
@@ -120,7 +124,6 @@ class Node(object):
         message['method']=  method
         resp = r.send(message, self.key)
         self.logger.info("Response: %s" % resp)
-        r.done()
         return resp
 
     def parse_message(self, message):
