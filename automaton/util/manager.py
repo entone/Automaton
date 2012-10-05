@@ -33,7 +33,7 @@ class Manager(object):
     def run(self):
         rpc = zmq.Context()
         rpc_socket = rpc.socket(zmq.REP)
-        rpc_socket.bind("tcp://127.0.0.1:%s" % settings.CLIENT_RPC)
+        rpc_socket.bind("tcp://*:%s" % settings.CLIENT_RPC)
         self.logger.info("RPC listening on: %s" % settings.CLIENT_RPC)
         while True: 
             try:       
@@ -50,7 +50,6 @@ class Manager(object):
             except Exception as e:
                 rpc_socket.send("{'error':true}")
                 self.logger.exception(e)
-            gevent.sleep(.1)
 
 
     def get_node(self, name):

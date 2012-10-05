@@ -9,7 +9,7 @@ class RPC(object):
 
     port = 6666
 
-    def __init__(self, address='127.0.0.1', port=6666):
+    def __init__(self, address='*', port=6666):
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)

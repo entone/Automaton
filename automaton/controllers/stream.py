@@ -62,6 +62,5 @@ class Graph(Controller):
         mes = json.loads(mes)
         mes['method'] = 'set_output_state'
         res = rpc.send(mes, settings.KEY)
-        rpc.done()
         return Response(json.dumps(res, cls=ComplexEncoder))
 

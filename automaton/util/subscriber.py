@@ -4,7 +4,6 @@ import simplejson as json
 import gevent
 import util
 import settings
-import select
 import socket
 from util import aes
 from gevent.monkey import patch_socket
@@ -51,7 +50,7 @@ class Subscriber(object):
         while self.running:
             try:
                 self.logger.info("Waiting for message")
-                result = select.select([self.sock],[],[])
+                result = gevent.select.select([self.sock],[],[])
                 msg, address = result[0][0].recvfrom(1048576) 
                 self.handle_message(msg, address)
                 gevent.sleep(.1)

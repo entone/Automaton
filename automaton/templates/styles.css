@@ -2,19 +2,23 @@ body{
     font-family: sans-serif;
 }
 
-.node{
-    width: 606px;
-    background-color: #ffffff;
-    box-shadow: 5px 5px 20px #dddddd;
+.node-frame{
+    width: 40%;
+    margin: 20px;
     float:left;
-    margin: 10px;
+}
+
+.node{
+    width: 100%;
+    background-color: #ffffff;
+    box-shadow: 5px 5px 20px #dddddd;            
 }        
 
 div.node > div.header{
-    padding: 10px;
-    padding-left: 20px;
     font-weight: bold;
-    width: 576px;
+    width: 100%;
+    padding-top: 10px;
+    padding-bottom: 5px;
     background-color: #eeeeee;
     border-top-left-radius: 15px;
     border-top-right-radius: 15px;            
@@ -23,14 +27,9 @@ div.node > div.header{
     text-shadow: 1px 1px 3px #999999;
 }
 
-@media screen and (max-device-width: 480px) {
-    .node{
-        width: 450px;
-    }
-
-    div.node > div.header{
-        width:420px;
-    }
+div.header-title{
+    left: 10px;
+    width: 50%;
 }
 
 .graph-holder{            
