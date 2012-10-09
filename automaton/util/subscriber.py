@@ -4,10 +4,8 @@ import simplejson as json
 import gevent
 import util
 import settings
-import socket
+import gevent.socket as socket
 from util import aes
-from gevent.monkey import patch_socket
-patch_socket()
 
 class Subscriber(object):
 
@@ -23,7 +21,6 @@ class Subscriber(object):
         if broadcast:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             self.sock.bind(('<broadcast>', port))
-            self.sock.setblocking(0)
             runner = self.run_udp
         else:
             self.context = zmq.Context()
@@ -54,7 +51,8 @@ class Subscriber(object):
                 msg, address = result[0][0].recvfrom(1048576) 
                 self.handle_message(msg, address)
                 gevent.sleep(.1)
-            except select.error:
+            except gevent.select.error as e:
+                self.logger.exception(e)
                 self.running = False
             except Exception as e:
                 self.logger.info(e.__class__)

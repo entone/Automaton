@@ -25,7 +25,7 @@ class Manager(object):
     def add_node(self, obj, **kwargs):
         rpc_port = settings.NODE_RPC+len(self.nodes.keys())
         key = aes.generate_key()
-        n = Node(obj=obj, address=obj.get('address'), port=rpc_port, pubsub=self.nodes_pubsub, key=key)
+        n = Node(name=obj.get('name'), address=obj.get('address'), port=rpc_port, pubsub=self.nodes_pubsub, key=key)
         self.nodes[n.name] = n
         n.publish(method='initialize_rpc', message=dict(port=rpc_port, key=base64.urlsafe_b64encode(key)), key=settings.KEY)
         return True
@@ -36,7 +36,8 @@ class Manager(object):
         rpc_socket.bind("tcp://*:%s" % settings.CLIENT_RPC)
         self.logger.info("RPC listening on: %s" % settings.CLIENT_RPC)
         while True: 
-            try:       
+            try:
+                self.logger.info("Waiting for RPC")
                 message = rpc_socket.recv()
                 self.logger.info("RPC Got: %s" % message)
                 message = aes.decrypt(message, settings.KEY)
@@ -57,7 +58,12 @@ class Manager(object):
 
     def initialized(self, obj, **kwargs):
         node = self.get_node(obj.get('name'))
-        if node: return node.call(method='hello')
+        if node: 
+            obj = node.call(method='hello')
+            self.logger.info("Yeah!")
+            node.set_obj = obj
+
+        return True
 
     def get_nodes(self, obj):
         return [n.call('json') for k,n in self.nodes.iteritems()]
@@ -96,12 +102,15 @@ class Manager(object):
 
 class Node(object):
 
-    def __init__(self, obj, address, port, pubsub, key):
+    def __init__(self, name, address, port, pubsub, key):
+        self.name = name
         self.port = port
         self.address = address
         self.pubsub = pubsub
         self.key = key
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+
+    def set_obj(self, obj):
         self.obj = obj
         for k,v in obj.iteritems(): setattr(self, k, v)
 

@@ -38,10 +38,18 @@ class Node(object):
         if LIVE: self.interface_kit = InterfaceKit()
         self.manager = PubSub(self, pub_port=settings.NODE_PUB, sub_port=settings.NODE_SUB, sub_filter=self.name)
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
-        json = self.json()
-        json['method']=  'add_node'
-        self.publish(json)
+        self.initialize()    
         self.run()
+
+    def initialize(self):
+        while self.initializing:            
+            self.logger.info("Waiting for manager")
+            json = dict(name=self.name, method='add_node')
+            self.publish(json)
+            gevent.sleep(1)
+            
+
+        return
 
     def publish(self, message):
         message['name'] = self.name
@@ -76,7 +84,7 @@ class Node(object):
             gevent.sleep(.1)
 
     def hello(self, obj):
-        return dict(response='hi')
+        return self.json()
 
     def get_sensor(self, index):
         for sensor in self.sensors:
