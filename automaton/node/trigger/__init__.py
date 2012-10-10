@@ -1,5 +1,6 @@
 from util.subscriber import Subscriber
 from util.rpc import RPC
+from util import pid
 import gevent
 import datetime
 import settings
@@ -84,6 +85,8 @@ class Repeater(object):
         )
 
 
+
+
 class Trigger(object):
     
     input = None
@@ -134,6 +137,51 @@ class Trigger(object):
             min=self.min,
             max=self.max,
             output=self.output.type,
-            state_change=self.state_change,
+            current_state=self.current_state,
+            cls=self.__class__.__name__
+        )
+
+class PID(object):
+    input = None
+    output = None
+    state = True
+
+    def __init__(self, input, output, state, set_point, P=2.0, I=0.0, D=1.0, Derivator=0, Integrator=0, Integrator_max=500, Integrator_min=-500):
+        self.input = input
+        self.output = output
+        self.state = state
+        self.set_point = set_point
+        self.pid = pid.PID(3.0,0.4,1.2)
+        self.pid.setPoint(set_point)
+        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        gevent.spawn(self.run)
+
+    def run(self):
+        while True:
+            val = self.input.get_value()
+            error = self.pid.update(val)
+            self.logger.info("Current Value: %s" % val)
+            self.logger.info("Error: %s" % error)
+            state_change = self.test_change(error)
+            if not state_change == None:
+                self.current_state = state_change
+                self.output.set_state(state_change)
+            gevent.sleep(1)
+
+    def test_change(self, error):
+        if error > 1 and not self.output.get_state() == self.state:
+            return self.state
+        elif error < 1 and self.output.get_state() == self.state:
+            return not self.state
+
+        return None
+
+
+    def json(self):
+        return dict(
+            input=self.input.type,
+            set_point=self.set_point,
+            output=self.output.type,
+            current_state=self.current_state,
             cls=self.__class__.__name__
         )
