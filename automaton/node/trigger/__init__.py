@@ -158,14 +158,17 @@ class PID(object):
 
     def run(self):
         while True:
-            val = self.input.get_value()
-            error = self.pid.update(val)
-            self.logger.info("Current Value: %s" % val)
-            self.logger.info("Error: %s" % error)
-            state_change = self.test_change(error)
-            if not state_change == None:
-                self.current_state = state_change
-                self.output.set_state(state_change)
+            try:
+                val = self.input.get_value()
+                error = self.pid.update(val)
+                self.logger.info("Current Value: %s" % val)
+                self.logger.info("Error: %s" % error)
+                state_change = self.test_change(error)
+                if not state_change == None:
+                    self.current_state = state_change
+                    self.output.set_state(state_change)
+            except Exception as e:
+                self.logger.exception(e)
             gevent.sleep(1)
 
     def test_change(self, error):

@@ -10,6 +10,7 @@ from node.input import Input
 from node.trigger import Trigger
 from node.trigger import Repeater
 from node.trigger import Clock
+from node.trigger import PID
 
 class Test(Node):
 
@@ -43,6 +44,7 @@ class Test(Node):
         #Triggers
         trig = Trigger(input=self.temp, output=self.fan, min=30, max=float('inf'), state=True, current_state=False)
         motion = Trigger(input=self.motion, output=self.laser, min=True, max=None, state=True, current_state=False)
+        pid = PID(input=self.temp, output=self.fan, state=True, set_point=27, P=3.0, I=0.4, D=1.2)
 
         self.triggers = [trig, motion]
 

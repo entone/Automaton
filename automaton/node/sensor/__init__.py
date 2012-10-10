@@ -25,7 +25,7 @@ class Sensor(object):
         self.current_value = self.conversion(float(val))
         return self.current_value
 
-    def get_value():
+    def get_value(self):
         return self.do_conversion(self.interface.interface_kit.getSensorValue(self.index))
 
     def json(self):
