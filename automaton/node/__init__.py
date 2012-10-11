@@ -107,14 +107,14 @@ class Node(object):
     def get_sensor_values(self, ob):
         res = {}
         for sensor in self.sensors:
-            res[sensor.type] = sensor.json()
+            res[sensor.id] = sensor.json()
 
         return res
 
     def get_output_values(self):
         res = {}
         for output in self.outputs:
-            res[ouput.type] = output.json()
+            res[ouput.id] = output.json()
 
         return res    
 

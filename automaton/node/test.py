@@ -24,10 +24,11 @@ class Test(Node):
         self.outputs = [self.plant_light, self.fan, self.pump, self.subpump, self.laser,]
 
         #Sensors
-        self.temp = Temperature(0, 'Temperature', 'temp', self, change=2)
+        self.temp = Temperature(0, 'Temperature', 'temp', self, change=2)        
         self.humidity = Humidity(1, 'Humidity', 'humidity', self, change=10)
         self.ph = PH(2, 'PH', 'ph', self, change=20)
-        self.sensors = [self.temp, self.humidity, self.ph,]
+        self.temp2 = Temperature(3, 'Temperature 2', 'water_temp', self, change=2)
+        self.sensors = [self.temp, self.humidity, self.ph, self.temp2]
         #Inputs
         self.motion = Input(0, 'Motion Detector', 'motion_detector', self)
         self.inputs = [self.motion]
@@ -44,7 +45,7 @@ class Test(Node):
         #Triggers
         trig = Trigger(input=self.temp, output=self.fan, min=30, max=float('inf'), state=True, current_state=False)
         motion = Trigger(input=self.motion, output=self.laser, min=True, max=None, state=True, current_state=False)
-        pid = PID(input=self.temp, output=self.fan, state=True, set_point=27, P=3.0, I=0.4, D=1.2)
+        #pid = PID(input=self.temp, output=self.fan, state=True, set_point=27, P=3.0, I=0.4, D=1.2)
 
         self.triggers = [trig, motion]
 
@@ -52,7 +53,7 @@ class Test(Node):
         
     def run(self):
         while True:
-            gevent.sleep(10)
+            gevent.sleep(2)
             self.temp.current_value = random.randint(0, 50)
             self.publish(self.temp.json())
             
