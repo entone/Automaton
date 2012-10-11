@@ -157,27 +157,24 @@ class PID(object):
         gevent.spawn(self.run)
 
     def run(self):
+        counter = 0
+        time_check = 60*5
         while True:
             try:
                 val = self.input.get_value()
                 error = self.pid.update(val)
-                self.logger.info("Current Value: %s" % val)
-                self.logger.info("Error: %s" % error)
-                state_change = self.test_change(error)
-                if not state_change == None:
-                    self.current_state = state_change
-                    self.output.set_state(state_change)
+                if counter == time_check:
+                    counter = 0
+                    self.current_state = self.state
+                    self.output.set_state(self.state)
+                    gevent.sleep(error)
+                    v = not self.state
+                    self.output.set_state(v)
+                    continue
+                counter+=1
             except Exception as e:
                 self.logger.exception(e)
             gevent.sleep(1)
-
-    def test_change(self, error):
-        if error > 1 and not self.output.get_state() == self.state:
-            return self.state
-        elif error < 1 and self.output.get_state() == self.state:
-            return not self.state
-
-        return None
 
 
     def json(self):

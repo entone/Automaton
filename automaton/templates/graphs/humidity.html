@@ -24,9 +24,10 @@
             width: 100%;
             background-color: #ffffff;
             box-shadow: 5px 5px 20px #dddddd;            
+            position:relative;
         }        
 
-        div.node > div.header{
+        div.header{
             font-weight: bold;
             width: 100%;
             padding-top: 10px;
@@ -37,11 +38,52 @@
             border: 2px solid #cccccc;
             border-bottom: none;
             text-shadow: 1px 1px 3px #999999;
+            position:relative;
         }
 
-        div.header-title{
+        div.video_overlay{
+            position:absolute;
+            top:20%;
+            left:15%;
+            display:none;
+            width: 70%;
+            height: 60%;
+            background-color: #ffffff;
+            box-shadow: 5px 5px 20px #dddddd;
+            border: 2px solid #cccccc;
+            border-radius: 15px;
+        }
+
+        div.video_overlay > video{
+            position:relative;
+            border: 2px solid #dddddd;
+            margin-left: 5%;
+            margin-top:8%;
+            width: 90%;
+        }
+
+        div.video_overlay_show{
+            display:block;
+        }
+
+        span.video_close{
+            position: absolute;
+            right: 10px;
+            top: 3px;
+            font-weight:bold;
+            size:13px;
+            text-shadow: 1px 1px 3px #999999;
+            cursor: pointer;
+        }
+
+        span.header-title{
             margin-left: 20px;
-            width: 50%;
+        }
+
+        span.video{
+            position:absolute;            
+            right: 20px;
+            cursor: pointer;
         }
 
         .graph-holder{            
@@ -270,6 +312,14 @@
             }
         }
 
+        function zeroFill(number, width){
+            width -= number.toString().length;
+            if (width > 0){
+                return new Array( width + (/\./.test( number ) ? 2 : 1) ).join( '0' ) + number;
+            }
+            return number + ""; // always return a string
+        }
+
         function rpc_on_off(obj){
             console.log("Setting:");
             obj = {node:obj.node, index:obj.index, state:obj.on};
@@ -373,7 +423,8 @@
         <div class='node-frame'>
             <div class='node'>
                 <div class='header'>
-                    <div class='header-title'>{{name}}</div>
+                    <span class='header-title'>{{name}}</span>
+                    <span class='video' id='{{name}}_video_button'><img src='static/video.png' /></span>
                 </div>
                 <div class='graph-holder'>
                     <ul class='legend clearfix'>
@@ -404,6 +455,12 @@
                         <div class='btn'><span class='t'></span></div>
                     </div>
                     {{/outputs}}
+                </div>
+                <div id='{{name}}_video' class='video_overlay'>
+                    <span class='video_close' id='{{name}}_video_close'>X</span>
+                    <video controls="controls">
+                        <source src="{{webcam}}" type='video/mp4' />
+                    </video>
                 </div>
             </div>
         </div>

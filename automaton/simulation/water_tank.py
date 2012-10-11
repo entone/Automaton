@@ -49,16 +49,23 @@ class WaterTank(object):
         total_watts = self.input_wattage*time
         self.current_temp+= (total_watts*JOULES_CELCIUS)/(self.volume*1000)
         print self.current_temp
+        gevent.sleep(time)
+        return
 
     def run(self):
         global POLYETHALENE_K, JOULES_CELCIUS
+        counter = 0
+        time_check = 60*5#1 minutes
         while True:
+            print "Counter: %s" % counter
             pid = self.pid.update(self.current_temp)
-            print pid
-            if pid > 1: 
+            print "PID: %s" % pid
+            if counter == time_check:
                 self.heat(pid)
-                gevent.sleep(1)
+                counter = 0
                 continue
+
+            counter+=1
             heat_loss = (POLYETHALENE_K*self.surface_area*(self.desired_temp-self.outside_temp)/self.thickness)/3600
             celc_change = (heat_loss*JOULES_CELCIUS)
             print "Heat Loss: %s" % celc_change

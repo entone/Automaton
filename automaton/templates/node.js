@@ -45,7 +45,8 @@ function Node(obj){
         }
         that.display_historical();
         that.display_day();
-    }, 1000);            
+    }, 1000);
+    this.init_video();
     var that = this;
     setInterval(function(){
         $.get("//"+url+"/graph/historical/"+that.name, function(data){
@@ -53,6 +54,17 @@ function Node(obj){
             that.display_historical();
         });
     }, 60000);
+}
+
+Node.prototype.init_video = function(){
+    var that = this;
+    document.getElementById(this.name+"_video_button").onclick = function(){
+        document.getElementById(that.name+"_video").classList.add("video_overlay_show");
+    }
+    document.getElementById(this.name+"_video_close").onclick = function(){
+        document.getElementById(that.name+"_video").classList.remove("video_overlay_show");
+    }
+
 }
 
 Node.prototype.display_day = function(){            
