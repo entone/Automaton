@@ -28,6 +28,9 @@ class Sensor(object):
     def get_value(self):
         return self.do_conversion(self.interface.interface_kit.getSensorValue(self.index))
 
+    def conversion(self, val):
+        return val
+
     def json(self):
         return dict(
             index=self.index,
