@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Automaton</title>
+    <link rel="stylesheet" type="text/css" href="static/css/styles.css">
+    <script type='text/javascript'>
+        var nodes = eval('(${values})');
+        var url = "${url}";
+    </script>
+    <script src="static/js/app.js"></script>
+    <script src="static/js/jquery.js"></script>
+    <script src="static/js/jquery.flot.js"></script>
+    <script src="static/js/mustache.js"></script>
+    <script src='static/js/node.js'></script>
+    <script src='static/js/toggle.js'></script>    
+</head>
+    <body>
+        <div id='content'></div>
+    </body>
+    <%include file="node.html"/>
+</html>

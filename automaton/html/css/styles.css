@@ -6,15 +6,17 @@ body{
     width: 40%;
     margin: 20px;
     float:left;
+    min-width: 300px;
 }
 
 .node{
     width: 100%;
     background-color: #ffffff;
     box-shadow: 5px 5px 20px #dddddd;            
+    position:relative;
 }        
 
-div.node > div.header{
+div.header{
     font-weight: bold;
     width: 100%;
     padding-top: 10px;
@@ -25,11 +27,55 @@ div.node > div.header{
     border: 2px solid #cccccc;
     border-bottom: none;
     text-shadow: 1px 1px 3px #999999;
+    position:relative;
 }
 
-div.header-title{
-    left: 10px;
-    width: 50%;
+div.video_overlay{
+    position:absolute;
+    opacity:0;
+    top:20%;
+    left:15%;
+    width: 70%;
+    height: 60%;
+    background-color: #ffffff;
+    box-shadow: 5px 5px 20px #dddddd;
+    border: 2px solid #cccccc;
+    border-radius: 15px;
+    transition: opacity .25s ease-in-out;
+    -moz-transition: opacity .25s ease-in-out;
+    -webkit-transition: opacity .25s ease-in-out;
+}
+
+div.video_overlay > video{
+    position:relative;
+    border: 2px solid #dddddd;
+    margin-left: 5%;
+    margin-top:8%;
+    width: 90%;
+}
+
+div.video_overlay_show{
+    opacity: 1;
+}
+
+span.video_close{
+    position: absolute;
+    right: 10px;
+    top: 3px;
+    font-weight:bold;
+    size:13px;
+    text-shadow: 1px 1px 3px #999999;
+    cursor: pointer;
+}
+
+span.header-title{
+    margin-left: 20px;
+}
+
+span.video{
+    position:absolute;            
+    right: 20px;
+    cursor: pointer;
 }
 
 .graph-holder{            

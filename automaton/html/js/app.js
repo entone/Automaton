@@ -1,30 +1,13 @@
 var inter = false;
 var offset = -(new Date().getTimezoneOffset()*60*1000);
-var last_x = new Date().getTime()+offset;        
+var last_x = new Date().getTime()+offset;       
 var node_objs = {};
 var graph = false;
 var node_template = "";
-var on_colors = ["#80DE03", "#C53437", "#6FDDFC", "#1D8480"];
-var daynode_height = 10;    
-
-var prefs = {
-    ph:{
-        color: "1D8480",
-        decorator: "",
-    },
-    temp:{
-        color: "C53437",
-        decorator: "&deg;C",
-    },
-    humidity:{
-        color: "E25618",
-        decorator: "%",
-    },
-    light:{
-        color: "6FDDFC",
-        decorator:"%",
-    }
-}
+var colors = ["#80DE03", "#C53437", "#6FDDFC", "#1D8480", "#E25618"];
+var decorators = {ph: "", temperature:"&deg;C",humidity:"%",light:"%", etape:"cm", ec:"ppm", dissolved_oxygen:"ppm"}
+var historical = {};
+var daynode_height = 10;
 
 function zeroFill(number, width){
     width -= number.toString().length;
@@ -114,6 +97,10 @@ function run(){
 
 function stop(){
     clearInterval(inter);
+}
+
+window.onload = function() {
+    init();
 }
 
 window.onfocus = function(){

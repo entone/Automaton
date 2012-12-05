@@ -1,15 +1,12 @@
 from envy.url import URL
-from controllers.stream import Graph
+from controllers.node import Node
 from controllers.static import Static
-from controllers.admin import Admin
 
 urls = (
-    URL(r'^graph/?$', Graph.index),
-    URL(r'^graph/historical/(?P<name>[-\w.]+)/?$', Graph.historical),
-    URL(r'^rpc/?$', Graph.control),
-    URL(r'^display/?$', Graph.display),
+    URL(r'^graph/?$', Node.index),
+    URL(r'^graph/historical/(?P<name>[-\w.]+)/?$', Node.historical),
+    URL(r'^rpc/?$', Node.control),
+    URL(r'^display/?$', Node.display),
     URL(r'^static/(?P<file>[-\w.]+)/?$', Static.index),
-    URL(r'^admin/?$', Admin.index),
-    URL(r'^admin/save/?$', Admin.save),
     URL(r'^favico.ico/?$', Static.index),
 )

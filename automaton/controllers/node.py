@@ -14,7 +14,7 @@ from util import aes
 
 logger = util.get_logger(__name__)
 
-class Graph(Controller):
+class Node(Controller):
 
     def display(self):
         res = {}
@@ -29,7 +29,7 @@ class Graph(Controller):
         
         self.logger.debug("Got Nodes: %s" % res)
         db.close()
-        return Response(self.render("graphs/humidity.html", values=json.dumps(res, cls=ComplexEncoder), url=home))
+        return Response(self.render("base.html", values=json.dumps(res, cls=ComplexEncoder), url=home))
 
     def historical(self, name):
         db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)

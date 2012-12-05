@@ -1,0 +1,46 @@
+<script type='text/x-mustache' id='node_template'>
+    <div class='node-frame'>
+        <div class='node'>
+            <div class='header'>
+                <span class='header-title'>{{name}}</span>
+                <span class='video' id='{{name}}_video_button'><img src='static/video.png' /></span>
+            </div>
+            <div class='graph-holder'>
+                <ul class='legend clearfix'>
+                    {{#sensors}}
+                        <li class='old_{{id}}' style="background-color:{{color}};">
+                            <span class='header'>{{display}}:<span class='info {{id}}' id='{{node}}{{id}}_header'></span></span>
+                        </li>
+                    {{/sensors}}
+                </ul>
+                <div class='graph' id="{{name}}" style="width:90%;height:300px;"></div>
+                <h3>Historical</h3>
+                <div class='historical_graph' id="historical_{{name}}" style="width:90%;height:100px"></div>
+                <h3>Timers</h3>
+                <div class='day_graph' id="day_{{name}}" style="width:85%;height:40px"></div>
+            </div>
+            <div class='inputs clearfix'>
+                {{#inputs}}
+                <div class='input' id='{{node}}{{id}}'>
+                    <div class='input_label'>{{display}}</div>
+                    <div class='input_btn'></div>
+                </div>
+                {{/inputs}}
+            </div>  
+            <div class='controls clearfix'>
+                {{#outputs}}
+                <div class='toggle' id='{{node}}{{type}}'>
+                    <div class='label'></div>
+                    <div class='btn'><span class='t'></span></div>
+                </div>
+                {{/outputs}}
+            </div>
+            <div id='{{name}}_video' class='video_overlay'>
+                <span class='video_close' id='{{name}}_video_close'>X</span>
+                <video controls="controls">
+                    <source src="{{webcam}}" type='video/mp4' />
+                </video>
+            </div>
+        </div>
+    </div>
+</script>
