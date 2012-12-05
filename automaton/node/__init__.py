@@ -47,8 +47,6 @@ class Node(object):
             json = dict(name=self.name, method='add_node')
             self.publish(json)
             gevent.sleep(1)
-            
-
         return
 
     def publish(self, message):
@@ -153,8 +151,9 @@ class Node(object):
 
     def interfaceKitError(self, e):
         try:
-            source = e.device
-            self.logger.info("InterfaceKit %i: Phidget Error %i: %s" % (source.getSerialNum(), e.eCode, e.description))
+            if e.eCode not in (36866,):
+                source = e.device
+                self.logger.info("InterfaceKit %i: Phidget Error %i: %s" % (source.getSerialNum(), e.eCode, e.description))
         except PhidgetException as e:
             self.logger.exception(e)
 

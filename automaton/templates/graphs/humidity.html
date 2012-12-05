@@ -288,32 +288,15 @@
         var inter = false;
         var offset = -(new Date().getTimezoneOffset()*60*1000);
         var last_x = new Date().getTime()+offset;
-        var nodes = eval('(${values})');        
+        var nodes = eval('(${values})');       
         var node_objs = {};
         var url = "${url}";
         var graph = false;
         var node_template = "";
-        var on_colors = ["#80DE03", "#C53437", "#6FDDFC", "#1D8480"];
-        var daynode_height = 10;    
-
-        var prefs = {
-            ph:{
-                color: "1D8480",
-                decorator: "",
-            },
-            temp:{
-                color: "C53437",
-                decorator: "&deg;C",
-            },
-            humidity:{
-                color: "E25618",
-                decorator: "%",
-            },
-            light:{
-                color: "6FDDFC",
-                decorator:"%",
-            }
-        }
+        var colors = ["#80DE03", "#C53437", "#6FDDFC", "#1D8480", "#E25618"];
+        var decorators = {ph: "", temperature:"&deg;C",humidity:"%",light:"%", etape:"cm", ec:"ppm", dissolved_oxygen:"ppm"}
+        var historical = {};
+        var daynode_height = 10;
 
         function zeroFill(number, width){
             width -= number.toString().length;
@@ -432,12 +415,12 @@
                 <div class='graph-holder'>
                     <ul class='legend clearfix'>
                         {{#sensors}}
-                            <li class='{{id}}'>
+                            <li class='old_{{id}}' style="background-color:{{color}};">
                                 <span class='header'>{{display}}:<span class='info {{id}}' id='{{node}}{{id}}_header'></span></span>
                             </li>
                         {{/sensors}}
                     </ul>
-                    <div class='graph' id="{{name}}" style="width:90%;height:300px"></div>
+                    <div class='graph' id="{{name}}" style="width:90%;height:300px;"></div>
                     <h3>Historical</h3>
                     <div class='historical_graph' id="historical_{{name}}" style="width:90%;height:100px"></div>
                     <h3>Timers</h3>
@@ -445,7 +428,7 @@
                 </div>
                 <div class='inputs clearfix'>
                     {{#inputs}}
-                    <div class='input' id='{{node}}{{type}}'>
+                    <div class='input' id='{{node}}{{id}}'>
                         <div class='input_label'>{{display}}</div>
                         <div class='input_btn'></div>
                     </div>

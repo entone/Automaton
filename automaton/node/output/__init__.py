@@ -13,11 +13,11 @@ class Output(object):
     interface=None
     current_state = False
 
-    def __init__(self, index, display, type, interface):
+    def __init__(self, index, display, interface):
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         self.index = index
         self.display = display
-        self.type = type
+        self.type = util.slugify(display)
         self.interface = interface
 
     def set_state(self, state):

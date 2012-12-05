@@ -3,3 +3,4 @@
 pyzmq
 simplejson
 pycrypto==2.6
+unidecode

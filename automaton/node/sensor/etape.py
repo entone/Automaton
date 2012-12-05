@@ -2,7 +2,7 @@ from node.sensor import Sensor
 
 class ETape(Sensor):
     decorator = 'cm'
-    type="temp"
+    type="etape"
     RESISTOR = 550
     MIN = 208.0
     MAX = 1457.0

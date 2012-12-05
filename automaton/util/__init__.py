@@ -6,6 +6,8 @@ import fcntl
 import struct
 import settings
 import sys
+import re
+import unidecode
 
 def get_ip_address(ifname):
     ip = socket.gethostbyname(socket.gethostname())
@@ -40,3 +42,7 @@ def get_logger(name):
     handler = SysLogHandler(address=address)
     logger.addHandler(handler)
     return logger
+
+def slugify(str):
+    str = unidecode.unidecode(str).lower()
+    return re.sub(r'\W+','-',str)

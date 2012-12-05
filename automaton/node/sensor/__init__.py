@@ -6,16 +6,16 @@ class Sensor(object):
     display = ""
     id = ""
     change = 2
-    data_rate = 16
+    data_rate = 64
     current_value = 0
     interface = None
     decorator = ""
     type = ""
 
-    def __init__(self, index, display, id, interface, change=2, data_rate=16):
+    def __init__(self, index, display, interface, change=2, data_rate=64):
         self.index = index
         self.display = display
-        self.id = id
+        self.id = util.slugify(display)
         self.change = change
         self.data_rate = data_rate
         self.interface = interface
@@ -26,7 +26,13 @@ class Sensor(object):
         return self.current_value
 
     def get_value(self):
-        return self.do_conversion(self.interface.interface_kit.getSensorValue(self.index))
+        try:
+            val = self.interface.interface_kit.getSensorValue(self.index)
+            return self.do_conversion(val)
+        except Exception as e:
+            self.logger.error("No value for: %s" % self.__class__.__name__)
+
+        return None
 
     def conversion(self, val):
         return val

@@ -24,16 +24,19 @@ function Node(obj){
     for(var key in obj){
         this[key] = obj[key];
     }
-    var ph = 7;
-    var temp = 30;
-    var humidity = 50;
-    var light = 50;
+    this.prefs = {}
     this.data = {};
-    this.last = {}
+    this.last = {};
+    this.h_data = {};
+    var tot = 0;
     for(var i in this.sensors){
         var s = this.sensors[i];
+        s.color = colors[tot];
+        this.prefs[s.id] = {color:colors[tot], decorator:decorators[s.type]}
         this.last[s.id] = s.value;
         this.data[s.id] = [];
+        this.h_data[s.id] = {data:[], color:colors[tot]};
+        tot++;
     }
     var output = Mustache.to_html(node_template, this);
     document.getElementById('content').innerHTML+= output;
@@ -106,7 +109,7 @@ Node.prototype.display_day = function(){
             var cur_wid=pad;
             for(var i=0; i<1440; i+=r.every){                        
                 var w = wid*r.run_for;
-                var on = new DayNode(cur_wid, rows*daynode_height, w, daynode_height, on_colors[rows], {name:r.output, start:i+r.padding, end:(i+r.padding)+r.run_for});
+                var on = new DayNode(cur_wid, rows*daynode_height, w, daynode_height, colors[rows], {name:r.output, start:i+r.padding, end:(i+r.padding)+r.run_for});
                 on.draw(c);
                 that.nodes.push(on);
                 cur_wid+=w;
@@ -140,7 +143,7 @@ Node.prototype.display_day = function(){
             var w_on = wid*o;
             var w_off = wid*of;
             ob = {name:ons[tt][1], start:o, end:of};
-            var on = new DayNode(w_on, rows*daynode_height, w_off-w_on, daynode_height, on_colors[rows], ob);
+            var on = new DayNode(w_on, rows*daynode_height, w_off-w_on, daynode_height, colors[rows], ob);
             on.draw(c);
             that.nodes.push(on);
             var off = new DayNode(0, rows*daynode_height, wid*o, daynode_height, "#dddddd");
@@ -165,7 +168,6 @@ Node.prototype.display_day = function(){
 }
 
 Node.prototype.display_historical = function(){
-    var h_data = {ph:{data:[]}, temp:{data:[]}, humidity:{data:[]}, light:{data:[]}};
     var oldest = 999999999999999999999999999;
     var newest = 0;
     console.log(this.historical);
@@ -175,24 +177,23 @@ Node.prototype.display_historical = function(){
             if(n[3]){
                 var da = new Date(n[0]).getTime()+offset;
                 oldest = da < oldest ? da : oldest;
-                newest = da > newest ? da : newest;
-                h_data[n[4]].data.push([da, n[3]]);
-                h_data[n[4]].color = prefs[n[4]].color;
+                newest = da > newest ? da : newest;                
+                this.h_data[n[4]].data.push([da, n[3]]);
             }
         }catch(e){
             continue;
         }
     }
     var plots = [];
-    for(var i in h_data){
-        var p = h_data[i].data;
+    for(var i in this.h_data){
+        var p = this.h_data[i].data;
         try{
             p.push([newest, p[p.length-1][1]]);
             p.unshift([oldest, p[0][1]]);
         }catch(e){
             continue;
         }
-        plots.push(h_data[i]);
+        plots.push(this.h_data[i]);
     }
     console.log(plots);
     $.plot($("#historical_"+this.name), plots, {
@@ -264,9 +265,9 @@ Node.prototype.update = function(){
 Node.prototype.display = function(){
     var plots = [];
     for (var d in this.data){
-        prefs[d].data = this.data[d];
-        plots.push(prefs[d]);
-        document.getElementById(this.name+d+"_header").innerHTML = this.last[d].toFixed(2)+prefs[d].decorator;
+        this.prefs[d].data = this.data[d]
+        plots.push(this.prefs[d]);
+        document.getElementById(this.name+d+"_header").innerHTML = this.last[d].toFixed(2)+this.prefs[d].decorator;
     }
 
     $.plot($("#"+this.name), plots, {

@@ -31,7 +31,7 @@ class Clock(object):
     def json(self):
         return dict(
             time=self.time,
-            output=self.output.type,
+            output=self.output.display,
             state_change=self.state_change,
             cls=self.__class__.__name__
         )
@@ -78,7 +78,7 @@ class Repeater(object):
         return dict(
             run_for=self.run_for,
             every=self.every,
-            output=self.output.type,
+            output=self.output.display,
             padding=self.padding,
             state_change=self.state_change,
             cls=self.__class__.__name__
@@ -146,7 +146,7 @@ class PID(object):
     output = None
     state = True
 
-    def __init__(self, input, output, state, set_point, P=2.0, I=0.0, D=1.0, Derivator=0, Integrator=0, Integrator_max=500, Integrator_min=-500):
+    def __init__(self, input, output, state, set_point, update=60, check=30, P=2.0, I=0.0, D=1.0, Derivator=0, Integrator=0, Integrator_max=500, Integrator_min=-500):
         self.input = input
         self.output = output
         self.state = state
@@ -154,15 +154,18 @@ class PID(object):
         self.pid = pid.PID(3.0,0.4,1.2)
         self.pid.setPoint(set_point)
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.update = update
+        self.check = check
         gevent.spawn(self.run)
 
     def run(self):
         counter = 0
-        time_check = 60*5
+        time_check = self.check
         while True:
             try:
-                val = self.input.get_value()
-                error = self.pid.update(val)
+                val = self.input.get_value()                
+                if val: error = self.pid.update(val)
+                else: error = 0
                 if counter == time_check:
                     counter = 0
                     self.current_state = self.state
@@ -174,7 +177,7 @@ class PID(object):
                 counter+=1
             except Exception as e:
                 self.logger.exception(e)
-            gevent.sleep(1)
+            gevent.sleep(self.update)
 
 
     def json(self):
