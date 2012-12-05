@@ -105,6 +105,7 @@ h3{
     margin-left: 35px;
     margin-top: 7px;
     text-shadow: 1px 1px 3px #999999;   
+    line-height: 15px
 }
 
 .legend{            
@@ -124,6 +125,7 @@ h3{
     border-radius: 6px;
     box-shadow: 2px 2px 5px #888;
     margin-right: 10px;
+    line-height: 8px;
 }
 
 .legend li > span.header{
@@ -133,22 +135,6 @@ h3{
 .legend li span.info{
     font-weight: normal;
     padding-left: 5px;
-}
-
-.legend li.ph{
-    background-color: #1D8480;
-}
-
-.legend li.temp{
-    background-color: #C53437;
-}
-
-.legend li.humidity{
-    background-color: #E25618;
-}
-
-.legend li.light{
-    background-color: #6FDDFC;
 }
 
 div.inputs{
@@ -209,7 +195,7 @@ div.toggle{
     padding-bottom: 10px;
 }
 
-div.btn{
+div.output-btn{
     width: 50px;
     height: 50px;
     border-radius: 50px;            
@@ -219,43 +205,45 @@ div.btn{
     border: 1px solid #333333;            
     text-align: center;
     margin: 0 auto;
+    line-height: 0px;
 }
 
-div.toggle div.label{
+div.toggle div.output-label{
     padding: 3px;
     font-size: 11px;
     font-weight: bold;
     border-bottom: 1px solid #dddddd;
     margin-bottom: 5px;
     background-color: #cccccc;
+    line-height: 10px;
 }
 
-div.btn span.t{
+div.output-btn span.t{
     font-size: 11px;
     font-weight: bold;
     text-transform: uppercase;
 }
 
-div.btn span.t::after{
+div.output-btn span.t::after{
     content:'off';
 }
 
-div.btn span.t{
+div.output-btn span.t{
     line-height: 50px;
 }
 
-div.btn.on span.t{
+div.output-btn.on span.t{
     color: #80DE03;
     text-shadow: 0px 0px 5px #80DE03;
 }
 
-div.btn.on{
+div.output-btn.on{
     background-color: #666666;
     border: 2px solid #80DE03;
     box-shadow: 0px 0px 5px #80DE03;
 }
 
-div.btn.on span.t::after{
+div.output-btn.on span.t::after{
     content:'on';
 }        
 
