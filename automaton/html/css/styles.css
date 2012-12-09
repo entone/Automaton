@@ -46,7 +46,7 @@ div.video_overlay{
     -webkit-transition: opacity .25s ease-in-out;
 }
 
-div.video_overlay > video{
+div.video_overlay > img{
     position:relative;
     border: 2px solid #dddddd;
     margin-left: 5%;

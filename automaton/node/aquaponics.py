@@ -14,7 +14,7 @@ import settings
 
 class Aquaponics(Node):
 
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self ,*args, **kwargs):
         #level = ETape(0, 'E-Tape', 'etape', self, change=1)
         temp = Temperature(0, 'Temperature', self, change=5)
         water_temp = Temperature(1, 'Water Temperature', self, change=5)
@@ -42,6 +42,6 @@ class Aquaponics(Node):
         pump_timing = Repeater(output=pump, run_for=15, every=30)
         self.repeaters = [pump_timing,]
 
-        super(Aquaponics, self).__init__(name, *args, **kwargs)
+        super(Aquaponics, self).__init__(*args, **kwargs)
         
             

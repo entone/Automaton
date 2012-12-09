@@ -31,9 +31,11 @@ class Node(object):
     clocks = []
     repeaters = []
     interface_kit = None
+    webcam=None
 
-    def __init__(self, name, *args, **kwargs):
-        self.name = name
+    def __init__(self, *args, **kwargs):
+        self.name = kwargs.get('name', 'Node')
+        self.webcam = kwargs.get('webcam', '')
         self.initializing = True
         if LIVE: self.interface_kit = InterfaceKit()
         self.manager = PubSub(self, pub_port=settings.NODE_PUB, sub_port=settings.NODE_SUB, sub_filter=self.name)
@@ -82,7 +84,9 @@ class Node(object):
             gevent.sleep(.1)
 
     def hello(self, obj):
-        return self.json()
+        o = self.json()
+        self.logger.info(o)
+        return o
 
     def get_sensor(self, index):
         for sensor in self.sensors:
@@ -126,12 +130,13 @@ class Node(object):
     def json(self, ob=None):
         return dict(
             name=self.name,
+            webcam=self.webcam,
             sensors=[s.json() for s in self.sensors],
             outputs=[o.json() for o in self.outputs],
             inputs=[i.json() for i in self.inputs],
             triggers=[t.json() for t in self.triggers],
             repeaters=[r.json() for r in self.repeaters],
-            clocks=[c.json() for c in self.clocks],
+            clocks=[c.json() for c in self.clocks],            
             cls=self.__class__.__name__
         )
 
