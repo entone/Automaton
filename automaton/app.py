@@ -2,6 +2,9 @@ try:
     from envy.wsgi import WSGI
     from urls import urls
     from envy.session import CookieSession
+    from pymongo.connection import Connection
+    import humongolus as orm
+    from models import Sensor
     import logging
     import settings    
     import signal
@@ -14,11 +17,24 @@ try:
         session_key='session_id', 
         session_cls=CookieSession
     )
-    print server_settings
+
+    conn = Connection()
+    logger = logging.getLogger("humongolus")
+    orm.settings(logger=logger, db_connection=conn)
+
+    for k,v in settings.SENSORS.iteritems():
+        s = Sensor()
+        s.type=k
+        s.decorator = v
+        try:
+            s.save()
+        except Exception as e:
+            logging.warning("%s already instantiated" % k)
 
     wsgi = WSGI(urls, server_settings)
 
 except Exception as e:
+    print e
     logging.exception(e)
 
 def log_request(self):

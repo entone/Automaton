@@ -28,6 +28,7 @@ function Node(obj){
     this.data = {};
     this.last = {};
     this.h_data = {};
+    var node_template = document.getElementById('node_template').innerHTML;
     var tot = 0;
     for(var i in this.sensors){
         var s = this.sensors[i];
@@ -39,6 +40,7 @@ function Node(obj){
         tot++;
     }
     var output = Mustache.to_html(node_template, this);
+    console.log()
     document.getElementById('content').innerHTML+= output;
     var that = this;
     setTimeout(function(){
@@ -258,6 +260,7 @@ Node.prototype.update = function(){
         var n = [last_x, this.last[s.id]];
         this.data[s.id].push(n);
         this.data[s.id] = this.data[s.id].slice(-200);
+        console.log(this.data[s.id].length);
     }
     this.display();
 }
@@ -269,7 +272,7 @@ Node.prototype.display = function(){
         plots.push(this.prefs[d]);
         document.getElementById(this.name+d+"_header").innerHTML = this.last[d].toFixed(2)+this.prefs[d].decorator;
     }
-
+    console.log(plots);
     $.plot($("#"+this.name), plots, {
         series: { lines: { show: true, fill: false},},
         yaxis: { 

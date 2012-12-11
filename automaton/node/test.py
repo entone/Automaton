@@ -16,18 +16,18 @@ class Test(Node):
 
     def __init__(self, name, *args, **kwargs):
         #Output
-        self.plant_light = Output(0, 'Foilage', 'plant_light', self)
-        self.fan = Output(1, 'Fan', 'fan', self)
-        self.pump = Output(2, 'Pump', 'pump', self)
-        self.subpump = Output(3, 'SubPump', 'subpump', self)
-        self.laser = Output(4, 'Laser', 'laser', self)
+        self.plant_light = Output(0, 'Foilage', self)
+        self.fan = Output(1, 'Fan', self)
+        self.pump = Output(2, 'Pump', self)
+        self.subpump = Output(3, 'SubPump', self)
+        self.laser = Output(4, 'Laser', self)
         self.outputs = [self.plant_light, self.fan, self.pump, self.subpump, self.laser,]
 
         #Sensors
-        self.temp = Temperature(0, 'Temperature', 'temp', self, change=2)        
-        self.humidity = Humidity(1, 'Humidity', 'humidity', self, change=10)
-        self.ph = PH(2, 'PH', 'ph', self, change=20)
-        self.temp2 = Temperature(3, 'Temperature 2', 'water_temp', self, change=2)
+        self.temp = Temperature(0, 'Temperature', self, change=2)        
+        self.humidity = Humidity(1, 'Humidity', self, change=10)
+        self.ph = PH(2, 'PH', self, change=20)
+        self.temp2 = Temperature(3, 'Water Temperature', self, change=2)
         self.sensors = [self.temp, self.humidity, self.ph, self.temp2]
         #Inputs
         self.motion = Input(0, 'Motion Detector', 'motion_detector', self)

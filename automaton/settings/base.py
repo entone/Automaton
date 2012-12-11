@@ -33,3 +33,12 @@ BLOCK_SIZE = 16
 INTERRUPT = u'\u0000'
 PAD = u'\u0000'
 KEY = '!!++automaton!!!'
+
+#Sensors
+
+SENSORS = dict(
+	Temperature='&deg;C',
+	PH='',
+	Humidity='%',
+	ETape='cm',
+)
