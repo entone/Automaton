@@ -8,6 +8,8 @@ import settings
 import sys
 import re
 import unidecode
+import hashlib
+import random
 
 def get_ip_address(ifname):
     ip = socket.gethostbyname(socket.gethostname())
@@ -46,3 +48,18 @@ def get_logger(name):
 def slugify(str):
     str = unidecode.unidecode(str).lower()
     return re.sub(r'\W+','-',str)
+
+def encrypt_password(self, password, salt=False):
+    algo="sha1"
+    lib = hashlib.__getattribute__(algo)
+    salt = salt if salt else lib(str(random.random())).hexdigest()[:5]
+    hash = lib("%s%s"%(salt, password)).hexdigest()
+    return "%s$%s$%s" % (algo, salt, hash)
+        
+def check_password(self, password, encrypted):
+    try:
+        algo, salt, hash = str(encrypted).split("$")
+        return encrypted == encrypt_password(password, salt)
+    except Exception as e: 
+        self.logger.exception(e)
+        return False

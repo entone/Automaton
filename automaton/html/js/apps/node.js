@@ -1,17 +1,4 @@
-function zeroFill(number, width){
-    width -= number.toString().length;
-    if (width > 0){
-        return new Array( width + (/\./.test( number ) ? 2 : 1) ).join( '0' ) + number;
-    }
-    return number + ""; // always return a string
-}
-var colors = ["#80DE03", "#C53437", "#6FDDFC", "#1D8480", "#E25618"];
-var decorators = {ph: "", temperature:"&deg;C",humidity:"%",light:"%", etape:"cm", ec:"ppm", dissolved_oxygen:"ppm"}
-var offset = -(new Date().getTimezoneOffset()*60*1000);    
-var last_x = new Date().getTime()+offset;
-var daynode_height = 10;
-
-App = function(){
+Applications.Node = function(){
     this.inter = false;
     this.node_objs = {};
     this.graph = false;
@@ -19,22 +6,12 @@ App = function(){
     this.historical = {};
 }
 
-function rpc_on_off(obj){
-    console.log("Setting:");
-    obj = {node:obj.node, index:obj.index, state:obj.on};
-    console.log(obj);
-    $.post("//"+url+"/rpc/", JSON.stringify(obj), function(res){
-        console.log(eval("("+res+")"));
-    });
-}
-
-App.prototype.update_toggle = function(frame){
+Applications.Node.prototype.update_toggle = function(frame){
     var tog = document.getElementById(frame.node+frame.type);
     tog.obj.set_state(frame.state);
 }
 
-App.prototype.update_input = function(frame){
-    console.log(frame);
+Applications.Node.prototype.update_input = function(frame){
     var tog = document.getElementById(frame.node+frame.type);
     if(frame.value){
         tog.children[1].classList.add('on');
@@ -43,9 +20,9 @@ App.prototype.update_input = function(frame){
     }
 }
 
-App.prototype.init = function(){
-    for(var n in nodes){
-        var node = nodes[n];
+Applications.Node.prototype.init = function(){
+    for(var n in loc.nodes){
+        var node = loc.nodes[n];
         console.log("Creating Node:");
         console.log(node);
         var new_node = new Node(node);
@@ -62,7 +39,7 @@ App.prototype.init = function(){
         this.send('hi');
     };
 
-    this.graph.onmessage = function(e) {
+    this.graph.onmessage = function(e){
         var lines = e.data.split('\n');
         for (var i = 0; i < lines.length - 1; i++) {
             var frame = eval("("+lines[i]+")");
@@ -83,7 +60,7 @@ App.prototype.init = function(){
     };
 }
 
-App.prototype.run = function(){
+Applications.Node.prototype.run = function(){
     for(var i in this.node_objs){
         for(var d in this.node_objs[i].data){
             this.node_objs[i].data[d] = [];
@@ -98,15 +75,15 @@ App.prototype.run = function(){
     }, 150);
 };
 
-App.prototype.stop = function(){
+Applications.Node.prototype.stop = function(){
     clearInterval(this.inter);
 };
 
-window.onload = function(){    
-    this.app = new App();
-    this.app.init();
-};
+window.onresize = function(ev){
+    for(var n in this.app.node_objs){
+        this.app.node_objs[n].display_day();
+    }
+}
 
-window.onblur = function(){
-    this.app.stop();
-};
+window.application = Applications.Node;
+

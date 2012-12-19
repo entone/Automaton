@@ -1,0 +1,24 @@
+<script type='text/x-mustache' id='dashboard_template'>
+    <ul class="thumbnails">
+        {{#nodes}}
+        <li class="span4">
+            <div class="thumbnail">            
+                <img data-src="{{webcam}}" src="{{webcam}}" alt="">
+                <h4 class='dashboard-title'>{{name}}</h4>
+                <ul class='legend clearfix dashboard-legend'>
+                    {{#sensors}}
+                        <li class='old_{{id}}' style="background-color:{{color}};">
+                            <span class='header'>{{display}}:<span class='info {{id}}' id='{{node}}{{id}}_header'>{{value}}{{{decorator}}}</span></span>
+                        </li>
+                    {{/sensors}}
+                </ul>
+                % if not settings.IS_CLOUD or settings.IS_DEV:
+                    <p>
+                        <a href="/realtime/{{id}}" class='btn btn-primary dashboard-view-btn'>Realtime</a>
+                    </p>
+                % endif
+            </div>
+        </li>
+        {{/nodes}}
+    </ul>
+</script>

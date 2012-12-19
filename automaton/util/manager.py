@@ -1,4 +1,5 @@
 import gevent
+import sqlite3
 import zmq.green as zmq
 import settings
 import simplejson as json
@@ -7,8 +8,9 @@ import base64
 from util import aes
 from util.pubsub import PubSub
 from util.rpc import RPC
+from util.cloud import Cloud
 from util.jsontools import ComplexEncoder
-from loggers import Logger
+from loggers import Logger, CloudLogger
 
 
 class Manager(object):
@@ -19,15 +21,39 @@ class Manager(object):
         self.clients_pubsub = PubSub(self, pub_port=settings.CLIENT_SUB, sub_port=settings.CLIENT_PUB, broadcast=False)
         self.nodes_pubsub = PubSub(self, pub_port=settings.NODE_SUB, sub_port=settings.NODE_PUB, parse_message=self.parse_message)
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.cloud = Cloud()
+        self.register()        
         Logger(self)
+        CloudLogger(self)
         self.run()
+
+    def register(self):
+        self.db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)
+        c = self.db.cursor()
+        try:
+            c.execute('''CREATE TABLE registration (id text)''')
+        except Exception as e: pass
+        self.logger.info("Table Created")
+        c.execute("SELECT id FROM registration")
+        self.id = c.fetchone()
+        self.logger.info(self.id)     
+        if not self.id:
+            res = self.cloud.register_location()
+            c.execute("INSERT INTO registration VALUES (?)", (res.get('id'),))
+            self.id = res.get('id')
+            self.db.commit()
+            self.logger.info(self.id)
+        else:
+            self.id = self.id[0]
+
+        c.close()
 
     def add_node(self, obj, **kwargs):
         rpc_port = settings.NODE_RPC+len(self.nodes.keys())
         key = aes.generate_key()
         n = Node(name=obj.get('name'), address=obj.get('address'), port=rpc_port, pubsub=self.nodes_pubsub, key=key)
         self.nodes[n.name] = n
-        n.publish(method='initialize_rpc', message=dict(port=rpc_port, key=base64.urlsafe_b64encode(key)), key=settings.KEY)
+        n.publish(method='initialize_rpc', message=dict(port=rpc_port, key=base64.urlsafe_b64encode(key)), key=settings.KEY)        
         return True
 
     def run(self):
@@ -61,7 +87,14 @@ class Manager(object):
         if node: 
             obj = node.call(method='hello')
             self.logger.info("Yeah!")
-            node.set_obj = obj
+            node.set_obj(obj)
+            if not obj.get('id'):
+                obj['location_id'] = self.id
+                res = self.cloud.add_node(obj)
+                self.logger.info(res)
+                mes = dict(id=res.get('id'))
+                node.id = res.get('id')
+                success = node.call(method='set_id', message=mes)
 
         return True
 
@@ -69,13 +102,14 @@ class Manager(object):
         return [n.call('json') for k,n in self.nodes.iteritems()]
 
     def get_sensor_values(self):
-        res = dict()
+        res = dict(location_id=self.id, nodes=[])
         for k, n in self.nodes.iteritems():
-            res[k] = n.call('get_sensor_values')
+            res['nodes'].append(n.call('get_sensor_values'))
 
         return res
 
     def node_change(self, obj):
+        obj['location_id'] = self.id
         mes = json.dumps(obj, cls=ComplexEncoder)
         mes = aes.encrypt(mes, settings.KEY)
         self.clients_pubsub.publish(mes)
@@ -108,6 +142,7 @@ class Node(object):
         self.address = address
         self.pubsub = pubsub
         self.key = key
+        self.id = None
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
 
     def set_obj(self, obj):

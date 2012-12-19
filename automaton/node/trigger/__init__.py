@@ -146,12 +146,15 @@ class PID(object):
     output = None
     state = True
 
-    def __init__(self, input, output, state, set_point, update=60, check=30, P=2.0, I=0.0, D=1.0, Derivator=0, Integrator=0, Integrator_max=500, Integrator_min=-500):
+    def __init__(self, input, output, state, set_point, update=60, check=30, P=2.0, I=0.0, D=1.0):
         self.input = input
         self.output = output
         self.state = state
         self.set_point = set_point
-        self.pid = pid.PID(3.0,0.4,1.2)
+        self.P = P
+        self.I = I
+        self.D = D
+        self.pid = pid.PID(P,I,D)
         self.pid.setPoint(set_point)
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         self.update = update
@@ -183,8 +186,12 @@ class PID(object):
     def json(self):
         return dict(
             input=self.input.type,
-            set_point=self.set_point,
             output=self.output.type,
-            current_state=self.current_state,
+            set_point=self.set_point,
+            update=self.update,
+            check=self.check,
+            proportional=self.P,
+            integral=self.I,
+            derivative=self.D,
             cls=self.__class__.__name__
         )

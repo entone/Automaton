@@ -1,14 +1,13 @@
 try:
-    from envy.wsgi import WSGI
-    from urls import urls
+    import logging
+    import signal
+    from envy.wsgi import WSGI    
     from envy.session import CookieSession
     from pymongo.connection import Connection
-    import humongolus as orm
-    from models import Sensor
-    import logging
+    import humongolus as orm    
+    from models.node import Sensor
     import settings    
-    import signal
-    from loggers import Logger
+    from urls import urls
 
     logging.basicConfig(format=settings.LOG_FORMAT, level=settings.LOG_LEVEL)
 
@@ -18,18 +17,19 @@ try:
         session_cls=CookieSession
     )
 
-    conn = Connection()
-    logger = logging.getLogger("humongolus")
-    orm.settings(logger=logger, db_connection=conn)
+    if settings.IS_CLOUD:
+        conn = Connection()
+        logger = logging.getLogger("humongolus")
+        orm.settings(logger=logger, db_connection=conn)
 
-    for k,v in settings.SENSORS.iteritems():
-        s = Sensor()
-        s.type=k
-        s.decorator = v
-        try:
-            s.save()
-        except Exception as e:
-            logging.warning("%s already instantiated" % k)
+        for k,v in settings.SENSORS.iteritems():
+            s = Sensor()
+            s.type=k
+            s.decorator = v
+            try:
+                s.save()
+            except Exception as e:
+                logging.warning("%s already instantiated" % k)
 
     wsgi = WSGI(urls, server_settings)
 

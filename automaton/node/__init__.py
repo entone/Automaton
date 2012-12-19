@@ -12,6 +12,7 @@ import settings
 import gevent
 import simplejson as json
 import util
+import sqlite3
 #Phidget specific imports
 LIVE = True
 try:
@@ -24,12 +25,14 @@ except:
 class Node(object):
 
     name = None
+    id = None
     sensors = []
     outputs = []
     inputs = []
     triggers = []
     clocks = []
     repeaters = []
+    pids = []
     interface_kit = None
     webcam=None
 
@@ -44,6 +47,17 @@ class Node(object):
         self.run()
 
     def initialize(self):
+        self.db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)
+        c = self.db.cursor()
+        try:
+            c.execute('''CREATE TABLE node_registration (id text)''')
+        except Exception as e: pass
+        self.logger.info("Table Created")
+        c.execute("SELECT id FROM node_registration")
+        self.id = c.fetchone()        
+        if self.id: self.id = self.id[0]
+        self.logger.info("ID: %s" % self.id)
+        c.close()
         while self.initializing:            
             self.logger.info("Waiting for manager")
             json = dict(name=self.name, method='add_node')
@@ -53,6 +67,7 @@ class Node(object):
 
     def publish(self, message):
         message['name'] = self.name
+        message['node_id'] = self.id
         message['method'] = message.get('method', 'node_change')
         self.manager.publish(aes.encrypt(json.dumps(message, cls=ComplexEncoder), settings.KEY))
         self.test_triggers(message)
@@ -83,6 +98,13 @@ class Node(object):
                 self.logger.exception(e)
             gevent.sleep(.1)
 
+    def set_id(self, message):
+        c = self.db.cursor()
+        c.execute("INSERT INTO node_registration VALUES (?)", (message.get('id'),))
+        self.db.commit()
+        c.close()
+        return True
+
     def hello(self, obj):
         o = self.json()
         self.logger.info(o)
@@ -107,14 +129,14 @@ class Node(object):
         return False
 
     def get_sensor_values(self, ob):
-        res = {}
+        res = {"id":self.id}
         for sensor in self.sensors:
             res[sensor.id] = sensor.json()
 
         return res
 
     def get_output_values(self):
-        res = {}
+        res = {"id":self.id}
         for output in self.outputs:
             res[ouput.id] = output.json()
 
@@ -129,6 +151,7 @@ class Node(object):
 
     def json(self, ob=None):
         return dict(
+            id=self.id,
             name=self.name,
             webcam=self.webcam,
             sensors=[s.json() for s in self.sensors],
@@ -136,7 +159,8 @@ class Node(object):
             inputs=[i.json() for i in self.inputs],
             triggers=[t.json() for t in self.triggers],
             repeaters=[r.json() for r in self.repeaters],
-            clocks=[c.json() for c in self.clocks],            
+            clocks=[c.json() for c in self.clocks],
+            pids=[p.json() for p in self.pids],        
             cls=self.__class__.__name__
         )
 

@@ -48,32 +48,22 @@ function Node(obj){
             var out = that.outputs[o];
             var light = new toggle(out.type, that.name+out.type, out.index, out.display, out.state, that.name, rpc_on_off);                    
         }
-        that.display_historical();
+        //that.display_historical();
         that.display_day();
     }, 1000);
-    this.init_video();
-    var that = this;
+    /*
     setInterval(function(){
-        $.get("//"+url+"/graph/historical/"+that.name, function(data){
+        $.get("//"+url+"/graph/historical/"+that.id, function(data){
             that.historical = eval("("+data+")");
             that.display_historical();
         });
     }, 60000);
-}
-
-Node.prototype.init_video = function(){
-    var that = this;
-    document.getElementById(this.name+"_video_button").onclick = function(){
-        document.getElementById(that.name+"_video").classList.add("video_overlay_show");
-    }
-    document.getElementById(this.name+"_video_close").onclick = function(){
-        document.getElementById(that.name+"_video").classList.remove("video_overlay_show");
-    }
-
+    */
 }
 
 Node.prototype.display_day = function(){            
     var that = this;
+    document.getElementById("day_"+that.name).innerHTML = "";
     var c = document.createElement("canvas");
     var prev = null;
     c.addEventListener('mousemove', function(e){                
@@ -150,7 +140,7 @@ Node.prototype.display_day = function(){
             that.nodes.push(on);
             var off = new DayNode(0, rows*daynode_height, wid*o, daynode_height, "#dddddd");
             off.draw(c);
-            var off2 = new DayNode(w_off, rows*daynode_height, 575-w_off, daynode_height, "#dddddd");
+            var off2 = new DayNode(w_off, rows*daynode_height, total_wid-w_off, daynode_height, "#dddddd");
             off2.draw(c);
             rows++;
         }
@@ -166,7 +156,7 @@ Node.prototype.display_day = function(){
         time.shadowOffsetY = 2;
         document.getElementById("day_"+that.name).appendChild(c);
     }
-    setInterval(draw, 1000);
+    draw();
 }
 
 Node.prototype.display_historical = function(){
@@ -220,19 +210,6 @@ Node.prototype.display_historical = function(){
     this.enable_rollover();
 }
 
-function showTooltip(x, y, contents) {
-    $('<div id="tooltip">' + contents + '</div>').css( {
-        position: 'absolute',
-        display: 'none',
-        top: y + 5,
-        left: x + 5,
-        border: '1px solid #fdd',
-        padding: '2px',
-        'background-color': '#fee',
-        opacity: 0.80
-    }).appendTo("body").fadeIn(200);
-}
-
 Node.prototype.enable_rollover = function(){
     var previousPoint = null;
     $("#historical_"+this.name).bind("plothover", function (event, pos, item) {
@@ -260,7 +237,6 @@ Node.prototype.update = function(){
         var n = [last_x, this.last[s.id]];
         this.data[s.id].push(n);
         this.data[s.id] = this.data[s.id].slice(-200);
-        console.log(this.data[s.id].length);
     }
     this.display();
 }
@@ -272,7 +248,6 @@ Node.prototype.display = function(){
         plots.push(this.prefs[d]);
         document.getElementById(this.name+d+"_header").innerHTML = this.last[d].toFixed(2)+this.prefs[d].decorator;
     }
-    console.log(plots);
     $.plot($("#"+this.name), plots, {
         series: { lines: { show: true, fill: false},},
         yaxis: { 

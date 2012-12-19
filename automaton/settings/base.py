@@ -2,6 +2,7 @@ import os
 import sys
 import logging
 import hashlib
+from pymongo.connection import Connection
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.abspath(os.path.join(BASE_DIR, '..'))
@@ -24,7 +25,22 @@ NODE_RPC = 6000
 IP_ADDRESS = '*'
 NETWORK_INTERFACE = 'eth0'
 
-LOG_INTERVAL = 10*60#seconds
+LOG_INTERVAL = 10*60#10 minutes
+CLOUD_LOG_INTERVAL = 10*60#5 minutes
+
+IS_DEV = True
+
+#MongoDB Settings
+MONGO_HOST = "localhost"
+MONGO_PORT = 27017
+try:
+	conn = Connection(MONGO_HOST, MONGO_PORT, network_timeout=1)
+	conn.automaton.collection_names()
+	IS_CLOUD = True
+except Exception as e:
+	IS_CLOUD = False
+
+
 
 HISTORICAL_DISPLAY = 8#hours
 
@@ -37,8 +53,16 @@ KEY = '!!++automaton!!!'
 #Sensors
 
 SENSORS = dict(
-	Temperature='&deg;C',
-	PH='',
-	Humidity='%',
-	ETape='cm',
+	temperature='&deg;C',
+	ph='',
+	humidity='%',
+	etape='cm',
+	ammonia='',
+	nitrite='',
+	nitrate='',
+	dissolved_oxygen='ppm',
 )
+
+#Cloud settings
+
+CLOUD_URI = "http://127.0.0.1/api/"

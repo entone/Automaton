@@ -3,20 +3,24 @@
 <head>
     <title>Automaton</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="static/css/bootstrap-responsive.min.css">
-    <link rel="stylesheet" type="text/css" href="static/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-responsive.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/styles.css">
     <script type='text/javascript'>
-        var nodes = eval('(${values})');
+        var loc = eval('(${values})');
         var url = "${url}";
-    </script>
-    <script src="static/js/app.js"></script>
-    <script src="static/js/jquery.js"></script>
-    <script src="static/js/jquery.flot.js"></script>
-    <script src="static/js/mustache.js"></script>
-    <script src='static/js/node.js'></script>
-    <script src='static/js/toggle.js'></script>    
-    <script src='static/js/bootstrap.min.js'></script>    
+        var Applications = {};
+        var now = new Date();
+        var today = (now.getMonth()+1)+"-"+now.getDate()+"-"+now.getFullYear();
+    </script>    
+    <script src="/static/js/common.js"></script>
+    <script src="/static/js/jquery.js"></script>
+    <script src="/static/js/jquery.flot.js"></script>
+    <script src="/static/js/mustache.js"></script>
+    <script src='/static/js/node.js'></script>
+    <script src='/static/js/toggle.js'></script>    
+    <script src='/static/js/bootstrap.min.js'></script>    
+    <%block name='js_app'/>
 </head>
     <body>
         <div class="navbar">
@@ -30,37 +34,48 @@
                     </a>
 
                     <!-- Be sure to leave the brand out there if you want it shown -->
-                    <a class="brand" href="#">Edu | Ponics</a>
+                    <a class="brand" href="/dashboard">Edu | Ponics</a>
 
                     <!-- Everything you want hidden at 940px or less, place within here -->
                     <div class="nav-collapse collapse navbar-responsive-collapse">
                         <ul class="nav">
-                            <li>
-                                <a href="#">Dashboard</a>
-                            </li>
-                            <li>
-                                <a href="#">Historical</a>
-                            </li>
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                    Nodes
-                                    <b class="caret"></b>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="#">Aquarium</a>
-                                    </li>
-                                    <li>
-                                        <a href="#">Aquaponics</a>
-                                    </li>
-                                </ul>
-                            </li>
+                            % if settings.IS_CLOUD or settings.IS_DEV:
+                                <li>
+                                    <a href="/dashboard">Dashboard</a>
+                                </li>
+                                <li>
+                                    <a href="/historical">Historical</a>
+                                </li>
+                                <li>
+                                    <a href="/manual_readings">Manual Readings</a>
+                                </li>
+                            % endif
+                            % if not settings.IS_CLOUD or settings.IS_DEV:
+                                <li>
+                                    <a href="/calibrate">Calibrate</a>
+                                </li>
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                        Realtime
+                                        <b class="caret"></b>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        % for n in location.nodes:
+                                            <li>
+                                                <a href="/realtime/${n.id}">${n.name}</a>
+                                        </li>
+                                        % endfor
+                                    </ul>
+                                </li>
+                            % endif
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
-        <div id='content' class='container-fluid'></div>
+        <div id='content' class='container-fluid'>
+            <%block name='content' />
+        </div>
     </body>
-    <%include file="node.html"/>
+    <%block name='templates'/>    
 </html>

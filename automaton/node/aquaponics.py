@@ -32,6 +32,7 @@ class Aquaponics(Node):
         trig = Trigger(input=temp, output=fan, min=30, max=float('inf'), state=True, current_state=False)
         pid = PID(input=water_temp, output=heater, state=True, set_point=27, P=3.0, I=0.4, D=1.2)
         
+        self.pids = [pid,]
         self.triggers = [trig,]
 
         light_on = Clock((12,00), plant_light, True)

@@ -14,22 +14,42 @@ from util import aes
 
 logger = util.get_logger(__name__)
 
-class Node(Controller):
+class Location(object):
+    nodes = []
 
-    def display(self):
-        res = {}
+    def __init__(self):
+        self.nodes = []
+
+    def json(self):
+        return dict(
+            nodes = [n.json() for n in self.nodes]
+        )
+
+class Node(object):
+
+    def __init__(self, obj):        
+        self.obj = obj
+        for k,v in obj.iteritems(): setattr(self, k, v)
+
+    def json(self):
+        return self.obj
+
+class Realtime(Controller):
+
+    def display(self, id=None):
+        location = Location()
         self.rpc = RPC(port=settings.CLIENT_RPC, address='127.0.0.1')
         res = self.rpc.send(dict(method='get_nodes'), settings.KEY)
+        if id:
+            for node in res:
+                if node.get('id') == id:
+                    n = Node(node)
+                    location.nodes.append(n)
+        else:
+            location.nodes = res
         home = self.request.env.get('HTTP_HOST')
-        db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)
-        cur = db.cursor()
-        q_t = datetime.datetime.utcnow()-datetime.timedelta(hours=settings.HISTORICAL_DISPLAY)
-        for n in res:
-            n['historical'] = cur.execute('SELECT * FROM logs WHERE node=? AND timestamp > ? LIMIT 20', (n.get('name'),q_t)).fetchall()
-        
-        self.logger.debug("Got Nodes: %s" % res)
-        db.close()
-        return Response(self.render("base.html", values=json.dumps(res, cls=ComplexEncoder), url=home))
+        self.logger.debug("Got Nodes: %s" % location)
+        return Response(self.render("node.html", values=json.dumps(location.json(), cls=ComplexEncoder), location=location, url=home, settings=settings))
 
     def historical(self, name):
         db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)

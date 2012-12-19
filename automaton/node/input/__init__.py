@@ -15,6 +15,7 @@ class Input(object):
         self.display = display
         self.type = type
         self.interface = interface
+        self.id = util.slugify(self.display)
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
 
     def do_conversion(self, val): 
@@ -26,6 +27,7 @@ class Input(object):
 
     def json(self):
         return dict(
+            id=self.id,
             index=self.index,
             display=self.display,
             type=self.type,      
