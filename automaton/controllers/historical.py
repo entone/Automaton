@@ -21,7 +21,7 @@ class Historical(Controller):
         location = node.Location(id=loc_id)
         self.logger.debug("Got location: %s" % location)
         home = self.request.env.get('HTTP_HOST')
-        return Response(self.render("historical.html", values=json.dumps(location.nodes, cls=ComplexEncoder), location=location, url=home, settings=settings))
+        return Response(self.render("historical.html", values=json.dumps(location.nodes, cls=ComplexEncoder), location=location, url=home, settings=settings, session=self.session))
 
     def get_data(self, node_id, type, frm=None, to=None):
         time = datetime.datetime.utcnow()

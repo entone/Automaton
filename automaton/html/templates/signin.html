@@ -1,0 +1,30 @@
+<%inherit file="base.html"/>
+<%block name='js_app'>
+    <script src="static/js/apps/signin.js"></script>
+</%block>
+
+<%block name='nav'>
+    
+</%block>
+
+<%block name='content'>
+    <form class="form-horizontal" id='signin_form'>
+        <div class="control-group">
+            <label class="control-label" for="email">Email</label>
+            <div class="controls">
+                <input type="text" id="email" name='email' placeholder="Email">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="password">Password</label>
+            <div class="controls">
+                <input type="password" id="password" name='password' placeholder="Password">
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <button type="submit" class="btn">Sign In</button>
+            </div>            
+        </div>        
+    </form>
+</%block>

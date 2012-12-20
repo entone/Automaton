@@ -160,7 +160,7 @@ div.input_btn.on{
     box-shadow: 0px 0px 5px #97fc00;
 }
 
-div.controls{
+div.node > div.controls{
     width: 100%; 
     border: 2px solid #cccccc;
     border-top: none;

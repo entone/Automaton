@@ -2,7 +2,7 @@ try:
     import logging
     import signal
     from envy.wsgi import WSGI    
-    from envy.session import CookieSession
+    from models.user import Session
     from pymongo.connection import Connection
     import humongolus as orm    
     from models.node import Sensor
@@ -13,8 +13,8 @@ try:
 
     server_settings = dict(
         template_dirs=settings.TEMPLATE_DIRS, 
-        session_key='session_id', 
-        session_cls=CookieSession
+        session_key='automaton_session', 
+        session_cls=Session
     )
 
     if settings.IS_CLOUD:

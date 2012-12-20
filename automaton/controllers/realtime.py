@@ -49,7 +49,7 @@ class Realtime(Controller):
             location.nodes = res
         home = self.request.env.get('HTTP_HOST')
         self.logger.debug("Got Nodes: %s" % location)
-        return Response(self.render("node.html", values=json.dumps(location.json(), cls=ComplexEncoder), location=location, url=home, settings=settings))
+        return Response(self.render("node.html", values=json.dumps(location.json(), cls=ComplexEncoder), location=location, url=home, settings=settings, session=self.session))
 
     def historical(self, name):
         db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)

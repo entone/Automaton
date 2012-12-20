@@ -77,8 +77,8 @@ Applications.Historical.prototype.draw_graph = function(res, ele){
         },
         xaxis: {
             mode: "time",
-            timeformat:"%H:%M:%S",
-            minTickSize: [5, "second"],
+            timeformat:"%m/%d %H:%M",
+            minTickSize: [10, "minute"],
         },
         grid:{
             color: "ffffff",

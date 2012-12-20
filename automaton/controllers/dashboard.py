@@ -10,11 +10,13 @@ from envy.response import Response
 from util.jsontools import ComplexEncoder
 from util.subscriber import Subscriber
 from util.rpc import RPC
+from util.decorators import level
 
 loc_id = "50ccfc511f99cd16ea70c3ea"
 
 class Dashboard(Controller):
 
+    @level(1)
     def index(self):
         location = node.Location(id=loc_id)
         self.logger.debug("Got location: %s" % len(location.nodes))
@@ -30,4 +32,4 @@ class Dashboard(Controller):
                 res = node.SensorValue.find(q, as_dict=True).sort('_id', -1).limit(1)
                 self.logger.info(res[0])
                 sensor.value = res[0].get('value')
-        return Response(self.render("dashboard.html", values=json.dumps(location.json(), cls=ComplexEncoder), location=location, url=home, settings=settings))
+        return Response(self.render("dashboard.html", values=json.dumps(location.json(), cls=ComplexEncoder), location=location, url=home, settings=settings, session=self.session))

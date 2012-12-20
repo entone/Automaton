@@ -66,7 +66,7 @@ class PID(orm.EmbeddedDocument):
 
 class Node(orm.EmbeddedDocument):
     id = field.Char()
-    name = field.Char(required=True)
+    name = field.Char()#required=True)
     webcam = field.Char()
     sensors = orm.List(type=NodeSensor)
     outputs = orm.List(type=Output)
@@ -79,6 +79,9 @@ class Node(orm.EmbeddedDocument):
 class Location(orm.Document):
     _db = 'automaton'
     _collection = 'locations'
+    _indexes = [
+        orm.Index('nodes.id', key=[("nodes.id", orm.Index.DESCENDING)], unique=False),
+    ]
     name = field.Char()
     nodes = orm.List(type=Node)
     location = field.Geo()

@@ -2,6 +2,7 @@ import urllib2
 import json
 import settings
 import util
+from util import aes
 from util.jsontools import ComplexEncoder
 
 class Cloud(object):
@@ -14,9 +15,11 @@ class Cloud(object):
             url = settings.CLOUD_URI+method
             data = ""
             if payload: data = json.dumps(payload, cls=ComplexEncoder)
-            req = urllib2.Request(url, data)
+            enc = aes.encrypt(data, settings.KEY)
+            req = urllib2.Request(url, enc)
             res = urllib2.urlopen(req)
             st = res.read()
+            st = aes.decrypt(st, settings.KEY)
             res.close()
             st = json.loads(st)
             return res
