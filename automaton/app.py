@@ -52,8 +52,6 @@ gevent.signal(signal.SIGQUIT, gevent.shutdown)
 
 def serve(env, start_response):
     try:
-        for k,v in env.iteritems():
-            logging.info("%s: %s" % (k,v))
         return wsgi.serve(env, start_response)
     except Exception as e:
         logging.exception(e)
