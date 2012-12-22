@@ -3,6 +3,7 @@ import datetime
 import humongolus as orm
 import humongolus.field as field
 from models.node import Location
+from envy.session import SessionEnd
 
 class Password(field.Char):
 
@@ -52,11 +53,19 @@ class Session(orm.Document):
 
     def __init__(self, key=None, request=None):
         id = key.value if key else None
-        super(Session, self).__init__(id=id)
+        try:
+            super(Session, self).__init__(id=id)
+        except Exception as e:
+            self.logger.info("Session is gone")
+            if id: raise SessionEnd()
+            raise e
         if self.user:
             self.user_obj = self._get('user')()
+            self.location = self.user_obj.locations[0]._get('location')()
 
     def save(self, response=None):
+        self.user_obj = None
+        self.location = None
         self.last_activity = datetime.datetime.utcnow()
         if self.logout:
             self.logger.info("Logging Out")

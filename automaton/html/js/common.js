@@ -46,3 +46,35 @@ window.onblur = function(){
 window.onfocus = function(){
     this.app.run();
 };
+
+function getURLParameter(name) {
+    return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+}
+
+var App = function(){
+
+}
+
+App.prototype.handle_response = function(res, cb){
+    switch(res.status){
+        case "redirect":
+            window.location = res.location;
+            break;
+        default:
+            cb(res);
+    }
+}
+
+App.prototype.post = function(url, data, cb){
+    var that = this;
+    $.post(url, data, function(res){
+        that.handle_response(res, cb);
+    }, "json");
+}
+
+App.prototype.get_url = function(url, cb){
+    var that = this;
+    $.get(url, function(res){
+        that.handle_response(res, cb);
+    }, "json");
+}

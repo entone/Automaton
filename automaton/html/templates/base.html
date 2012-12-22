@@ -38,51 +38,61 @@
                         <a class="brand" href="/dashboard">Edu | Ponics</a>
 
                         <%block name='nav'>
-                            <!-- Everything you want hidden at 940px or less, place within here -->
-                            <div class="nav-collapse collapse navbar-responsive-collapse">
-                                <ul class="nav">
-                                    % if settings.IS_CLOUD or settings.IS_DEV:
-                                        <li>
-                                            <a href="/dashboard">Dashboard</a>
-                                        </li>
-                                        <li>
-                                            <a href="/historical">Historical</a>
-                                        </li>
-                                        <li>
-                                            <a href="/manual_readings">Manual Readings</a>
-                                        </li>
-                                    % endif
-                                    % if not settings.IS_CLOUD or settings.IS_DEV:
-                                        <li>
-                                            <a href="/calibrate">Calibrate</a>
-                                        </li>
+                            % if hasattr(session, 'user_obj'):
+                                <!-- Everything you want hidden at 940px or less, place within here -->
+                                <div class="nav-collapse collapse navbar-responsive-collapse">
+                                    <ul class="nav">
+                                        % if settings.IS_CLOUD or settings.IS_DEV:
+                                            <li>
+                                                <a href="/dashboard">Dashboard</a>
+                                            </li>
+                                            <li>
+                                                <a href="/historical">Historical</a>
+                                            </li>
+                                            <li>
+                                                <a href="/manual_readings">Manual Readings</a>
+                                            </li>
+                                        % endif
+                                        % if not settings.IS_CLOUD or settings.IS_DEV:
+                                            <li>
+                                                <a href="/calibrate">Calibrate</a>
+                                            </li>
+                                            <li class="dropdown">
+                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                                    Realtime
+                                                    <b class="caret"></b>
+                                                </a>
+                                                <ul class="dropdown-menu">
+                                                    % for n in session.location.nodes:
+                                                        <li>
+                                                            <a href="/realtime/${n.id}">${n.name}</a>
+                                                        </li>
+                                                    % endfor
+                                                </ul>
+                                            </li>
+                                        % endif
+                                    </ul>
+                                    <ul class="nav pull-right">
                                         <li class="dropdown">
                                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                                Realtime
+                                                Hello ${session.user_obj.firstname}
                                                 <b class="caret"></b>
                                             </a>
                                             <ul class="dropdown-menu">
-                                                % for n in location.nodes:
-                                                    <li>
-                                                        <a href="/realtime/${n.id}">${n.name}</a>
+                                                <li>
+                                                    <a href="/signout">Signout</a>
                                                 </li>
-                                                % endfor
                                             </ul>
                                         </li>
-                                    % endif
-                                </ul>
-                                <ul class="nav pull-right">
-                                    <li>
-                                        <a href="/account">Hello ${session.user_obj.firstname}!</a>
-                                    </li>
-                                </ul>
-                            </div>
+                                    </ul>
+                                </div>
+                            % endif
                         </%block>
                     </div>
                 </div>
             </div>
         </%block>
-        <div id='content' class='container-fluid'>
+        <div id='content' class='container-fluid'>            
             <%block name='content' />
         </div>
     </body>

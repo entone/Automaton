@@ -246,3 +246,7 @@ div.output-btn.on span.t::after{
 .dropdown-menu{
     z-index: 1012;
 }
+
+.hide{
+    display: none;
+}

@@ -8,6 +8,18 @@
 </%block>
 
 <%block name='content'>
+    <div class="alert alert-block bad-login hide" id="sessionended">
+        <h4>Session Ended</h4>
+        You&apos;re session has ended, please log back in.
+    </div>
+    <div class="alert alert-block bad-login hide">
+        <h4>Oops!</h4>
+        Maybe you mistyped your password...?
+    </div>
+    <div class="alert alert-block all-fields hide">
+        <h4>Oops!</h4>
+        All fields are required
+    </div>
     <form class="form-horizontal" id='signin_form'>
         <div class="control-group">
             <label class="control-label" for="email">Email</label>

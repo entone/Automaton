@@ -5,12 +5,13 @@ import simplejson as json
 import sqlite3
 import settings
 import util
-from envy.controller import Controller
+from controllers import DefaultController
 from envy.response import Response
 from util.jsontools import ComplexEncoder
 from util.subscriber import Subscriber
 from util.rpc import RPC
 from util import aes
+from util.decorators import level
 
 logger = util.get_logger(__name__)
 
@@ -34,8 +35,9 @@ class Node(object):
     def json(self):
         return self.obj
 
-class Realtime(Controller):
+class Realtime(DefaultController):
 
+    @level(0)
     def display(self, id=None):
         location = Location()
         self.rpc = RPC(port=settings.CLIENT_RPC, address='127.0.0.1')

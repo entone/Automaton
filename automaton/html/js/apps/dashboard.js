@@ -5,6 +5,9 @@ Applications.Dashboard = function(){
     this.h_data = {};
 }
 
+Applications.Dashboard.prototype = new App();
+Applications.Dashboard.constructor = Applications.Dashboard;
+
 Applications.Dashboard.prototype.init = function(){    
     for(var n in loc.nodes){
         var tot = 0;

@@ -1,4 +1,6 @@
 Applications.Historical = function(){}
+Applications.Historical.prototype = new App();
+Applications.Historical.constructor = Applications.Historical;
 
 Applications.Historical.prototype.init = function(){    
     var content = $('#custom_content').html()
@@ -48,7 +50,7 @@ Applications.Historical.prototype.fetch_data = function(node, id, ele){
         this.current_to = to;
     }
     var that = this;
-    $.get(url, function(res){
+    this.get_url(url, function(res){
         that.draw_graph(res, ele);
     }, "json");
 }

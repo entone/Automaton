@@ -8,20 +8,18 @@ import csv
 import cStringIO
 import models.node as node
 from envy.controller import Controller
+from controllers import DefaultController
 from envy.response import Response
 from util.jsontools import ComplexEncoder
 from util.subscriber import Subscriber
 from util.rpc import RPC
+from util.decorators import level
 
-loc_id = "50ccfc511f99cd16ea70c3ea"
+class Historical(DefaultController):
 
-class Historical(Controller):
-
+    @level(0)
     def index(self):
-        location = node.Location(id=loc_id)
-        self.logger.debug("Got location: %s" % location)
-        home = self.request.env.get('HTTP_HOST')
-        return Response(self.render("historical.html", values=json.dumps(location.nodes, cls=ComplexEncoder), location=location, url=home, settings=settings, session=self.session))
+        return self.default_response("historical.html")
 
     def get_data(self, node_id, type, frm=None, to=None):
         time = datetime.datetime.utcnow()
@@ -64,8 +62,7 @@ class Historical(Controller):
 
 
     def data(self, node_id, type, frm=None, to=None):
-        location = node.Location(id=loc_id)
-        node_obj = location.get_node(node_id)
+        node_obj = self.session.location.get_node(node_id)
         res = self.get_data(node_id, type, frm, to)
         ret = []
         def get_obj(sensor):

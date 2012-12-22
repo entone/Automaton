@@ -1,4 +1,6 @@
 Applications.Signup = function(){}
+Applications.Signup.prototype = new App();
+Applications.Signup.constructor = Applications.Signup;
 
 var EMPTY = ["", " ", null];
 

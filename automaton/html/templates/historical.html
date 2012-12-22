@@ -10,7 +10,7 @@
     <p>Download sensor data from any node for any timeframe</p>
     <form class="form-inline historical-form" method="POST" action="/historical/csv">
         <select id="node">
-        % for node in location.nodes:
+        % for node in session.location.nodes:
             <option value="${node.id}">${node.name}</option>
         % endfor
         </select>

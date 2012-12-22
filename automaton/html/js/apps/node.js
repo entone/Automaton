@@ -6,6 +6,9 @@ Applications.Node = function(){
     this.historical = {};
 }
 
+Applications.Node.prototype = new App();
+Applications.Node.constructor = Applications.Node;
+
 Applications.Node.prototype.update_toggle = function(frame){
     var tog = document.getElementById(frame.node+frame.type);
     tog.obj.set_state(frame.state);

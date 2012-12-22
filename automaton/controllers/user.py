@@ -21,7 +21,7 @@ class User(DefaultController):
         return self.default_response('signup.html')
 
     def signout(self):
-        resp = Response("bye")
+        resp = Response("bye", status="301 Moved Permanently", headers=[('Location', '/signin'),])
         self.session.logout = True
         return resp
 

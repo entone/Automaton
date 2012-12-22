@@ -1,8 +1,15 @@
 Applications.Signin = function(){}
 
+Applications.Signin.prototype = new App();
+Applications.Signin.constructor = Applications.Signin;
+
 var EMPTY = ["", " ", null];
 
 Applications.Signin.prototype.init = function(){
+	var that = this;
+	if(getURLParameter('sessionended')){
+		$("#sessionended").show();
+	}
 	$("#signin_form").submit(function(){
 		var res = $(this).serializeArray();
 		obj = {}
@@ -18,12 +25,15 @@ Applications.Signin.prototype.init = function(){
 			}
 		}
 		if(empty_field){
-			alert("All fields are required");
+			$(".all-fields").show();
+			return false;
 		}
-		$.post("/auth", JSON.stringify(obj), function(res){
+		that.post("/auth", JSON.stringify(obj), function(res){
 			console.log(res);
 			if(res.success){
 				window.location = "/dashboard";
+			}else{
+				$(".bad-login").show();
 			}
 		}, "json");
 		return false;

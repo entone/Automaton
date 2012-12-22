@@ -10,7 +10,7 @@ urls = (
     URL(r'^graph/?$', Realtime.index),
     URL(r'^graph/historical/(?P<name>[-\w.]+)/?$', Realtime.historical),
     URL(r'^rpc/?$', Realtime.control),
-    URL(r'^realtime/(?P<id>[-\w.]+)?$', Realtime.display),
+    URL(r'^realtime/(?P<id>[-\w.]+)/?$', Realtime.display),
     URL(r'^dashboard/?$', Dashboard.index),
     URL(r'^historical/?$', Historical.index),
     URL(r'^historical/csv/(?P<node_id>[-\w.]+)/(?P<type>[-\w.]+)/(?P<frm>[-\w.]+)/(?P<to>[-\w.]+)/?$', Historical.csv),

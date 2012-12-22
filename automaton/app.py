@@ -14,7 +14,8 @@ try:
     server_settings = dict(
         template_dirs=settings.TEMPLATE_DIRS, 
         session_key='automaton_session', 
-        session_cls=Session
+        session_cls=Session,
+        session_end_redirect='/signin?sessionended=true',
     )
 
     if settings.IS_CLOUD:
@@ -51,7 +52,8 @@ gevent.signal(signal.SIGQUIT, gevent.shutdown)
 
 def serve(env, start_response):
     try:
-        logging.info(server_settings)
+        for k,v in env.iteritems():
+            logging.info("%s: %s" % (k,v))
         return wsgi.serve(env, start_response)
     except Exception as e:
         logging.exception(e)
