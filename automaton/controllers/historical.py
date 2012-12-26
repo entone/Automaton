@@ -23,26 +23,33 @@ class Historical(DefaultController):
 
     def get_data(self, node_id, type, frm=None, to=None):
         time = datetime.datetime.utcnow()
-        if type == 'hour':
+        step = 1
+        if type == 'hour':            
             time = datetime.datetime.utcnow()-datetime.timedelta(hours=1)
         if type == 'day':
+            step = 6
             time = datetime.datetime.utcnow()-datetime.timedelta(hours=24)
         if type == 'week':
+            step = 18
             time = datetime.datetime.utcnow()-datetime.timedelta(days=7)
         if type == 'month':
+            step = 36
             time = datetime.datetime.utcnow()-datetime.timedelta(days=30)        
         q = dict(
             node=node_id, 
             timestamp={'$gte':time}
         )
         if type == 'custom':
+            step = 18
             frm = datetime.datetime.strptime(frm, "%m-%d-%Y")
             to = datetime.datetime.strptime(to, "%m-%d-%Y")
             q['timestamp'] = {'$gte':frm, '$lt':to}
 
-        self.logger.debug("Query: %s" % q)
+        self.logger.debug("Query: %s" % q)        
         res = node.SensorValue.find(q, as_dict=True, fields={'timestamp':1,'sensor':1,'value':1})
-        return res        
+        res.batch_size(10000)
+        res = [res[i] for i in xrange(0, res.count(), step)]
+        return res
 
     def csv(self, node_id, type, frm=None, to=None):
         location = node.Location(id=loc_id)
