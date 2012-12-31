@@ -14,34 +14,27 @@ import settings
 
 class Aquaponics(Node):
 
-    def __init__(self ,*args, **kwargs):
-        #level = ETape(0, 'E-Tape', 'etape', self, change=1)
-        temp = Temperature(0, 'Temperature', self, change=5)
-        water_temp = Temperature(1, 'Water Temperature', self, change=5)
-        humidity = Humidity(2, 'Humidity', self, change=5)
-        #ph = PH(3, 'PH', 'ph', self, change=20)
-        #light = Light(4, 'Light', 'light', self, change=20)
-        self.sensors = [temp, water_temp, humidity,]
+    def __init__(self ,*args, **kwargs):        
+        water_temp = Temperature(0, 'Water Temperature', self, change=5)
+        ph = PH(1, 'PH', self, change=20)        
+        temp = Temperature(2, 'Temperature', self, change=5)
+        humidity = Humidity(3, 'Humidity', self, change=5)
+        level = ETape(7, 'Water Level', self, change=1)         
+        
+        
+        self.sensors = [water_temp, ph, temp, humidity, level]
 
         plant_light = Output(0, 'Plant Light', self)
-        heater = Output(1, 'Heater', self)
-        pump = Output(2, 'Fish Pump', self)
-        fan = Output(3, 'Fan', self)
-        self.outputs = [plant_light,heater,pump, fan]
-
-        trig = Trigger(input=temp, output=fan, min=30, max=float('inf'), state=True, current_state=False)
-        pid = PID(input=water_temp, output=heater, state=True, set_point=27, P=3.0, I=0.4, D=1.2)
-        
-        self.pids = [pid,]
-        self.triggers = [trig,]
+        aqua_light = Output(1, 'Aqua Light', self)
+        self.outputs = [plant_light, aqua_light]
 
         light_on = Clock((12,00), plant_light, True)
         light_off = Clock((0, 1), plant_light, False)
 
-        self.clocks = [light_on, light_off]
+        aqua_light_on = Clock((12,00), aqua_light, True)
+        aqua_light_off = Clock((0, 1), aqua_light, False)
 
-        pump_timing = Repeater(output=pump, run_for=15, every=30)
-        self.repeaters = [pump_timing,]
+        self.clocks = [light_on, light_off, aqua_light_on, aqua_light_off]
 
         super(Aquaponics, self).__init__(*args, **kwargs)
         

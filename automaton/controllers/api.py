@@ -30,7 +30,7 @@ class API(Controller):
         for sensor in node.get('sensors'):
             s = node_models.NodeSensor()
             fill_object(s, sensor, nots=['type'])
-            s.type = models.Sensor.find_one({'type':sensor['type']})
+            s.type = node_models.Sensor.find_one({'type':sensor['type']})
             node_obj.sensors.append(s)
 
         for out in node.get('outputs'):
