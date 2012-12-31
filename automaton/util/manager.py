@@ -10,6 +10,7 @@ from util.pubsub import PubSub
 from util.rpc import RPC
 from util.cloud import Cloud
 from util.jsontools import ComplexEncoder
+from util.download_image import DownloadImage
 from loggers import Logger, CloudLogger
 
 
@@ -88,13 +89,14 @@ class Manager(object):
             obj = node.call(method='hello')
             self.logger.info("Yeah!")
             node.set_obj(obj)
+            node.downloader = DownloadImage(node.name, "%s%s" % (node.webcam, settings.TIMELAPSE_URL), settings.TIMELAPSE_PATH, settings.TIMELAPSE_PERIOD)
             if not obj.get('id'):
                 obj['location_id'] = self.id
                 res = self.cloud.add_node(obj)
                 self.logger.info(res)
                 mes = dict(id=res.get('id'))
                 node.id = res.get('id')
-                success = node.call(method='set_id', message=mes)
+                success = node.call(method='set_id', message=mes)            
 
         return True
 
@@ -143,7 +145,7 @@ class Node(object):
         self.pubsub = pubsub
         self.key = key
         self.id = None
-        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))   
 
     def set_obj(self, obj):
         self.obj = obj

@@ -52,8 +52,7 @@ class Historical(DefaultController):
         return res
 
     def csv(self, node_id, type, frm=None, to=None):
-        location = node.Location(id=loc_id)
-        node_obj = location.get_node(node_id)
+        node_obj = self.session.location.get_node(node_id)
         res = self.get_data(node_id, type, frm, to)
         ret = []
         csv_buffer = cStringIO.StringIO()

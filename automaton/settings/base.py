@@ -65,4 +65,14 @@ SENSORS = dict(
 
 #Cloud settings
 
-CLOUD_URI = "http://127.0.0.1/api/"
+CLOUD_API = "http://127.0.0.1/api/"
+
+#Timelapse Settings
+
+TIMELAPSE_URL = "img/snapshot.cgi?size=3&quality=1"
+TIMELAPSE_PATH = "/home/www/public/timelapse/"
+TIMELAPSE_PERIOD = 60*60 #1 Hour
+
+#Webcam Settings
+
+WEBCAM_VIDEO = "img/video.mjpeg"

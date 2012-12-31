@@ -34,8 +34,6 @@ class User(orm.Document):
     admin = field.Boolean()
 
     def check_password(self, password):
-        self.logger.info(password)
-        self.logger.info(self.password)
         return util.check_password(password, self.password)
 
     def allowed(self, level):
@@ -53,15 +51,21 @@ class Session(orm.Document):
 
     def __init__(self, key=None, request=None):
         id = key.value if key else None
+        print "SESSION KEY: %s" % key
+        print "SESSION ID: %s" % id
         try:
             super(Session, self).__init__(id=id)
+
         except Exception as e:
             self.logger.info("Session is gone")
             if id: raise SessionEnd()
             raise e
         if self.user:
-            self.user_obj = self._get('user')()
-            self.location = self.user_obj.locations[0]._get('location')()
+            try:
+                self.user_obj = self._get('user')()
+                self.location = self.user_obj.locations[0]._get('location')()
+            except Exception as e:
+                self.logger.exception(e)
 
     def save(self, response=None):
         self.user_obj = None

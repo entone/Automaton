@@ -250,3 +250,10 @@ div.output-btn.on span.t::after{
 .hide{
     display: none;
 }
+
+@media screen and (max-width: 980px) {
+    .node-frame{
+        width: 92%;
+        margin: auto;
+    }
+}
