@@ -5,6 +5,7 @@ import simplejson as json
 import sqlite3
 import settings
 import util
+import models.node as node_models
 from controllers import DefaultController
 from envy.response import Response
 from util.jsontools import ComplexEncoder
@@ -41,9 +42,10 @@ class Realtime(DefaultController):
     def display(self, id=None):
         location = Location()
         self.rpc = RPC(port=settings.CLIENT_RPC, address='127.0.0.1')
-        res = self.rpc.send(dict(method='get_nodes'), settings.KEY)
+        res = self.rpc.send(dict(method='get_nodes'), settings.KEY)        
         if id:
             for node in res:
+                self.logger.info("Node ID: %s" % node.get('id'))
                 if node.get('id') == id:
                     n = Node(node)
                     location.nodes.append(n)
@@ -51,7 +53,10 @@ class Realtime(DefaultController):
             location.nodes = res
         home = self.request.env.get('HTTP_HOST')
         self.logger.debug("Got Nodes: %s" % location)
-        return Response(self.render("node.html", values=json.dumps(location.json(), cls=ComplexEncoder), location=location, url=home, settings=settings, session=self.session))
+        sensors = {str(value._id): value.json() for value in node_models.Sensor.find()}
+        return Response(self.render("node.html", values=json.dumps(location.json(), cls=ComplexEncoder), 
+            url=home, settings=settings, session=self.session, location=location,
+            sensors=json.dumps(sensors, cls=ComplexEncoder)))
 
     def historical(self, name):
         db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)

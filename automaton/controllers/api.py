@@ -73,15 +73,7 @@ class API(Controller):
         location.nodes.append(node_obj)
         location.save()
         return Response(
-            aes.encrypt(
-                json.dumps(
-                    dict(
-                        id=node_obj.id
-                    ), 
-                    cls=ComplexEncoder
-                )
-            ), 
-            settings.KEY
+            aes.encrypt(json.dumps(dict(id=node_obj.id), cls=ComplexEncoder), settings.KEY)
         )
 
     def register_location(self):

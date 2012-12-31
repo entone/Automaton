@@ -30,6 +30,9 @@ class Dashboard(DefaultController):
                 )
                 self.logger.info(q)
                 res = node.SensorValue.find(q, as_dict=True).sort('_id', -1).limit(1)
-                self.logger.info(res[0])
-                sensor.value = res[0].get('value')
+                if res.count():
+                    self.logger.info(res[0])
+                    sensor.value = "%.2f" % res[0].get('value')
+                else:
+                    sensor.value = 0
         return self.default_response("dashboard.html")

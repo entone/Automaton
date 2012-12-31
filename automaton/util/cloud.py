@@ -22,7 +22,7 @@ class Cloud(object):
             st = aes.decrypt(st, settings.KEY)
             res.close()
             st = json.loads(st)
-            return res
+            return st
 
         return call
 
