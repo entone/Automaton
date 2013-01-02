@@ -1,0 +1,23 @@
+<script type='text/x-mustache' id='timelapse_template'>
+    <ul class='thumbnails'>        
+        <li class='span6'>
+            <div class='thumbnail'>
+                {{#images}}
+                    <div class="btn-group play-pause">
+                        <button class="btn" onclick='{{object}}.play();'>Play</button>
+                        <button class="btn" onclick='{{object}}.pause();'>Pause</button>
+                    </div>                    
+                    <div id='images1' class='images'></div>
+                    <div id='progress_holder' class='progress_holder'>
+                        <div id='loading_bar' class='loading_bar'></div>
+                        <div id='progress_bar' class='progress_bar'></div>
+                    </div>                
+                {{/images}}                
+                <div id="graph"></div>
+                <div id='downloader'>
+                    <button type='button' class='btn btn-primary pull-right' id='download-button'>Download CSV</button>
+                </div>
+            </div>            
+        </li>
+    </ul>
+</script>

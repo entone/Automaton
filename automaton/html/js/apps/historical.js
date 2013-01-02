@@ -2,6 +2,8 @@ Applications.Historical = function(){}
 Applications.Historical.prototype = new App();
 Applications.Historical.constructor = Applications.Historical;
 
+var marker = null;
+
 Applications.Historical.prototype.init = function(){    
     var content = $('#custom_content').html()
     $('#custom_range').popover({html:true,placement:'bottom', content:content});
@@ -21,14 +23,20 @@ Applications.Historical.prototype.init = function(){
         }, 500);
     });    
     this.bind_dl_buttons(); 
-    $("#hour").click();
+    $("#hour").click();    
 }
 
 Applications.Historical.prototype.bind_dl_buttons = function(){
     var that = this;
-    $(".get-csv").click(function(){
+    $(".get-csv").click(function(){        
+        try{
+            that.timelapse.pause();            
+        }catch(e){}
+        delete that.timelapse;
+        delete that.graph_data;
         $("#graph").html("");
-        $("#downloader").hide();
+        $("#timelapse").html("");        
+        $("#downloader").hide();        
         $(this).button('loading');
         $(this).button('toggle');
         var id = $(this).attr('id');
@@ -51,18 +59,63 @@ Applications.Historical.prototype.fetch_data = function(node, id, ele){
     }
     var that = this;
     this.get_url(url, function(res){
-        that.draw_graph(res, ele);
+        that.draw_timelapse(res, ele);
     }, "json");
 }
 
-Applications.Historical.prototype.draw_graph = function(res, ele){    
-    for(var sensor in res.result.data){
-        var ar = res.result.data[sensor].data;
-        for(var i in ar){
-            ar[i][0]+=offset;
+Applications.Historical.prototype.draw_timelapse = function(res, ele){
+    try{
+        this.timelapse.pause();    
+        delete this.timelapse;
+    }catch(e){}    
+    var template = $('#timelapse_template').html();
+    var obj = {object:"window.app.timelapse"}
+    if(res.result.images.length){
+        obj.images = true;
+    }
+    var output = Mustache.to_html(template, obj);
+    $('#timelapse').html(output);
+    rate = (200-res.result.images.length)/(500);
+    var images = [];
+    for(var i in res.result.images){
+        images.push(res.result.images[i].file);
+    }
+    this.images = res.result.images;
+    this.timelapse = new timelapse(images, 'images1', rate, '');
+    this.timelapse.image_updated.add(this, 'update_graph');
+    var that = this;
+    var a = {};
+    a.update_percent = function(percent){
+        $('#loading_bar').css('width',percent+'%');
+    }   
+    $('#progress_holder').click(function(e){
+        that.timelapse.goto(e)
+    });
+    this.timelapse.images_loaded.add(a, 'update_percent');
+    this.draw_graph(res, ele);
+}
+
+Applications.Historical.prototype.update_graph = function(image){
+    for(var i in this.images){
+        if(this.images[i].file == image.src){
+            marker = this.images[i].mod;
+            this.draw_graph();
+            break;
         }
     }
-    this.graph = $.plot($("#graph"), res.result.data, {
+}
+
+Applications.Historical.prototype.draw_graph = function(res, ele){    
+    if(!this.graph_data){
+        for(var sensor in res.result.data){
+            var ar = res.result.data[sensor].data;
+            for(var i in ar){
+                ar[i][0]+=offset;
+            }
+        }
+        this.graph_data = res.result.data;
+    }
+    this.graph = $.plot($("#graph"), this.graph_data, {
         series: { 
             lines: { 
                 show: true, 
@@ -88,15 +141,25 @@ Applications.Historical.prototype.draw_graph = function(res, ele){
             borderWidth: 3,
             borderColor: "dddddd",
             hoverable: true,
+            markings: this.markings,
         },
         legend:{
             backgroundColor:"#FFFFFF",
-        }
+            position: "nw",
+        },        
     });
-    this.enable_rollover();
-    $('#custom_range').popover('hide');
-    $(ele).button('reset');
-    this.enable_download();    
+    if(res){
+        this.enable_rollover();
+        $('#custom_range').popover('hide');    
+        $(ele).button('reset');
+        this.enable_download();    
+    }
+}
+
+Applications.Historical.prototype.markings = function(axes){
+    marker = marker ? marker : axes.xaxis.min;
+    var wid = ((axes.xaxis.max-axes.xaxis.min)/100)*.2;
+    return [{xaxis:{from:marker,to:marker+wid}, color:"#333333"}];
 }
 
 Applications.Historical.prototype.enable_download = function(){

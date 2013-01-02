@@ -1,8 +1,13 @@
 <%inherit file="base.html"/>
 <%block name='js_app'>
+    <script>
+        var timelapse_images = eval('(${images})');
+    </script>
     <script src="static/js/apps/historical.js"></script>
     <script src="static/js/bootstrap-datepicker.js"></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/datepicker.css">
+    <script src="static/js/event.js"></script>
+    <script src="static/js/timelapse.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/datepicker.css">    
 </%block>
 
 <%block name='content'>
@@ -34,10 +39,10 @@
             <p></p>
             <button type="submit" class="btn get-csv" id="custom" data-loading-text="Loading...">View</button>
         </div>
-    </div>
-    </form>
-    <div id="graph"></div>
-    <div id='downloader'>
-        <button type='button' class='btn btn-primary pull-right' id='download-button'>Download CSV</button>
-    </div>
+    </form>    
+    <div id="timelapse"></div>    
+</%block>
+
+<%block name='templates'>
+    <%include file='mustache/timelapse.html'/>
 </%block>

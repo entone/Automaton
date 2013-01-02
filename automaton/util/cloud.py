@@ -13,6 +13,7 @@ class Cloud(object):
     def __getattr__(self, method):
         def call(payload=None):
             url = settings.CLOUD_API+method
+            self.logger.warning(url)
             data = ""
             if payload: data = json.dumps(payload, cls=ComplexEncoder)
             enc = aes.encrypt(data, settings.KEY)

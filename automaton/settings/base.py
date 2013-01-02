@@ -26,7 +26,7 @@ IP_ADDRESS = '*'
 NETWORK_INTERFACE = 'eth0'
 
 LOG_INTERVAL = 10*60#10 minutes
-CLOUD_LOG_INTERVAL = 10*60#5 minutes
+CLOUD_LOG_INTERVAL = 10*60#10 minutes
 
 IS_DEV = True
 
@@ -65,13 +65,14 @@ SENSORS = dict(
 
 #Cloud settings
 
-CLOUD_API = "http://127.0.0.1/api/"
+CLOUD_API = "http://garden.entropealab.mine.nu/api/"
 
 #Timelapse Settings
 
 TIMELAPSE_URL = "img/snapshot.cgi?size=3&quality=1"
 TIMELAPSE_PATH = "/home/www/public/timelapse/"
 TIMELAPSE_PERIOD = 60*60 #1 Hour
+TIMELAPSE_URL = "http://entropealab.mine.nu/timelapse/"
 
 #Webcam Settings
 

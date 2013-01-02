@@ -229,18 +229,27 @@ div.output-btn.on span.t::after{
     content:'on';
 }
 
+.play-pause{
+    position:absolute;
+    left: 10px;
+    top: 10px;
+}
+
 #custom_content{
     display:none;
 }
 
 #graph{
     height: 200px;
-    margin: 30px;
+    margin-top: 5px;
+    margin-right: 15px;
 }
 
 #downloader{
+    position:absolute;
+    right: 10px;
+    top: 10px;
     display:none;
-    margin: 30px;
 }
 
 .dropdown-menu{
@@ -257,3 +266,28 @@ div.output-btn.on span.t::after{
         margin: auto;
     }
 }
+
+.progress_holder{
+    position: relative;
+    height: 10px;
+    border: 2px solid #ffffff;
+}
+
+.progress_bar{
+    position:absolute;
+    left:0px;
+    top:0px;
+    width: 1%;
+    height: 100%;
+    background-color: #cccccc;
+}
+
+.loading_bar{
+    position:absolute;
+    left:0px;
+    top:0px;
+    width: 0%;
+    height: 100%;
+    background-color: #eeeeee;
+}
+            
