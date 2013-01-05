@@ -7,8 +7,21 @@
 
 <%block name='content'>
     <h1>Settings</h1>
-    <div id='start'></div>
-    <div id='amount'></div>
+    <div class='time_range'>
+    	<div class='slider' id='start'></div>
+    	<div id='display'></div>
+    </div>
+
+    <div class='repeater'>
+    	<input type='number' id='run_for' />
+    	<input type='number' id='every' />
+    	<div id='repeater_display'></div>
+    </div>
+
+    <div class='pid'>
+    	<input type='number' id='set_value' step=.1 />
+    </div>
+
 </%block>
 
 <%block name='templates'>
