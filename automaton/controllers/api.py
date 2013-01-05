@@ -115,3 +115,21 @@ class API(Controller):
                 settings.KEY
             )
         )
+
+    def save_image(self):
+        payload = util.get_request_payload(self.request, encrypted=True)
+        image = node_models.Image()
+        image.timestamp = datetime.datetime.fromtimestamp(payload.get('timestamp')/1000)
+        image.location = payload.get('location')
+        image.node = payload.get('node')
+        image.filename = payload.get('filename')
+        image.save()
+        return Response(
+            aes.encrypt(
+                json.dumps(
+                    dict(success=True)
+                ), 
+                settings.KEY
+            )
+        )
+

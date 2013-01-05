@@ -98,7 +98,7 @@ Applications.Historical.prototype.draw_timelapse = function(res, ele){
 Applications.Historical.prototype.update_graph = function(image){
     for(var i in this.images){
         if(this.images[i].file == image.src){
-            marker = this.images[i].mod;
+            marker = this.images[i].mod+offset;
             this.draw_graph();
             break;
         }

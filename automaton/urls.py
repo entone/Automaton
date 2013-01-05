@@ -4,6 +4,7 @@ from controllers.dashboard import Dashboard
 from controllers.api import API
 from controllers.user import User
 from controllers.historical import Historical
+from controllers.node_settings import NodeSettings
 from controllers.static import Static
 
 urls = (
@@ -11,6 +12,7 @@ urls = (
     URL(r'^graph/historical/(?P<name>[-\w.]+)/?$', Realtime.historical),
     URL(r'^rpc/?$', Realtime.control),
     URL(r'^realtime/(?P<id>[-\w.]+)/?$', Realtime.display),
+    URL(r'^/?$', Dashboard.index),
     URL(r'^dashboard/?$', Dashboard.index),
     URL(r'^historical/?$', Historical.index),
     URL(r'^historical/csv/(?P<node_id>[-\w.]+)/(?P<type>[-\w.]+)/(?P<frm>[-\w.]+)/(?P<to>[-\w.]+)/?$', Historical.csv),
@@ -20,11 +22,13 @@ urls = (
     URL(r'^api/register_location/?$', API.register_location),
     URL(r'^api/add_node/?$', API.add_node),
     URL(r'^api/sensor_values/?$', API.sensor_values),
+    URL(r'^api/save_image/?$', API.save_image),
     URL(r'^signup/?$', User.signup),
     URL(r'^signin/?$', User.signin),
     URL(r'^signout/?$', User.signout),
     URL(r'^auth/?$', User.auth),
     URL(r'^create_account/?$', User.create_account),
+    URL(r'^settings/?$', NodeSettings.index),
     URL(r'^static/(?P<file>[-\w.]+)/?$', Static.index),
     URL(r'^favico.ico/?$', Static.index),
 

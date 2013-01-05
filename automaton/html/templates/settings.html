@@ -1,0 +1,16 @@
+<%inherit file="base.html"/>
+<%block name='js_app'>
+    <script src="static/js/apps/settings.js"></script>
+    <script src="static/js/jquery-ui-1.9.2.custom.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/jquery-ui-1.9.2.custom.min.css">
+</%block>
+
+<%block name='content'>
+    <h1>Settings</h1>
+    <div id='start'></div>
+    <div id='amount'></div>
+</%block>
+
+<%block name='templates'>
+    <%include file='mustache/settings.html'/>
+</%block>

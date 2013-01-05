@@ -1,7 +1,7 @@
 function timelapse(arr, dom_ele, rate, id){
     //console.log(arr.length);
     this.loaded = 0;
-    this.buffer = 5;
+    this.buffer = arr.length;
     this.arr = arr;
     this.images = [];
     this.ele = document.getElementById(dom_ele);
@@ -20,16 +20,24 @@ timelapse.prototype.load_image = function(){
     var im = new Image();
     im.obj = this;
     im.onload = this.image_loaded;
+    im.onerror = this.image_error;
     im.src = this.arr[this.loaded];
     //im.width = this.ele.offsetWidth;
     this.images.push(im);
 }
 
 timelapse.prototype.image_loaded = function(event){
-    //console.log("LOADED: "+this.obj.arr[this.obj.loaded]);
     this.obj.loaded++;
     this.obj.images_loaded.fire((this.obj.loaded/this.obj.arr.length)*100);
-    if((this.obj.loaded == this.obj.buffer) && !this.obj.playing) this.obj.play();
+    if((this.obj.loaded >= this.obj.buffer) && !this.obj.playing) this.obj.play();
+    if(this.obj.loaded < this.obj.arr.length) this.obj.load_image();
+}
+
+timelapse.prototype.image_error = function(event){
+    this.obj.images.splice(this.obj.loaded,1);
+    this.obj.arr.splice(this.obj.loaded,1);
+    this.obj.buffer = this.obj.arr.length;
+    if((this.obj.loaded >= this.obj.buffer) && !this.obj.playing) this.obj.play();
     if(this.obj.loaded < this.obj.arr.length) this.obj.load_image();
 }
 
@@ -40,13 +48,15 @@ timelapse.prototype.pause = function(){
 }
 
 timelapse.prototype.play = function(){
-    if(!this.playing){
+    if(!this.playing && this.arr.length > 1){
         //console.log('playing!!!');
         this.playing = true;
         var self = this;
         this.play_interval = setInterval(function(){
             self.update_image();
         }, this.rate);
+    }else if(this.arr.length == 1){
+        this.update_image();
     }
     return false;
 }

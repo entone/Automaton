@@ -16,7 +16,6 @@ Applications.Dashboard.prototype.init = function(){
             s.color = colors[tot];
             var sensor = sensors[s.type];
             s.decorator = sensor.decorator;
-            console.log(s.type);
             this.prefs[s.id] = {color:colors[tot], decorator:decorators[s.type]}
             this.last[s.id] = s.value;
             this.data[s.id] = [];

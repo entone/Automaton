@@ -5,6 +5,7 @@ import settings
 import simplejson as json
 import util
 import base64
+import datetime
 from util import aes
 from util.pubsub import PubSub
 from util.rpc import RPC
@@ -88,8 +89,7 @@ class Manager(object):
         if node: 
             obj = node.call(method='hello')
             self.logger.info("Yeah!")
-            node.set_obj(obj)
-            node.downloader = DownloadImage(node.name, "%s%s" % (node.webcam, settings.TIMELAPSE_URL), settings.TIMELAPSE_PATH, settings.TIMELAPSE_PERIOD)
+            node.set_obj(obj)            
             if not obj.get('id'):
                 obj['location_id'] = self.id
                 res = self.cloud.add_node(obj)
@@ -98,7 +98,13 @@ class Manager(object):
                 node.id = res.get('id')
                 success = node.call(method='set_id', message=mes)            
 
+            node.downloader = DownloadImage(node.id, "%s%s" % (node.webcam, settings.TIMELAPSE_PATH), settings.TIMELAPSE_SAVE_PATH, settings.TIMELAPSE_PERIOD, s3=True, cb=self.log_image)
+
         return True
+
+    def log_image(self, filename, id):
+        ts = datetime.datetime.utcnow()
+        self.cloud.save_image(dict(timestamp=ts, location=self.id, node=id, filename=filename))
 
     def get_nodes(self, obj):
         return [n.call('json') for k,n in self.nodes.iteritems()]

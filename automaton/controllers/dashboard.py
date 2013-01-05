@@ -17,9 +17,16 @@ class Dashboard(DefaultController):
     @level(0)
     def index(self):
         home = self.request.env.get('HTTP_HOST')
-        self.logger.info("Nodes: %s" % self.session.location.nodes)
+        self.logger.info("Nodes: %s" % self.session.location.nodes)        
         for n in self.session.location.nodes:
-            self.logger.info("N: %s" % len(n.sensors))
+            self.logger.warn("N: %s" % len(n.sensors))
+            i_q = dict(node=n.id)
+            image = node.Image.find(i_q, as_dict=True, fields={'filename':1}).sort('_id', -1).limit(1)
+            self.logger.warn("Image: %s" % image.count())
+            if image.count():
+                image = settings.TIMELAPSE_URL+image[0].get('filename')
+                self.logger.warn("Image: %s" % image)
+                n.webcam = image
             for sensor in n.sensors:
                 t = sensor._get('type')()
                 self.logger.info(t)
@@ -35,4 +42,4 @@ class Dashboard(DefaultController):
                     sensor.value = "%.2f" % res[0].get('value')
                 else:
                     sensor.value = 0
-        return self.default_response("dashboard.html")
+        return self.default_response("dashboard.html", image=image)

@@ -69,11 +69,17 @@ CLOUD_API = "http://garden.entropealab.mine.nu/api/"
 
 #Timelapse Settings
 
-TIMELAPSE_URL = "img/snapshot.cgi?size=3&quality=1"
-TIMELAPSE_PATH = "/home/www/public/timelapse/"
+TIMELAPSE_PATH = "img/snapshot.cgi?size=3&quality=1"
+TIMELAPSE_SAVE_PATH = "/home/www/public/timelapse/"
 TIMELAPSE_PERIOD = 60*60 #1 Hour
-TIMELAPSE_URL = "http://entropealab.mine.nu/timelapse/"
+TIMELAPSE_URL = "http://automaton.s3.amazonaws.com/"
 
 #Webcam Settings
 
 WEBCAM_VIDEO = "img/video.mjpeg"
+
+#AWS Settings
+
+AWS_KEY = "AKIAJFUPTTPKUO73LRZA"
+AWS_SECRET = "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"
+S3_BUCKET = "automaton"

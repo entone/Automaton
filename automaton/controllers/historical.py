@@ -24,7 +24,7 @@ class Historical(DefaultController):
 
     @level(0)
     def index(self):
-        return self.default_response("historical.html", images=json.dumps(images))
+        return self.default_response("historical.html")
 
     def get_images(self, time=None, frm=None, to=None):
         da_files = []
@@ -33,7 +33,7 @@ class Historical(DefaultController):
                 if name.startswith('.') == False:
                     f = os.path.join(root, name)
                     size = os.path.getsize(f)
-                    if size > 200:
+                    if size > 1000:
                         mod = mod_date(f)
                         filename = "%s%s" % (settings.TIMELAPSE_URL, name)
                         obj = dict(mod=mod, file=filename)
@@ -70,12 +70,18 @@ class Historical(DefaultController):
             q['timestamp'] = {'$gte':frm, '$lt':to}
 
 
-        images = self.get_images(time, frm, to)
-        self.logger.debug("Query: %s" % q)        
+        images = node.Image.find(q, as_dict=True, fields={'timestamp':1, 'filename':1})
+        ret_images = []
+        for img in images:
+            ob = dict(
+                file="%s%s" %(settings.TIMELAPSE_URL, img.get('filename')),
+                mod=img.get('timestamp'),
+            )
+            ret_images.append(ob)
         res = node.SensorValue.find(q, as_dict=True, fields={'timestamp':1,'sensor':1,'value':1})
         res.batch_size(10000)
         res = [res[i] for i in xrange(0, res.count(), step)]
-        return res, images
+        return res, ret_images
 
     def csv(self, node_id, type, frm=None, to=None):
         node_obj = self.session.location.get_node(node_id)

@@ -92,6 +92,19 @@ class Location(orm.Document):
 
         return None
 
+class Image(orm.Document):
+    _db = 'automaton'
+    _collection = 'images'
+    _indexes = [
+        orm.Index('node', key=[("node", orm.Index.DESCENDING)], unique=False),
+        orm.Index('location', key=[("location", orm.Index.DESCENDING)], unique=False),
+        orm.Index('timestamp', key=[("timestamp", orm.Index.DESCENDING)], unique=False),
+    ]
+    timestamp = field.Date()
+    location = field.DocumentId(type=Location)
+    node = field.Char()
+    filename = field.Char()
+
 class SensorValue(orm.Document):
     _db = 'automaton'
     _collection = 'sensor_values'
