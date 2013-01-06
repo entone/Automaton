@@ -291,3 +291,6 @@ div.output-btn.on span.t::after{
     background-color: #eeeeee;
 }
             
+.thumbnail{
+    padding: 15px;
+}

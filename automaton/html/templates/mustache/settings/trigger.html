@@ -1,9 +1,14 @@
 <script type='text/x-mustache' id='trigger_template'>
-    <div class='repeater'>
-    	If {{input}} is between
-    	<input class='min' type='number' id='min{{input}}{{output}}' value={{min}} step=.1 />
-    	and
-    	<input class='max' type='number' id='max{{input}}{{output}}' value={{max}} step=.1 />
-    	turn {{output}} on.
-    </div>
+	<li class='span6'>
+        <div class='thumbnail'>
+        	<h4>{{input}}</h4>
+		    <div class='repeater'>
+		    	<p>If {{input}} is between</p>
+		    	<input class='min' type='number' id='min{{input}}{{output}}' value={{min}} step=.1 />
+		    	<p>and</p>
+		    	<input class='max' type='number' id='max{{input}}{{output}}' value={{max}} step=.1 />
+		    	<p>turn {{output}} on.</p>
+		    </div>
+		</div>
+	</li>
 </script>

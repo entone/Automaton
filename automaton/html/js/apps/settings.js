@@ -38,17 +38,21 @@ Applications.Settings.prototype.init = function(){
 
     for(var i in loc.nodes){
         $("#content").append("<h2>Triggers</h2>");
+        var output = "<ul class='thumbnails'>";
         for(var t in loc.nodes[i].triggers){
             console.log(loc.nodes[i].triggers[t]);
-            var output = Mustache.to_html(trigger_template, loc.nodes[i].triggers[t]);
-            $("#content").append(output);
+            output+= Mustache.to_html(trigger_template, loc.nodes[i].triggers[t]);            
         }
+        $("#content").append(output+"</ul>");
+
         $("#content").append("<h2>Repeaters</h2>");
+        var output = "<ul class='thumbnails'>";
         for(var r in loc.nodes[i].repeaters){
-            var output = Mustache.to_html(repeater_template, loc.nodes[i].repeaters[r]);
-            $("#content").append(output);
+            output+=Mustache.to_html(repeater_template, loc.nodes[i].repeaters[r]);            
             draw_repeater(loc.nodes[i].repeaters[r].every, loc.nodes[i].repeaters[r].run_for, loc.nodes[i].repeaters[r].output);
         }
+        $("#content").append(output+"</ul>");
+
         var ons = {};
         var ends = {};
         for(var c in loc.nodes[i].clocks){
@@ -61,18 +65,19 @@ Applications.Settings.prototype.init = function(){
             }
         }
         $("#content").append("<h2>Clocks</h2>");
+        var output = "<ul class='thumbnails'>";
         for(t in ons){
             var obj = {start:ons[t], end:ends[t], output:t}
-            var output = Mustache.to_html(range_template, obj);
-            console.log(obj)
-            $("#content").append(output);
+            output+= Mustache.to_html(range_template, obj);
         }
+        $("#content").append(output+"</ul>");
+
         $("#content").append("<h2>PIDs</h2>");
+        var output = "<ul class='thumbnails'>";
         for(var p in loc.nodes[i].pids){
-            var output = Mustache.to_html(pid_template, loc.nodes[i].pids[p]);
-            $("#content").append(output);
-            console.log(loc.nodes[i].pids[p]);
+            output+= Mustache.to_html(pid_template, loc.nodes[i].pids[p]);            
         }
+        $("#content").append(output+"</ul>");
     }
 
     $(".run-for, .every").change(function(){
@@ -81,13 +86,41 @@ Applications.Settings.prototype.init = function(){
         var run_for = parseInt($('#run_for'+out).val());
         if(every && run_for){
             draw_repeater(every, run_for, out);
-        }        
+        }
     })
+
+    $(".run-for").each(function(){
+        var out = $(this).data('output');
+        var every = parseInt($('#every'+out).val());
+        var run_for = parseInt($('#run_for'+out).val());
+        if(every && run_for){
+            draw_repeater(every, run_for, out);
+        }
+    });
+
+    $(".range").each(function(){
+        var output = $(this).data('output');
+        var start = $(this).data('start');
+        var end = $(this).data('end');
+        $(this).slider({
+            range: true,
+            min: 0,
+            max: 1440,
+            values: [start, end],
+            animate:'fast',
+            step:15,
+            slide: function(event, ui) {
+                $("#display"+output).html(format_time(ui.values[0])+" - "+format_time(ui.values[1]));
+            }
+        });
+        $("#display"+output).html(format_time(start)+" - "+format_time(end));
+    });
 }
 
 function draw_repeater(every, run_for, out){
     $("#repeater_display"+out).html("");
-    var wid = parseInt(800)/1440;
+    var w = $("#repeater"+out).width()-30;
+    var wid = parseInt(w)/1440;
     var rows=0;
     var daynode_height = 30;
     var cur_wid = 0;
@@ -96,7 +129,7 @@ function draw_repeater(every, run_for, out){
     c.width = 800;
     c.height = 30;
     var cxt =  c.getContext("2d");
-    cxt.clearRect(0, 0, 800, 40);
+    cxt.clearRect(0, 0, w, 30);
     for(var i=0; i<1440; i+=every){
         var w = wid*run_for;
         var on = new DayNode(cur_wid, rows*daynode_height, w, daynode_height, colors[rows], {});

@@ -1,21 +1,11 @@
 <script type='text/x-mustache' id='range_template'>
-    <h4>{{output}}</h4>
-    <div class='time_range'>
-        <div class='range' id='range{{output}}'></div>
-        <div class='range_display' id='display{{output}}'></div>
-    </div>
-    <script type='text/javascript' language='javascript'>
-        $("#range{{output}}").slider({
-            range: true,
-            min: 0,
-            max: 1440,
-            values: [{{start}}, {{end}}],
-            animate:'fast',
-            step:15,
-            slide: function(event, ui) {
-                $("#display{{output}}").html(format_time(ui.values[0])+" - "+format_time(ui.values[1]));
-            }
-        });
-        $("#display{{output}}").html(format_time({{start}})+" - "+format_time({{end}}));
-    </script>
+    <li class='span6'>
+        <div class='thumbnail'>
+            <h4>{{output}}</h4>
+            <div class='time_range'>
+                <div class='range' id='range{{output}}' data-output='{{output}}' data-start='{{start}}' data-end='{{end}}'></div>
+                <div class='range_display' id='display{{output}}'></div>
+            </div>            
+        </div>
+    </li>
 </script>
