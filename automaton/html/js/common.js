@@ -44,7 +44,7 @@ window.onblur = function(){
 };
 
 window.onfocus = function(){
-    this.app.run();
+    //this.app.run();
 };
 
 function getURLParameter(name) {
