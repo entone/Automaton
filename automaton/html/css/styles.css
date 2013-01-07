@@ -290,4 +290,12 @@ div.output-btn.on span.t::after{
     height: 100%;
     background-color: #eeeeee;
 }
-            
+
+#time_display{
+    position:absolute;
+    top: 50px;
+    left: 10px;
+    background-color: #FFFFFF;
+    opacity: .75;
+    padding: 2px;
+}

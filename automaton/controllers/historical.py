@@ -70,7 +70,7 @@ class Historical(DefaultController):
             q['timestamp'] = {'$gte':frm, '$lt':to}
 
 
-        images = node.Image.find(q, as_dict=True, fields={'timestamp':1, 'filename':1})
+        images = node.Image.find(q, as_dict=True, fields={'timestamp':1, 'filename':1}).sort('timestamp', 1)
         ret_images = []
         for img in images:
             ob = dict(

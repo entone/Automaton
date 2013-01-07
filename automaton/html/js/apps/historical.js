@@ -83,6 +83,7 @@ Applications.Historical.prototype.draw_timelapse = function(res, ele){
     this.images = res.result.images;
     this.timelapse = new timelapse(images, 'images1', rate, '');
     this.timelapse.image_updated.add(this, 'update_graph');
+    this.timelapse.image_updated.add(this, 'update_time_display');
     var that = this;
     var a = {};
     a.update_percent = function(percent){
@@ -100,6 +101,18 @@ Applications.Historical.prototype.update_graph = function(image){
         if(this.images[i].file == image.src){
             marker = this.images[i].mod+offset;
             this.draw_graph();
+            break;
+        }
+    }
+}
+
+Applications.Historical.prototype.update_time_display = function(image){
+    for(var i in this.images){
+        if(this.images[i].file == image.src){
+            marker = this.images[i].mod;
+            var d = new Date(marker);
+            console.log(d.toString());
+            $("#time_display").html(d.toString());
             break;
         }
     }
