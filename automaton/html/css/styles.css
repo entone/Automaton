@@ -299,3 +299,7 @@ div.output-btn.on span.t::after{
     opacity: .75;
     padding: 2px;
 }
+            
+.thumbnail{
+    padding: 15px;
+}

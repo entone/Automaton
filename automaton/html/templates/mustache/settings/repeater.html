@@ -1,0 +1,14 @@
+<script type='text/x-mustache' id='repeater_template'>
+	<li class='span6' id='repeater{{output}}'>
+        <div class='thumbnail'>
+        	<h4>{{output}}</h4>
+		    <div class='repeater'>
+		    	<p>Run {{output}} for</p>
+		    	<input class='run-for' type='number' id='run_for{{output}}' data-output='{{output}}' value='{{run_for}}'/>
+		    	<p>minutes every</p>
+		    	<input class='every' type='number' id='every{{output}}' data-output='{{output}}' value='{{every}}' /><p>minutes</p>
+		    	<div class='repeater_display' id='repeater_display{{output}}'></div>
+		    </div>
+		</div>
+	</li>
+</script>
