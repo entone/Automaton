@@ -42,14 +42,17 @@ class DownloadImage(object):
         filename = "%s/image%s.jpeg" % (self.id, str(now))
         self.logger.warn("URL: %s" % self.url)
         try:
-            f = urllib.urlopen(self.url).read()
+            f = urllib.urlopen(self.url)
+            st = f.read()
+            f.close()
             conn = S3Connection(settings.AWS_KEY, settings.AWS_SECRET)
             bucket = conn.create_bucket(settings.S3_BUCKET)
             obj = Key(bucket)
             obj.key = filename
             obj.set_metadata("Content-Type", 'image/jpeg')    
-            obj.set_contents_from_string(f)
+            obj.set_contents_from_string(st)
             obj.set_acl("public-read")
+            obj.close()
             return filename
         except Exception as e:
             return False

@@ -56,10 +56,6 @@ a.video-btn{
     border: 2px solid #cccccc;
 }
 
-.thumbnail{
-    position:relative;
-}
-
 .dashboard-view-btn{
     position: absolute;
     top: 10px;
@@ -299,7 +295,12 @@ div.output-btn.on span.t::after{
     opacity: .75;
     padding: 2px;
 }
-            
+
+
 .thumbnail{
+    position:relative;
+}
+
+.settings .thumbnail{
     padding: 15px;
 }

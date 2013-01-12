@@ -75,7 +75,8 @@ Applications.Settings.prototype.init = function(){
         $("#content").append("<h2>PIDs</h2>");
         var output = "<ul class='thumbnails'>";
         for(var p in loc.nodes[i].pids){
-            output+= Mustache.to_html(pid_template, loc.nodes[i].pids[p]);            
+            console.log(loc.nodes[i].pids);
+            output+= Mustache.to_html(pid_template, loc.nodes[i].pids[p]);
         }
         $("#content").append(output+"</ul>");
     }
