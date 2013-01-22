@@ -14,6 +14,7 @@ class Clock(object):
     def __init__(self, time, output, state):
         self.time = time
         self.output = output
+        self.id = "clock_%s" % util.slugify(self.output)
         self.state_change = state
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         gevent.spawn(self.run)
@@ -30,6 +31,7 @@ class Clock(object):
 
     def json(self):
         return dict(
+            id=self.id,
             time=self.time,
             output=self.output.display,
             state_change=self.state_change,
@@ -49,6 +51,7 @@ class Repeater(object):
         self.output = output
         self.state = state
         self.padding = padding
+        self.id = "repeater_%s" % util.slugify(self.output)
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         self.times = {}
         for t in xrange(0, 1440, self.every):
@@ -76,6 +79,7 @@ class Repeater(object):
 
     def json(self):
         return dict(
+            id=self.id,
             run_for=self.run_for,
             every=self.every,
             output=self.output.display,
@@ -101,6 +105,7 @@ class Trigger(object):
         self.min = min
         self.max = max
         self.output = output
+        self.id = "trigger_%s%s" % (util.slugify(self.input), util.slugify(self.output))
         self.state = state
         self.current_state = current_state
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
@@ -133,6 +138,7 @@ class Trigger(object):
 
     def json(self):
         return dict(
+            id=self.id,
             input=self.input.type,
             min=self.min,
             max=self.max,
@@ -149,6 +155,7 @@ class PID(object):
     def __init__(self, input, output, state, set_point, update=60, check=30, P=2.0, I=0.0, D=1.0):
         self.input = input
         self.output = output
+        self.id = "pid_%s%s" % (util.slugify(self.input), util.slugify(self.output))
         self.state = state
         self.set_point = set_point
         self.P = P
@@ -185,6 +192,7 @@ class PID(object):
 
     def json(self):
         return dict(
+            id=self.id,
             input=self.input.type,
             output=self.output.type,
             set_point=self.set_point,

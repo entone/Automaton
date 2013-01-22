@@ -59,9 +59,9 @@ Applications.Settings.prototype.init = function(){
             var clock = loc.nodes[i].clocks[c];
             var t = (clock.time.hour*60)+clock.time.minute;
             if(clock.state_change == true){
-                ons[clock.output] = t;
+                ons[clock.id] = t;
             }else if(clock.state_change == false){
-                ends[clock.output] = t;
+                ends[clock.id] = t;
             }
         }
         $("#content").append("<h2>Clocks</h2>");

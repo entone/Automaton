@@ -22,25 +22,30 @@ class NodeSensor(orm.EmbeddedDocument):
     value = field.Float()
 
 class Input(orm.EmbeddedDocument):
+    id = field.Char()
     index = field.Integer()
     display = field.Char()
     type = field.Char()
 
 class Output(orm.EmbeddedDocument):
+    id = field.Char()
     index = field.Integer()
     display = field.Char()
     type = field.Char()
 
 class Time(orm.EmbeddedDocument):
+    id = field.Char()
     hour = field.Integer()
     minute = field.Integer()
 
 class Clock(orm.EmbeddedDocument):
+    id = field.Char()
     time = Time()
     output = field.Char()
     state_change = field.Boolean()
 
 class Repeater(orm.EmbeddedDocument):
+    id = field.Char()
     run_for = field.Integer()
     every = field.Integer()
     output = field.Char()
@@ -48,12 +53,14 @@ class Repeater(orm.EmbeddedDocument):
     state_change = field.Boolean()
 
 class Trigger(orm.EmbeddedDocument):
+    id = field.Char()
     input = field.Char()
     min = field.Float()
     max = field.Float()
     output = field.Char()
 
 class PID(orm.EmbeddedDocument):
+    id = field.Char()
     input = field.Char()
     output = field.Char()
     set_point = field.Float()
