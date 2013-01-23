@@ -39,14 +39,20 @@ function Node(obj){
         this.h_data[s.id] = {data:[], color:colors[tot]};
         tot++;
     }
+    for(var o in this.outputs){
+        this.outputs[o].parent_id = this.id;
+    }
+    for(var i in this.inputs){
+        this.inputs[i].parent_id = this.id;
+    }
+    console.log(this.outputs);
     var output = Mustache.to_html(node_template, this);
-    console.log()
     document.getElementById('content').innerHTML+= output;
     var that = this;
     setTimeout(function(){
         for(var o in that.outputs){
             var out = that.outputs[o];
-            var light = new toggle(out.type, that.name+out.type, out.index, out.display, out.state, that.name, rpc_on_off);                    
+            var light = new toggle(out.type, that.id+out.id, out.index, out.display, out.state, that.name, rpc_on_off);
         }
         //that.display_historical();
         that.display_day();

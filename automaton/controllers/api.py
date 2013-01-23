@@ -62,7 +62,7 @@ class API(Controller):
             node_obj.clocks.append(s)
 
         for pid in node.get('pids'):
-            s = models.PID()            
+            s = node_models.PID()            
             fill_object(s, pid)
             node_obj.pids.append(s)
 

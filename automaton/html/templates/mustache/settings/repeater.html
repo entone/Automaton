@@ -1,12 +1,12 @@
 <script type='text/x-mustache' id='repeater_template'>
-	<li class='span6' id='repeater{{output}}'>
+	<li class='span6' id='repeater{{id}}'>
         <div class='thumbnail'>
         	<h4>{{output}}</h4>
-		    <div class='repeater'>
+		    <div class='setting repeater' data-id='{{id}}'>
 		    	<p>Run {{output}} for</p>
-		    	<input class='run-for' type='number' id='run_for{{id}}' data-output='{{id}}' value='{{run_for}}'/>
+		    	<input class='run-for' type='number' id='run_for__{{id}}' data-output='{{id}}' value='{{run_for}}'/>
 		    	<p>minutes every</p>
-		    	<input class='every' type='number' id='every{{id}}' data-output='{{id}}' value='{{every}}' /><p>minutes</p>
+		    	<input class='every' type='number' id='every__{{id}}' data-output='{{id}}' value='{{every}}' /><p>minutes</p>
 		    	<div class='repeater_display' id='repeater_display{{id}}'></div>
 		    </div>
 		</div>
