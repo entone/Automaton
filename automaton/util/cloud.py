@@ -1,4 +1,4 @@
-import urllib2
+import urllib
 import json
 import settings
 import util
@@ -17,8 +17,7 @@ class Cloud(object):
             data = ""
             if payload: data = json.dumps(payload, cls=ComplexEncoder)
             enc = aes.encrypt(data, settings.KEY)
-            req = urllib2.Request(url, enc)
-            res = urllib2.urlopen(req)
+            res = urllib.urlopen(url, enc)
             st = res.read()
             st = aes.decrypt(st, settings.KEY)
             res.close()
