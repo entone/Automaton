@@ -115,10 +115,14 @@ class Historical(DefaultController):
             ret.append(o)
             return o
 
+        markers = []
         for r in res:
+            if r.get('sensor') == 'marker':
+                markers.append([r.get('timestamp'), r.get('value')])
+                continue
             d = get_obj(r.get('sensor'))
             d['data'].append([r.get('timestamp'), r.get('value')])
 
-        res = dict(name=node_obj.name, data=ret, images=images)
+        res = dict(name=node_obj.name, data=ret, images=images, markers=markers)
         return Response(json.dumps(dict(result=res), cls=ComplexEncoder))
 

@@ -308,3 +308,7 @@ div.output-btn.on span.t::after{
 .settings button.last{
     margin-bottom: 30px;
 }
+
+.marker{
+    display:none;
+}

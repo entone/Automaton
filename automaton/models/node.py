@@ -126,3 +126,6 @@ class SensorValue(orm.Document):
     node = field.Char()
     sensor = field.Char()
     value = field.Float()
+
+class Marker(SensorValue):
+    value = field.Char()

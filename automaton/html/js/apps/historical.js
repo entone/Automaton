@@ -3,6 +3,7 @@ Applications.Historical.prototype = new App();
 Applications.Historical.constructor = Applications.Historical;
 
 var marker = null;
+var static_markers = [];
 
 Applications.Historical.prototype.init = function(){    
     var content = $('#custom_content').html()
@@ -84,9 +85,10 @@ Applications.Historical.prototype.draw_timelapse = function(res, ele){
     this.timelapse = new timelapse(images, 'images1', rate, '');
     this.timelapse.image_updated.add(this, 'update_graph');
     this.timelapse.image_updated.add(this, 'update_time_display');
+    static_markers = res.result.markers;
     var that = this;
     var a = {};
-    a.update_percent = function(percent){
+    a.update_percent = function(percent){   
         $('#loading_bar').css('width',percent+'%');
     }   
     $('#progress_holder').click(function(e){
@@ -166,13 +168,32 @@ Applications.Historical.prototype.draw_graph = function(res, ele){
         $('#custom_range').popover('hide');    
         $(ele).button('reset');
         this.enable_download();    
-    }
+    }    
+    var that = this;
+    $.each(static_markers, function(i, el){
+        var o = that.graph.pointOffset({x: el[0]+offset, y: 100});
+        $('<div class="data-point-label">' + el[1] + '</div>').css( {
+            position: 'absolute',
+            padding: 4,
+            background: "#FFFFFF",
+            opacity:.75,
+            left: o.left+3,
+            top: o.top,
+            display: 'none'
+        }).appendTo(that.graph.getPlaceholder()).fadeIn('fast');
+    });
 }
 
 Applications.Historical.prototype.markings = function(axes){
     marker = marker ? marker : axes.xaxis.min;
     var wid = ((axes.xaxis.max-axes.xaxis.min)/100)*.2;
-    return [{xaxis:{from:marker,to:marker+wid}, color:"#333333"}];
+    var m_wid = ((axes.xaxis.max-axes.xaxis.min)/100)*.6;
+    var ar = [{xaxis:{from:marker,to:marker+wid}, color:"#333333"}];
+    for(var i in static_markers){
+        var m = static_markers[i];
+        ar.push({xaxis:{from:m[0]+offset,to:m[0]+offset+m_wid}, color:"#333333"})
+    }
+    return ar;
 }
 
 Applications.Historical.prototype.enable_download = function(){

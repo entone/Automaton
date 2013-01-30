@@ -1,0 +1,31 @@
+<%inherit file="base.html"/>
+<%block name='js_app'>
+    <script src="/static/js/apps/manual_readings.js"></script>
+</%block>
+
+<%block name='content'>
+	<h1>Manual Readings</h1>
+    <p>Add a manual sensor reading or marker</p>
+    <div class="alert alert-success hide">Added!</div>
+    <form class="form-inline manual_readings-form" method="POST" action="/manual_readings/">
+        <select id="node">
+        % for node in session.location.nodes:
+            <option value="${node.id}">${node.name}</option>
+        % endfor
+        </select>
+        <select id="type">
+            <option value='nitrogen'>Nitrogen</option>
+            <option value='ammonia'>Ammonia</option>
+            <option value='nitrite'>Nitrite</option>
+            <option value='nitrate'>Nitrate</option>
+            <option value='dissolved_oxygen'>Dissolved Oxygen</option>
+            <option value='marker'>Marker</option>
+        </select>
+        <input class='hide' type='text' id='marker' placeholder='Added Water, 5 new tilapia, etc.' maxlength=50 />
+        <input class='value' type='number' id='value' placeholder='Value' step=.1 />
+        <button class='btn btn-primary' id='save'>Save</button>
+    </form>
+</%block>
+
+
+<%block name='content_class'>manual_readings</%block>

@@ -18,10 +18,9 @@ class NodeSettings(DefaultController):
     def save(self):
         settings = util.get_request_payload(self.request)
         node_id = settings.pop("node")
-        d = node.Location.find_one({
+        loc = node.Location.find_one({
             "nodes.id":node_id,
-        }, as_dict=True, fields={})
-        loc = node.Location(id=d.get("_id"))
+        })
         n_obj = loc.get_node(node_id)
         self.update_settings(n_obj, settings)
         loc.save()

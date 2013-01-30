@@ -5,6 +5,7 @@ from controllers.api import API
 from controllers.user import User
 from controllers.historical import Historical
 from controllers.node_settings import NodeSettings
+from controllers.manual_readings import ManualReadings
 from controllers.static import Static
 
 urls = (
@@ -30,6 +31,8 @@ urls = (
     URL(r'^create_account/?$', User.create_account),
     URL(r'^settings/?$', NodeSettings.index),
     URL(r'^settings/save/?$', NodeSettings.save),
+    URL(r'^manual_readings/?$', ManualReadings.index),
+    URL(r'^manual_readings/save/?$', ManualReadings.save),
     URL(r'^static/(?P<file>[-\w.]+)/?$', Static.index),
     URL(r'^favico.ico/?$', Static.index),
 

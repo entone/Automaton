@@ -99,8 +99,9 @@ Applications.Settings.prototype.init = function(){
 
     $(".run-for").each(function(){
         var out = $(this).data('output');
-        var every = parseInt($('#every'+out).val());
-        var run_for = parseInt($('#run_for'+out).val());
+        console.log(out);
+        var every = parseInt($('#every__'+out).val());
+        var run_for = parseInt($('#run_for__'+out).val());
         if(every && run_for){
             draw_repeater(every, run_for, out);
         }
