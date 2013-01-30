@@ -1,6 +1,6 @@
 var colors = ["#80DE03", "#C53437", "#6FDDFC", "#1D8480", "#E25618"];
 var decorators = {ph: "", temperature:"&deg;C",humidity:"%",light:"%", etape:"cm", ec:"ppm", dissolved_oxygen:"ppm"}
-var offset = -(new Date().getTimezoneOffset()*60*1000);    
+var offset = -(new Date().getTimezoneOffset()*60*1000);   
 var last_x = new Date().getTime()+offset;
 var daynode_height = 10;
 
@@ -19,6 +19,12 @@ function rpc_on_off(obj){
     $.post("//"+url+"/rpc/", JSON.stringify(obj), function(res){
         console.log(eval("("+res+")"));
     });
+}
+
+function format_time(minutes){
+    var hours = String('00'+parseInt(minutes/60)).slice(-2);
+    var min = String('00'+parseInt(minutes%60)).slice(-2);
+    return hours+":"+min;
 }
 
 function showTooltip(x, y, contents){
@@ -44,7 +50,7 @@ window.onblur = function(){
 };
 
 window.onfocus = function(){
-    //this.app.run();
+    this.app.run();
 };
 
 function getURLParameter(name) {

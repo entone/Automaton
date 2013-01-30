@@ -14,7 +14,7 @@ class Clock(object):
     def __init__(self, time, output, state):
         self.time = time
         self.output = output
-        self.id = "clock_%s" % util.slugify(self.output)
+        self.id = "clock_%s" % self.output.id
         self.state_change = state
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         gevent.spawn(self.run)
@@ -51,7 +51,7 @@ class Repeater(object):
         self.output = output
         self.state = state
         self.padding = padding
-        self.id = "repeater_%s" % util.slugify(self.output)
+        self.id = "repeater_%s" % self.output.id
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         self.times = {}
         for t in xrange(0, 1440, self.every):
@@ -70,7 +70,7 @@ class Repeater(object):
     def run(self):
         while True:
             now = datetime.datetime.utcnow()
-            self.logger.debug("Now: %s" % now)            
+            self.logger.debug("Now: %s" % now)         
             time = "%i:%i" % (now.hour, now.minute)
             self.logger.debug(time)
             t = self.times.get(time)
@@ -105,7 +105,7 @@ class Trigger(object):
         self.min = min
         self.max = max
         self.output = output
-        self.id = "trigger_%s%s" % (util.slugify(self.input), util.slugify(self.output))
+        self.id = "trigger_%s%s" % (self.input.id, self.output.id)
         self.state = state
         self.current_state = current_state
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
@@ -155,7 +155,7 @@ class PID(object):
     def __init__(self, input, output, state, set_point, update=60, check=30, P=2.0, I=0.0, D=1.0):
         self.input = input
         self.output = output
-        self.id = "pid_%s%s" % (util.slugify(self.input), util.slugify(self.output))
+        self.id = "pid_%s%s" % (self.input.id, self.output.id)
         self.state = state
         self.set_point = set_point
         self.P = P

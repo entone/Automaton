@@ -6,6 +6,15 @@
 </%block>
 
 <%block name='content'>
+	<h1>Settings</h1>
+    <p>Update settings for each node</p>
+    <form class="form-inline settings-form" method="POST" action="/historical/csv">
+        <select id="node">
+        % for node in session.location.nodes:
+            <option value="${node.id}">${node.name}</option>
+        % endfor
+        </select>
+    </form>
 </%block>
 
 

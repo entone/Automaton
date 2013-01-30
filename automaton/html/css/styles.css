@@ -304,3 +304,7 @@ div.output-btn.on span.t::after{
 .settings .thumbnail{
     padding: 15px;
 }
+
+.settings button.last{
+    margin-bottom: 30px;
+}

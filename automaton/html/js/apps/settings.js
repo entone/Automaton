@@ -1,3 +1,5 @@
+var off = (new Date().getTimezoneOffset());
+
 function DayNode(x, y, width, height, color, obj){
     this.x = x;
     this.y = y;
@@ -28,10 +30,12 @@ Applications.Settings = function(){
 }
 
 Applications.Settings.prototype = new App();
-Applications.Settings.constructor = Applications.Dashboard;
+Applications.Settings.constructor = Applications.Settings;
 
 Applications.Settings.prototype.init = function(){    
     var range_template = $("#range_template").html();
+    var ph_template = $("#range_template").html();
+    var temperature_template = $("#range_template").html();
     var trigger_template = $("#trigger_template").html();
     var pid_template = $("#pid_template").html();
     var repeater_template = $("#repeater_template").html();
@@ -56,18 +60,20 @@ Applications.Settings.prototype.init = function(){
         var ons = {};
         var ends = {};
         for(var c in loc.nodes[i].clocks){
+            console.log(loc.nodes[i].clocks[c]);
             var clock = loc.nodes[i].clocks[c];
             var t = (clock.time.hour*60)+clock.time.minute;
+            var ob = {time:t, display:clock.output};
             if(clock.state_change == true){
-                ons[clock.id] = t;
+                ons[clock.id] = ob;
             }else if(clock.state_change == false){
-                ends[clock.id] = t;
+                ends[clock.id] = ob;
             }
         }
         $("#content").append("<h2>Clocks</h2>");
         var output = "<ul class='thumbnails'>";
         for(t in ons){
-            var obj = {start:ons[t], end:ends[t], output:t}
+            var obj = {start:ons[t].time, end:ends[t].time, id:t, output:ons[t].display}
             output+= Mustache.to_html(range_template, obj);
         }
         $("#content").append(output+"</ul>");
@@ -83,6 +89,7 @@ Applications.Settings.prototype.init = function(){
 
     $(".run-for, .every").change(function(){
         var out = $(this).data('output');
+        console.log(out);
         var every = parseInt($('#every'+out).val());
         var run_for = parseInt($('#run_for'+out).val());
         if(every && run_for){
@@ -103,6 +110,12 @@ Applications.Settings.prototype.init = function(){
         var output = $(this).data('output');
         var start = $(this).data('start');
         var end = $(this).data('end');
+        if(start > end){
+            end = (1440+end)-off;
+        }else{
+            end = end-off;
+        }
+        start-=off;
         $(this).slider({
             range: true,
             min: 0,
@@ -110,11 +123,41 @@ Applications.Settings.prototype.init = function(){
             values: [start, end],
             animate:'fast',
             step:15,
-            slide: function(event, ui) {
+            slide: function(event, ui){
                 $("#display"+output).html(format_time(ui.values[0])+" - "+format_time(ui.values[1]));
             }
         });
         $("#display"+output).html(format_time(start)+" - "+format_time(end));
+    });    
+    $("#content").prepend("<button class='save btn btn-primary pull-right'>Save</button>");
+    $("#content").append("<button class='last save btn btn-primary pull-right'>Save</button>");
+    var that = this;
+    $(".save").click(function(){
+        that.save();
+    });
+
+}
+
+Applications.Settings.prototype.save = function(){
+    var obj = {node:$("#node").val()};
+    $(".setting").each(function(){
+        var id = $(this).data('id');
+        obj[id] = {};
+        $(this).children("input").each(function(){
+            obj[id][$(this).attr('id')] = $(this).val();
+        })
+    });    
+    $(".range").each(function(){
+        var id = $(this).parent().data('id');
+        obj[id] = $(this).slider('option', 'values');
+        var min = obj[id][0]+off > 1440 ?  obj[id][0]+off - 1440 : obj[id][0]+off
+        var max = obj[id][1]+off > 1440 ?  obj[id][1]+off - 1440 : obj[id][1]+off
+        obj[id][0] = min
+        obj[id][1] = max;
+    })
+    console.log(obj);
+    this.post("/settings/save/", JSON.stringify(obj), function(res){
+        console.log(res);
     });
 }
 
@@ -127,8 +170,8 @@ function draw_repeater(every, run_for, out){
     var cur_wid = 0;
     var colors = ['#FF0000'];
     var c = document.createElement("canvas");
-    c.width = 800;
-    c.height = 30;
+    c.width = w;
+    c.height = 20;
     var cxt =  c.getContext("2d");
     cxt.clearRect(0, 0, w, 30);
     for(var i=0; i<1440; i+=every){
@@ -142,12 +185,6 @@ function draw_repeater(every, run_for, out){
         cur_wid+=o_w;
     }
     $("#repeater_display"+out).append(c);
-}
-
-function format_time(minutes){
-    var hours = String('00'+parseInt(minutes/60)).slice(-2);
-    var min = String('00'+parseInt(minutes%60)).slice(-2);
-    return hours+":"+min;
 }
 
 Applications.Settings.prototype.run = function(){}

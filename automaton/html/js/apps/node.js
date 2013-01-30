@@ -10,12 +10,16 @@ Applications.Node.prototype = new App();
 Applications.Node.constructor = Applications.Node;
 
 Applications.Node.prototype.update_toggle = function(frame){
-    var tog = document.getElementById(frame.node+frame.type);
-    tog.obj.set_state(frame.state);
+    var tog = document.getElementById(frame.node_id+frame.id);
+    try{
+        tog.obj.set_state(frame.state);
+    }catch(e){
+        console.error("Not initialized yet");
+    }
 }
 
 Applications.Node.prototype.update_input = function(frame){
-    var tog = document.getElementById(frame.node+frame.type);
+    var tog = document.getElementById(frame.node_id+frame.id);
     if(frame.value){
         tog.children[1].classList.add('on');
     }else{
@@ -29,7 +33,7 @@ Applications.Node.prototype.init = function(){
         console.log("Creating Node:");
         console.log(node);
         var new_node = new Node(node);
-        this.node_objs[new_node.name] = new_node;
+        this.node_objs[new_node.id] = new_node;
     }
 
     this.run();
@@ -54,7 +58,7 @@ Applications.Node.prototype.init = function(){
                     that.update_input(frame);
                     break;
                 default:
-                    var node = that.node_objs[frame.node];
+                    var node = that.node_objs[frame.node_id];
                     node.last[frame.id] = frame.value;
                     break;
             }

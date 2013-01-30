@@ -29,6 +29,7 @@ urls = (
     URL(r'^auth/?$', User.auth),
     URL(r'^create_account/?$', User.create_account),
     URL(r'^settings/?$', NodeSettings.index),
+    URL(r'^settings/save/?$', NodeSettings.save),
     URL(r'^static/(?P<file>[-\w.]+)/?$', Static.index),
     URL(r'^favico.ico/?$', Static.index),
 
