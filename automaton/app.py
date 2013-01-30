@@ -17,7 +17,7 @@ try:
         session_cls=Session,
         session_end_redirect='/signin?sessionended=true',
     )
-
+    conn = None
     if settings.IS_CLOUD:
         conn = Connection()
         logger = logging.getLogger("humongolus")
@@ -52,6 +52,8 @@ gevent.signal(signal.SIGQUIT, gevent.shutdown)
 
 def serve(env, start_response):
     try:
-        return wsgi.serve(env, start_response)
+        res = wsgi.serve(env, start_response)
+        if conn: conn.close()
+        return res
     except Exception as e:
         logging.exception(e)

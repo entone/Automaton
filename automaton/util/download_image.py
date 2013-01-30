@@ -57,6 +57,7 @@ class DownloadImage(object):
         obj.set_contents_from_string(data)
         obj.set_acl("public-read")
         obj.close()
+        conn.close()
         return filename
 
 
