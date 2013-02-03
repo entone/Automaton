@@ -178,9 +178,8 @@ Applications.Historical.prototype.draw_graph = function(res, ele){
             background: "#FFFFFF",
             opacity:.75,
             left: o.left+3,
-            top: o.top,
-            display: 'none'
-        }).appendTo(that.graph.getPlaceholder()).fadeIn('fast');
+            top: i*30
+        }).appendTo(that.graph.getPlaceholder());
     });
 }
 

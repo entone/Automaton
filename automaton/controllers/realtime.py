@@ -47,6 +47,7 @@ class Realtime(DefaultController):
             for node in res:
                 self.logger.info("Node ID: %s" % node.get('id'))
                 if node.get('id') == id:
+                    node['webcam'] = "%s%s" % (node.get('webcam'), settings.WEBCAM_VIDEO)
                     n = Node(node)
                     location.nodes.append(n)
         else:

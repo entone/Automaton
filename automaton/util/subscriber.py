@@ -40,13 +40,13 @@ class Subscriber(object):
         ob = json.loads(message)
         ob['address'] = address[0]
         ob['timestamp'] = datetime.datetime.utcnow()
-        self.logger.info("Got Message: %s" % ob)
+        self.logger.debug("Got Message: %s" % ob)
         if not self.callback(ob, **self.kwargs): self.stop()
 
     def run_udp(self):
         while self.running:
             try:
-                self.logger.info("Waiting for message")
+                self.logger.debug("Waiting for message")
                 result = gevent.select.select([self.sock],[],[])
                 msg, address = result[0][0].recvfrom(1048576) 
                 self.handle_message(msg, address)
@@ -64,7 +64,7 @@ class Subscriber(object):
     def run(self):
         while self.running:
             try:
-                self.logger.info("Waiting for message")
+                self.logger.debug("Waiting for message")
                 st = self.socket.recv()
                 self.handle_message(st)
                 gevent.sleep(.1)

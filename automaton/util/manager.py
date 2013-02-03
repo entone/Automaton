@@ -161,7 +161,7 @@ class Node(object):
         key = key if key else self.key
         message = message if message else {}
         message['method'] = method
-        self.logger.info("Publishing: %s" % message)
+        self.logger.debug("Publishing: %s" % message)
         message = json.dumps(message, cls=ComplexEncoder, encoding='utf-8')
         message = aes.encrypt(message, key)
         st = self.name+message
@@ -174,7 +174,7 @@ class Node(object):
         message['name'] = self.name
         message['method']=  method
         resp = r.send(message, self.key)
-        self.logger.info("Response: %s" % resp)
+        self.logger.debug("Response: %s" % resp)
         return resp
 
     def parse_message(self, message):

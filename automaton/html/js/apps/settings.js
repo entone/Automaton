@@ -41,50 +41,58 @@ Applications.Settings.prototype.init = function(){
     var repeater_template = $("#repeater_template").html();
 
     for(var i in loc.nodes){
-        $("#content").append("<h2>Triggers</h2>");
-        var output = "<ul class='thumbnails'>";
-        for(var t in loc.nodes[i].triggers){
-            console.log(loc.nodes[i].triggers[t]);
-            output+= Mustache.to_html(trigger_template, loc.nodes[i].triggers[t]);            
-        }
-        $("#content").append(output+"</ul>");
-
-        $("#content").append("<h2>Repeaters</h2>");
-        var output = "<ul class='thumbnails'>";
-        for(var r in loc.nodes[i].repeaters){
-            output+=Mustache.to_html(repeater_template, loc.nodes[i].repeaters[r]);            
-            draw_repeater(loc.nodes[i].repeaters[r].every, loc.nodes[i].repeaters[r].run_for, loc.nodes[i].repeaters[r].output);
-        }
-        $("#content").append(output+"</ul>");
-
-        var ons = {};
-        var ends = {};
-        for(var c in loc.nodes[i].clocks){
-            console.log(loc.nodes[i].clocks[c]);
-            var clock = loc.nodes[i].clocks[c];
-            var t = (clock.time.hour*60)+clock.time.minute;
-            var ob = {time:t, display:clock.output};
-            if(clock.state_change == true){
-                ons[clock.id] = ob;
-            }else if(clock.state_change == false){
-                ends[clock.id] = ob;
+        if(loc.nodes[i].triggers.length){
+            $("#content").append("<h2>Triggers</h2>");
+            var output = "<ul class='thumbnails'>";
+            for(var t in loc.nodes[i].triggers){
+                console.log(loc.nodes[i].triggers[t]);
+                output+= Mustache.to_html(trigger_template, loc.nodes[i].triggers[t]);            
             }
+            $("#content").append(output+"</ul>");
         }
-        $("#content").append("<h2>Clocks</h2>");
-        var output = "<ul class='thumbnails'>";
-        for(t in ons){
-            var obj = {start:ons[t].time, end:ends[t].time, id:t, output:ons[t].display}
-            output+= Mustache.to_html(range_template, obj);
-        }
-        $("#content").append(output+"</ul>");
 
-        $("#content").append("<h2>PIDs</h2>");
-        var output = "<ul class='thumbnails'>";
-        for(var p in loc.nodes[i].pids){
-            console.log(loc.nodes[i].pids);
-            output+= Mustache.to_html(pid_template, loc.nodes[i].pids[p]);
+        if(loc.nodes[i].repeaters.length){
+            $("#content").append("<h2>Repeaters</h2>");
+            var output = "<ul class='thumbnails'>";
+            for(var r in loc.nodes[i].repeaters){
+                output+=Mustache.to_html(repeater_template, loc.nodes[i].repeaters[r]);            
+                draw_repeater(loc.nodes[i].repeaters[r].every, loc.nodes[i].repeaters[r].run_for, loc.nodes[i].repeaters[r].output);
+            }
+            $("#content").append(output+"</ul>");
         }
-        $("#content").append(output+"</ul>");
+
+        if(loc.nodes[i].clocks.length){
+            var ons = {};
+            var ends = {};
+            for(var c in loc.nodes[i].clocks){
+                console.log(loc.nodes[i].clocks[c]);
+                var clock = loc.nodes[i].clocks[c];
+                var t = (clock.time.hour*60)+clock.time.minute;
+                var ob = {time:t, display:clock.output};
+                if(clock.state_change == true){
+                    ons[clock.id] = ob;
+                }else if(clock.state_change == false){
+                    ends[clock.id] = ob;
+                }
+            }
+            $("#content").append("<h2>Clocks</h2>");
+            var output = "<ul class='thumbnails'>";
+            for(t in ons){
+                var obj = {start:ons[t].time, end:ends[t].time, id:t, output:ons[t].display}
+                output+= Mustache.to_html(range_template, obj);
+            }
+            $("#content").append(output+"</ul>");
+        }
+
+        if(loc.nodes[i].pids.length){
+            $("#content").append("<h2>PIDs</h2>");
+            var output = "<ul class='thumbnails'>";
+            for(var p in loc.nodes[i].pids){
+                console.log(loc.nodes[i].pids);
+                output+= Mustache.to_html(pid_template, loc.nodes[i].pids[p]);
+            }
+            $("#content").append(output+"</ul>");
+        }
     }
 
     $(".run-for, .every").change(function(){

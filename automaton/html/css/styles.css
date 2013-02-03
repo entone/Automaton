@@ -43,10 +43,6 @@ a.video-btn{
     width: 100%;
 }
 
-.graph{
-    margin-left: 10px;
-}
-
 .historical_graph{
     margin-left: 10px;
 }
@@ -58,8 +54,18 @@ a.video-btn{
 
 .dashboard-view-btn{
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 20px;
+    right: 20px;
+}
+
+.webcam{
+    position:relative;
+    padding-right: 22px;
+}
+
+.webcam img{
+    border: 10px solid #999999;
+    border-radius: 10px;
 }
 
 h3{
@@ -75,7 +81,7 @@ h3{
 
 h4.dashboard-title{
     position:absolute;
-    left: 10px;
+    left: 20px;
     top: 5px;
     color: white;
     background-color: #C53437;
@@ -91,6 +97,9 @@ h4.dashboard-title{
 }
 
 .dashboard-legend{
+    position:absolute;
+    left: 10px;
+    bottom: 20px;
     margin-left: 10px;
 
 }
@@ -101,7 +110,7 @@ h4.dashboard-title{
     background-color: #cccccc;
     margin-bottom: 6px;
     border-radius: 6px;
-    box-shadow: 2px 2px 5px #888;
+    box-shadow: 2px 2px 5px #000;
     margin-right: 10px;
     line-height: 8px;
 }
@@ -239,6 +248,12 @@ div.output-btn.on span.t::after{
     height: 200px;
     margin-top: 5px;
     margin-right: 15px;
+}
+
+.graph{
+    height: 200px;
+    margin-top: 5px;
+    margin-right: 15px;   
 }
 
 #downloader{

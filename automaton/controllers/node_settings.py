@@ -24,7 +24,7 @@ class NodeSettings(DefaultController):
         n_obj = loc.get_node(node_id)
         self.update_settings(n_obj, settings)
         loc.save()
-        self.logger.debug(n_obj._json())
+        self.logger.warning(n_obj._json())
         return Response(json.dumps(settings))
 
     def update_settings(self, obj, settings):

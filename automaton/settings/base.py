@@ -10,7 +10,7 @@ PROJECT_DIR = os.path.abspath(os.path.join(BASE_DIR, '..'))
 TEMPLATE_DIRS = ["%s/html/templates" % PROJECT_DIR,]
 
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = logging.INFO
 
 logging.basicConfig(format=LOG_FORMAT, level=LOG_LEVEL)
 
@@ -66,7 +66,7 @@ SENSORS = dict(
 
 #Cloud settings
 
-CLOUD_API = "http://localhost/api/"
+CLOUD_API = "http://garden.entropealab.mine.nu/api/"
 
 #Timelapse Settings
 

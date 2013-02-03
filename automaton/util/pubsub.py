@@ -33,7 +33,7 @@ class PubSub(object):
 
     def publish(self, st):
         try:
-            self.logger.info("Publishing: %s" % st)
+            self.logger.debug("Publishing: %s" % st)
             self.pub.send(st)
         except Exception as e:
             self.logger.exception(e)
