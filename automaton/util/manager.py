@@ -25,7 +25,7 @@ class Manager(object):
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         self.cloud = Cloud()
         self.register()        
-        Logger(self)
+        #Logger(self)
         CloudLogger(self)
         self.run()
 
