@@ -70,6 +70,7 @@ class Manager(object):
                 self.logger.info("RPC Got: %s" % message)
                 message = aes.decrypt(message, settings.KEY)
                 ob = json.loads(message)
+                del message
                 res = getattr(self, ob.get("method"))(ob)
                 self.logger.info("Result: %s" % res)
                 st = json.dumps(res, cls=ComplexEncoder)
@@ -151,6 +152,7 @@ class Node(object):
         self.pubsub = pubsub
         self.key = key
         self.id = None
+        self.rpc = RPC(address=self.address, port=self.port)
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))   
 
     def set_obj(self, obj):
@@ -169,11 +171,10 @@ class Node(object):
         return True
 
     def call(self, method, message=None):
-        r = RPC(address=self.address, port=self.port)
         message = message if message else {}
         message['name'] = self.name
         message['method']=  method
-        resp = r.send(message, self.key)
+        resp = self.rpc.send(message, self.key)
         self.logger.debug("Response: %s" % resp)
         return resp
 

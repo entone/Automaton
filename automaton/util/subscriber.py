@@ -24,9 +24,9 @@ class Subscriber(object):
             runner = self.run_udp
         else:
             self.context = zmq.Context()
-            self.socket = self.context.socket(zmq.SUB)
-            self.socket.connect("tcp://*:%s" % port)
-            self.socket.setsockopt(zmq.SUBSCRIBE, filter)
+            self.sock = self.context.socket(zmq.SUB)
+            self.sock.connect("tcp://*:%s" % port)
+            self.sock.setsockopt(zmq.SUBSCRIBE, filter)
             runner = self.run
 
         if spawn: gevent.spawn(runner)
@@ -48,9 +48,10 @@ class Subscriber(object):
             try:
                 self.logger.debug("Waiting for message")
                 result = gevent.select.select([self.sock],[],[])
-                msg, address = result[0][0].recvfrom(1048576) 
-                self.handle_message(msg, address)
-                gevent.sleep(.1)
+                for s in result[0]:
+                    msg, address = s.recvfrom(1048576)
+                    self.handle_message(msg, address)
+                gevent.sleep(0)
             except gevent.select.error as e:
                 self.logger.exception(e)
                 self.running = False
@@ -65,13 +66,14 @@ class Subscriber(object):
         while self.running:
             try:
                 self.logger.debug("Waiting for message")
-                st = self.socket.recv()
+                st = self.sock.recv()
                 self.handle_message(st)
-                gevent.sleep(.1)
+                del st
+                gevent.sleep(0)
             except Exception as e:
                 self.logger.exception(e)
 
-        self.socket.close()
+        self.sock.close()
         self.context.destroy()
         return
 
