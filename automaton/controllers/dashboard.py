@@ -42,7 +42,7 @@ class Dashboard(DefaultController):
         return self.default_response("dashboard.html", image=image, averages=json.dumps(avgs, cls=ComplexEncoder))
 
     def get_sensor_averages(self, nod):
-        time = datetime.datetime.utcnow()-datetime.timedelta(days=5)
+        time = datetime.datetime.utcnow()-datetime.timedelta(days=14)
         match = {"$match":{"node":nod.id, "timestamp":{"$gte":time}, "sensor":{"$ne":"marker"}}}
         project = {
             "$project":{

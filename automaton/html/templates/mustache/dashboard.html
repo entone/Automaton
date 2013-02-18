@@ -3,7 +3,20 @@
     <div class='row-fluid'>
         <div class="span12">
             <div class='row-fluid'>
-                <div class="span6 webcam">            
+                <div class="span7">                              
+                    <div class='row-fluid'>
+                        <div id="avg_watertemp" class='graph span5'></div>
+                        <div id="avg_ph" class='graph span5'></div>                
+                    </div>
+                    <div class='row-fluid'>
+                        <div id="avg_temp" class='graph span5'></div>
+                        <div id="avg_humidity" class='graph span5'></div>
+                    </div>
+                    <div class='row-fluid'>
+                        <div id="avg_waterlevel" class='graph span5'></div>
+                    </div>                     
+                </div>
+                <div class="span4 webcam">            
                     <img src="{{webcam}}" alt="">
                     <h4 class='dashboard-title'>{{name}}</h4>
                     % if not settings.IS_CLOUD or settings.IS_DEV:
@@ -18,20 +31,7 @@
                             </li>
                         {{/sensors}}
                     </ul>            
-                </div>
-                <div class="span6">                              
-                    <div class='row-fluid'>
-                        <div id="avg_watertemp" class='graph span5'></div>
-                        <div id="avg_ph" class='graph span5'></div>                
-                    </div>
-                    <div class='row-fluid'>
-                        <div id="avg_temp" class='graph span5'></div>
-                        <div id="avg_humidity" class='graph span5'></div>
-                    </div>
-                    <div class='row-fluid'>
-                        <div id="avg_waterlevel" class='graph span5'></div>
-                    </div>                     
-                </div>
+                </div>                
             </div>
         </div>        
     </div>

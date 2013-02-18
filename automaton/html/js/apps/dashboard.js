@@ -2,7 +2,7 @@ var bar_options = {
     series:{
         bars:{
             show:true,
-            barWidth:(20 * 60 * 60 * 1000),
+            barWidth:(17 * 60 * 60 * 1000),
             align: "center",
         },
     },
