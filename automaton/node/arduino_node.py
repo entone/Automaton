@@ -53,7 +53,7 @@ class Arduino(object):
     running = True
     past_values = []
 
-    def __init__(self, sensors, port='/dev/tty.usbmodemfa131', baud=38400):
+    def __init__(self, sensors, port='/dev/ttyS0', baud=9600):
         self.port = port
         self.baud = baud
         self.serial = serial.Serial(self.port, self.baud, timeout=1)
@@ -72,7 +72,7 @@ class Arduino(object):
         while(self.running):
             try:
                 ch = self.serial.read(size=1)
-                if ch == "@" and not buffering: buffering = True                
+                if ch == "@" and not buffering: buffering = True
                 if buffering and not ch == "!": buffer+=ch
                 if ch == "!" and buffering:
                     buffering = False

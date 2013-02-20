@@ -17,6 +17,11 @@ bool AtlasScientific::data_available(){
 			_data = "";
 			return true;
     	}
+    	if(in == -1){
+    		Serial.println("Bad Data: " + _data);
+    		_data = "";
+    		break;
+    	}
   	}
   	return false;
 }

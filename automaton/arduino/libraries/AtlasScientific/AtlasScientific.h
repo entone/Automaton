@@ -4,7 +4,7 @@
 #define NUM_VALUES 3
 
 #include "Arduino.h"
-#include "AltSoftwareSerial.h"
+#include "AltSoftSerial.h"
 
 class AtlasScientific: public AltSoftSerial{
 	public:
