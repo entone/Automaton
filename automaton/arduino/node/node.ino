@@ -78,7 +78,11 @@ void serialEvent() {
 void ecEvent(){
   while(ec.available()){
       char in = (char)ec.read();
-      if(in == -1) break;
+      Serial.print(in);
+      if(in == -1){
+        ec_input = "";
+        break;
+      } 
       ec_input+=in;
       if(in == '\r'){
           ec_avail = true;          
