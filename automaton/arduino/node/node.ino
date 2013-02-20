@@ -66,12 +66,13 @@ void serialEvent() {
     }
 }
 
-void loop(){
-  ec.loop();
+void loop(){  
   Serial.print("@");
-  ec.write(EC, 0);
-  ec.write(TDS, 1);
-  ec.write(SALINITY, 2);
+  if(ec.data_available()){
+    ec.write(EC, 0);
+    ec.write(TDS, 1);
+    ec.write(SALINITY, 2);
+  }
   temp.write();
   humidity.write();
   water_temp.write();

@@ -8,15 +8,17 @@ AtlasScientific::AtlasScientific()
 		int _values[NUM_VALUES] = {0};
 }
 
-void AtlasScientific::loop(){
+bool AtlasScientific::data_available(){
 	while(available()){
     	char in = (char)read();
     	_data+=in;
     	if(in == '\r'){
     		_parse_serial(_data);
 			_data = "";
+			return true;
     	}
   	}
+  	return false;
 }
 
 void AtlasScientific::command(String command){
