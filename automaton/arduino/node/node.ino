@@ -51,7 +51,7 @@ void parse_serial(String command, int *args){
 void setup(){
     input.reserve(20);
     ec_input.reserve(30);
-    Serial.begin(38400);
+    Serial.begin(9600);
     ec.begin(38400);
     delay(1000);
     ec.print("C\r");
