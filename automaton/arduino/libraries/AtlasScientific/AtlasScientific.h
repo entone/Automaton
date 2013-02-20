@@ -12,7 +12,6 @@ class AtlasScientific: public AltSoftSerial{
 		void command(String command);
 		void write(int output, int value_index);
 		void loop();
-		bool data_available;
 	private:
 		String _data;
 		void _parse_serial(String command);
