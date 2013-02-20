@@ -1,5 +1,5 @@
 #include <AnalogSensor.h>
-#include <AtlasScientific.h>
+//#include <AtlasScientific.h>
 #include <AltSoftSerial.h>
 
 #define EC 0
@@ -7,7 +7,15 @@
 #define SALINITY 2
 #define LIGHTS 13
 
-AtlasScientific ec = AtlasScientific();
+int ec_value;
+int tds_value;
+int salinity_value;
+int ec_values[3];
+bool ec_avail = false;
+
+AltSoftSerial ec = AltSoftSerial();
+
+//AtlasScientific ec = AtlasScientific();
 
 AnalogSensor temp = AnalogSensor(A0, 3);
 AnalogSensor humidity = AnalogSensor(A1, 4);
@@ -16,8 +24,7 @@ AnalogSensor ph = AnalogSensor(A3, 6);
 AnalogSensor water_level = AnalogSensor(A4, 7);
 
 String input;
-
-int ec_check = 10;
+String ec_input;
 
 void parse_serial(String command, int *args){
   int numArgs = 0;
@@ -43,10 +50,11 @@ void parse_serial(String command, int *args){
 
 void setup(){
     input.reserve(20);
+    ec_input.reserve(30);
     Serial.begin(38400);
     ec.begin(38400);
     delay(1000);
-    ec.command("C");
+    ec.print("C\r");
     pinMode(LIGHTS, OUTPUT);
 }
 
@@ -67,18 +75,39 @@ void serialEvent() {
     }
 }
 
+void ecEvent(){
+  while(ec.available()){
+      char in = (char)ec.read();
+      ec_input+=in;
+      if(in == '\r'){
+          ec_avail = true;          
+      }
+    }
+}
+
+void print_value(int output, int value){
+  Serial.print(output);
+  Serial.print(",");
+  Serial.println(value);
+}
+
 
 void loop(){
-    Serial.write("@");
-    ec.loop();
-    ec.write(EC, 0);
-    ec.write(TDS, 1);
-    ec.write(SALINITY, 2);
-    temp.write();
-    humidity.write();
-    water_temp.write();
-    ph.write();
-    water_level.write();
-    Serial.write("!");
-    delay(100);
+  Serial.write("@");
+  ecEvent();
+  if(ec_avail){
+    parse_serial(ec_input, ec_values);
+    ec_input = "";
+    print_value(EC, ec_values[0]);
+    print_value(TDS, ec_values[1]);
+    print_value(SALINITY, ec_values[2]);
+    ec_avail = false;
+  }
+  temp.write();
+  humidity.write();
+  water_temp.write();
+  ph.write();
+  water_level.write();
+  Serial.write("!");
+  delay(100);
 }

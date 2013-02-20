@@ -79,6 +79,7 @@ class Arduino(object):
                     buffer = buffer.lstrip("@")
                     buffer = buffer.rstrip("\r\n")
                     lines = buffer.split('\r\n')
+                    print lines
                     buffer = ""
                     for data in lines:
                         sensor, value = data.split(",")
