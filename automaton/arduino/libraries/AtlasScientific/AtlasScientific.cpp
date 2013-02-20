@@ -5,6 +5,7 @@
 AtlasScientific::AtlasScientific()
 	: AltSoftSerial(){		
 		_data.reserve(30);
+		data_available = false;
 		int _values[NUM_VALUES] = {0};
 }
 
@@ -13,8 +14,7 @@ void AtlasScientific::loop(){
     	char in = (char)read();
     	_data+=in;
     	if(in == '\r'){
-      		_parse_serial(_data);
-      		_data = "";
+    		data_available = true;      		
     	}
   	}
 }
@@ -45,13 +45,13 @@ void AtlasScientific::_parse_serial(String command){
 	_values[numArgs++] = atoi(charBuffer);
 }
 
-int AtlasScientific::value(int value_index){
-	return _values[value_index];
-}
-
 void AtlasScientific::write(int output, int value_index){
-	Serial.print(output);
-	Serial.print(",");
-	int val = _values[value_index];
-	Serial.println(val);
+	if(data_available){
+		_parse_serial(_data);
+		_data = "";
+		data_available = false;
+		Serial.print(output);
+		Serial.print(",");
+		Serial.println(_values[value_index]);
+	}
 }
