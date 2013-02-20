@@ -15,7 +15,7 @@ AnalogSensor water_temp = AnalogSensor(A2, 5);
 AnalogSensor ph = AnalogSensor(A3, 6);
 AnalogSensor water_level = AnalogSensor(A4, 7);
 
-String input = "";
+String input;
 
 int ec_check = 10;
 
@@ -42,6 +42,7 @@ void parse_serial(String command, int *args){
 }
 
 void setup(){
+    input.reserve(20);
     Serial.begin(38400);
     ec.begin(38400);
     delay(1000);

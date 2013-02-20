@@ -4,7 +4,7 @@
 
 AtlasScientific::AtlasScientific()
 	: AltSoftSerial(){		
-		_data.reserve(200);
+		_data.reserve(30);
 		int _values[NUM_VALUES] = {0};
 }
 
