@@ -10,7 +10,7 @@ AtlasScientific::AtlasScientific()
 
 bool AtlasScientific::data_available(){
 	while(available()){
-    	char in = (char)read();
+    	char in = (char)read();    	
     	_data+=in;
     	if(in == '\r'){
     		_parse_serial(_data);
