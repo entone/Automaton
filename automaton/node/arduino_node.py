@@ -53,7 +53,7 @@ class Arduino(object):
     running = True
     past_values = []
 
-    def __init__(self, sensors, port='/dev/tty.usbmodemfa131', baud=9600):
+    def __init__(self, sensors, port='/dev/ttyS0', baud=9600):
         self.port = port
         self.baud = baud
         self.serial = serial.Serial(self.port, self.baud, timeout=1)
