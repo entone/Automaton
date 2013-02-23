@@ -1,9 +1,9 @@
 #include "Arduino.h"
-#include "SoftwareSerial.h"
+#include "AltSoftSerial.h"
 #include "AtlasScientific.h"
 
-AtlasScientific::AtlasScientific(uint8_t rx, uint8_t tx)
-	: SoftwareSerial(rx, tx){		
+AtlasScientific::AtlasScientific()
+	: AltSoftSerial(){
 		_data.reserve(30);
 		int _values[NUM_VALUES] = {0};
 }

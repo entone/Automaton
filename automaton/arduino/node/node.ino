@@ -1,6 +1,6 @@
 #include <AnalogSensor.h>
 #include <AtlasScientific.h>
-#include <SoftwareSerial.h>
+#include <AltSoftSerial.h>
 
 #define EC 0
 #define TDS 1
@@ -9,8 +9,8 @@
 
 #define LIGHTS 13
 
-AtlasScientific ec = AtlasScientific(8,9);
-AtlasScientific ph = AtlasScientific(10,11);
+//AtlasScientific ec = AtlasScientific(EC);
+AtlasScientific ph = AtlasScientific();
 
 AnalogSensor temp = AnalogSensor(A0, 3);
 AnalogSensor humidity = AnalogSensor(A1, 4);
@@ -45,7 +45,7 @@ void setup(){
     input.reserve(20);
     Serial.begin(9600);
     ph.begin(38400);
-    ec.begin(38400);
+    //ec.begin(38400);
     delay(1000);
     ph.command("C");
     //ec.command("C");
