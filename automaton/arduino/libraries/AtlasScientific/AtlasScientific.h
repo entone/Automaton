@@ -4,11 +4,11 @@
 #define NUM_VALUES 3
 
 #include "Arduino.h"
-#include "AltSoftSerial.h"
+#include "SoftwareSerial.h"
 
-class AtlasScientific: public AltSoftSerial{
+class AtlasScientific: public SoftwareSerial{
 	public:
-		AtlasScientific();
+		AtlasScientific(uint8_t rx, uint8_t tx);
 		void command(String command);
 		void write(int output, int value_index);		
 		bool data_available();

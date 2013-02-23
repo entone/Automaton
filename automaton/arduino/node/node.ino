@@ -1,24 +1,20 @@
 #include <AnalogSensor.h>
 #include <AtlasScientific.h>
-#include <AltSoftSerial.h>
+#include <SoftwareSerial.h>
 
 #define EC 0
 #define TDS 1
 #define SALINITY 2
+#define PH 6
+
 #define LIGHTS 13
 
-int ec_value;
-int tds_value;
-int salinity_value;
-int ec_values[3];
-bool ec_avail = false;
-
-AtlasScientific ec = AtlasScientific();
+AtlasScientific ec = AtlasScientific(8,9);
+AtlasScientific ph = AtlasScientific(10,11);
 
 AnalogSensor temp = AnalogSensor(A0, 3);
 AnalogSensor humidity = AnalogSensor(A1, 4);
 AnalogSensor water_temp = AnalogSensor(A2, 5);
-AnalogSensor ph = AnalogSensor(A3, 6);
 AnalogSensor water_level = AnalogSensor(A4, 7);
 
 String input;
@@ -48,9 +44,11 @@ void parse_serial(String command, int *args){
 void setup(){
     input.reserve(20);
     Serial.begin(9600);
+    ph.begin(38400);
     ec.begin(38400);
     delay(1000);
-    ec.command("C");
+    ph.command("C");
+    //ec.command("C");
     pinMode(LIGHTS, OUTPUT);
 }
 
@@ -73,15 +71,19 @@ void serialEvent() {
 
 void loop(){
   Serial.print("@");
+  /*
   if(ec.data_available()){
-    ec.write(EC, ec_values[0]);
-    ec.write(TDS, ec_values[1]);
-    ec.write(SALINITY, ec_values[2]);
+    ec.write(EC, 0);
+    ec.write(TDS, 1);
+    ec.write(SALINITY, 2);
+  }
+  */
+  if(ph.data_available()){
+    ph.write(PH, 0);
   }
   temp.write();
   humidity.write();
   water_temp.write();
-  ph.write();
   water_level.write();
   Serial.print("!");
   delay(100);
