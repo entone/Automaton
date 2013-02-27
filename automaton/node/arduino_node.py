@@ -133,7 +133,7 @@ class WaterLevelEvent(SensorEvent): pass
 
 class Temperature(Sensor):
     def conversion(self, value):
-        mV = value * (5500/1024)
+        mV = value * (5000/1024)
         return (mV-500)/10
 
 class Humidity(Sensor):
