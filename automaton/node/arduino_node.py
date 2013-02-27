@@ -53,10 +53,11 @@ class Arduino(object):
     running = True
     past_values = []
 
-    def __init__(self, sensors, port='/dev/tty.usbmodemfa131', baud=9600):
-        self.port = port
+    def __init__(self, sensors, port=['/dev/ttyS0', '/dev/tty.usbmodemfa131'], baud=9600):
+        self.port = port        
         self.baud = baud
-        self.serial = serial.Serial(self.port, self.baud, timeout=1)
+        self.port_try = 0 
+        self.try_serial()       
         self.running = True
         self.sensors = dict()
         self.sensor_ids = []
@@ -65,6 +66,17 @@ class Arduino(object):
             self.sensors[sensor.name] = sensor
         self.past_values = [0 for i in xrange(100)]
         gevent.spawn(self.run)
+
+    def try_serial(self):
+        try:
+            self.serial = serial.Serial(self.port[self.port_try], self.baud, timeout=1)
+        except Exception as e:
+            print e
+            self.port_try+=1
+            if self.port_try < len(self.port):
+                self.try_serial()
+            else:
+                raise e
 
     def run(self):
         buffer = ''
@@ -113,7 +125,7 @@ class TempEvent(SensorEvent):
 
 class HumidityEvent(SensorEvent):
     def run(self, value):
-        print "%s: %s%" % (self.__class__.__name__, value)
+        print "%s: %s%%" % (self.__class__.__name__, value)
 
 class WaterTempEvent(SensorEvent): pass
 class PHEvent(SensorEvent): pass
