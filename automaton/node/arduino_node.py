@@ -111,7 +111,10 @@ class TempEvent(SensorEvent):
     def run(self, value):
         print "%s: %s˚C" % (self.__class__.__name__, value)
 
-class HumidityEvent(SensorEvent): pass
+class HumidityEvent(SensorEvent):
+    def run(self, value):
+        print "%s: %s%" % (self.__class__.__name__, value)
+
 class WaterTempEvent(SensorEvent): pass
 class PHEvent(SensorEvent): pass
 class WaterLevelEvent(SensorEvent): pass
@@ -120,6 +123,17 @@ class Temperature(Sensor):
 
     def conversion(self, value):
         return ((value*4.9)-500)/10
+
+class Humidity(Sensor):
+    voltage = 5.0
+    celcius = 25.0
+
+    def conversion(self, value):
+        volt = value/1023 * self.voltage
+        rh = 161.0*volt/self.voltage-25.8
+        true = rh/(1.0546-.0026*self.celcius)
+        return true
+
         
 
 ard = Arduino(sensors=[
@@ -131,8 +145,8 @@ ard = Arduino(sensors=[
     Sensor('DO',[DOEvent]), 
     Sensor('ORP',[ORPEvent]), 
     Temperature('Temperature',[TempEvent], change=2),
-    Sensor('Humidity',[HumidityEvent]), 
-    Sensor('Water Temperature',[WaterTempEvent]), 
+    Humidity('Humidity',[HumidityEvent]),
+    Temperature('Water Temperature',[WaterTempEvent]), 
     Sensor('Water Level',[WaterLevelEvent]),
 ])
 
