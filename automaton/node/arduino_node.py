@@ -132,13 +132,17 @@ class PHEvent(SensorEvent): pass
 class WaterLevelEvent(SensorEvent): pass
 
 class Temperature(Sensor):
-    voltage = 5.5
+    voltage = 5.0
     def conversion(self, value):
-        volt = value/1023 * self.voltage
-        return 100*volt-50
+        Tf = float(value)*5.0
+        Tf = Tf/10
+        Tc = float(Tf)-32
+        diff = 5.0/9
+        Tc = Tc*diff
+        return Tc
 
 class Humidity(Sensor):
-    voltage = 5.5
+    voltage = 5.0
     celcius = 25.0
 
     def conversion(self, value):
