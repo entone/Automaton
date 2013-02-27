@@ -146,8 +146,6 @@ class Humidity(Sensor):
         true = rh/(1.0546-.0026*self.celcius)
         return true
 
-    def set_temp()
-
         
 
 ard = Arduino(sensors=[
