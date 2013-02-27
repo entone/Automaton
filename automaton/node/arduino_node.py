@@ -53,7 +53,7 @@ class Arduino(object):
     running = True
     past_values = []
 
-    def __init__(self, sensors, port='/dev/ttyS0', baud=9600):
+    def __init__(self, sensors, port='/dev/tty.usbmodemfa131', baud=9600):
         self.port = port
         self.baud = baud
         self.serial = serial.Serial(self.port, self.baud, timeout=1)
@@ -105,6 +105,8 @@ class Arduino(object):
 class ECEvent(SensorEvent): pass
 class TDSEvent(SensorEvent): pass
 class SalinityEvent(SensorEvent): pass
+class DOEvent(SensorEvent): pass
+class ORPEvent(SensorEvent): pass
 class TempEvent(SensorEvent):
     def run(self, value):
         print "%s: %s˚C" % (self.__class__.__name__, value)
@@ -121,13 +123,16 @@ class Temperature(Sensor):
         
 
 ard = Arduino(sensors=[
+    Sensor('PH', [PHEvent], change=25), 
     Sensor('EC', [ECEvent], change=25), 
-    Sensor('TDS',[TDSEvent], change=20), 
+    Sensor('TDS',[TDSEvent], change=20),
     Sensor('Salinity',[SalinityEvent]), 
+    Sensor('DO Percentage',[DOEvent]), 
+    Sensor('DO',[DOEvent]), 
+    Sensor('ORP',[ORPEvent]), 
     Temperature('Temperature',[TempEvent], change=2),
     Sensor('Humidity',[HumidityEvent]), 
     Sensor('Water Temperature',[WaterTempEvent]), 
-    Sensor('PH',[PHEvent]), 
     Sensor('Water Level',[WaterLevelEvent]),
 ])
 

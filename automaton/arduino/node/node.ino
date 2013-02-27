@@ -2,20 +2,18 @@
 #include <AtlasScientific.h>
 #include <AltSoftSerial.h>
 
-#define EC 0
-#define TDS 1
-#define SALINITY 2
-#define PH 6
-
 #define LIGHTS 13
+#define PH_ACTIVE true
+#define EC_ACTIVE false
+#define DO_ACTIVE true
+#define ORP_ACTIVE false
 
-//AtlasScientific ec = AtlasScientific(EC);
-AtlasScientific ph = AtlasScientific();
+AtlasScientific as = AtlasScientific(PH_ACTIVE, EC_ACTIVE, DO_ACTIVE, ORP_ACTIVE);
 
-AnalogSensor temp = AnalogSensor(A0, 3);
-AnalogSensor humidity = AnalogSensor(A1, 4);
-AnalogSensor water_temp = AnalogSensor(A2, 5);
-AnalogSensor water_level = AnalogSensor(A4, 7);
+AnalogSensor temp = AnalogSensor(A0, 7);
+AnalogSensor humidity = AnalogSensor(A1, 8);
+AnalogSensor water_temp = AnalogSensor(A2, 9);
+AnalogSensor water_level = AnalogSensor(A4, 10);
 
 String input;
 
@@ -32,7 +30,7 @@ void parse_serial(String command, int *args){
       arg.toCharArray(charBuffer, 16);
   
       // add error handling for atoi:
-        args[numArgs++] = atoi(charBuffer);
+      args[numArgs++] = atoi(charBuffer);
       beginIdx = idx + 1;
       idx = command.indexOf(",", beginIdx);
   }
@@ -44,11 +42,9 @@ void parse_serial(String command, int *args){
 void setup(){
     input.reserve(20);
     Serial.begin(9600);
-    ph.begin(38400);
-    //ec.begin(38400);
+    as.begin(38400);
+    as.start();
     delay(1000);
-    ph.command("C");
-    //ec.command("C");
     pinMode(LIGHTS, OUTPUT);
 }
 
@@ -71,15 +67,8 @@ void serialEvent() {
 
 void loop(){
   Serial.print("@");
-  /*
-  if(ec.data_available()){
-    ec.write(EC, 0);
-    ec.write(TDS, 1);
-    ec.write(SALINITY, 2);
-  }
-  */
-  if(ph.data_available()){
-    ph.write(PH, 0);
+  if(as.data_available()){
+    as.write();
   }
   temp.write();
   humidity.write();
