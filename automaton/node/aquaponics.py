@@ -30,7 +30,13 @@ class Aquaponics(Node):
         )
         water_temp = Temperature('Water Temperature', self, [self.publish])
         level = ETape('Water Level', self, [self.publish], change=100)
-                
+
+        lights = Output(0, "Lights", self)
+        test = Output(13, "Debug", self)
+
+        self.outputs = [lights, test]
+
+        self.clocks = [Clock([13,0], lights, True), Clock([1,0], lights, False)]
         self.sensors = [ph, ec, tds, sal, do_per, do, orp, temp, humidity, water_temp, level]
 
         super(Aquaponics, self).__init__(*args, **kwargs)

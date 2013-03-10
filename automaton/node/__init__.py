@@ -41,9 +41,9 @@ class Node(object):
 
     def run(self):
         while True: 
-            self.interface_kit.digital(13, 1)
+            self.set_output_state(dict(index=13, state=True))
             gevent.sleep(1)
-            self.interface_kit.digital(13, 0)
+            self.set_output_state(dict(index=13, state=False))
             gevent.sleep(1)
 
     def initialize(self):
@@ -146,9 +146,12 @@ class Node(object):
     def set_output_state(self, ob):
         output = self.get_output(ob.get('index'))
         if output:
-            self.logger.info("%s: turning %s to %s index: %s" % (self.name, ob.get('type'), ob.get('state'), output.index))
+            self.logger.info("%s: turning %s to %s index: %s" % (self.name, output.display, ob.get('state'), output.index))
             output.set_state(ob.get('state'))
             return dict(state=output.current_state)
+
+    def digital(self, index, value):
+        self.interface_kit.digital(index, value)
 
     def json(self, ob=None):
         return dict(

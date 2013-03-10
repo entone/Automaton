@@ -15,12 +15,14 @@ class Output(object):
         self.display = display
         self.id = util.slugify(self.display)
         self.type = util.slugify(display)
+        self.logger.info(self.type)
         self.interface = interface
 
     def set_state(self, state):
-        self.logger.debug("Setting Output: %s to: %s" % (self.json(), state))
+        self.logger.info("Setting Output: %s to: %s" % (self.json(), state))
         self.interface.digital(self.index, state)
         self.current_state = state
+        self.interface.publish(message=self.json())
         return
 
     def get_state(self):

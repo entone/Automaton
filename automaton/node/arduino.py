@@ -9,6 +9,7 @@ import util
 class Arduino(object):
     running = True
     past_values = []
+    outputs = []
 
     def __init__(self, sensors, port=['/dev/ttyS0', '/dev/tty.usbmodemfa131'], baud=9600):
         self.port = port        
@@ -65,14 +66,17 @@ class Arduino(object):
             for key, sensor in self.sensors.iteritems():
                 sensor.do_conversion(random.randint(0, 100))
                 sensor.fire(message=sensor.json())
-                gevent.sleep(.5)
+                gevent.sleep(5)
 
     def digital(self, pin, val):
+        val = 0 if val == False else 1
         st = "D|%s|%s\r" % (pin, val)
         try:
+            self.logger.info("Setting: %s" % st)
             return self.serial_conn.write(st)
         except Exception as e:
             self.logger.warning(e)
+        return
 
     def serial(self, pin, val):
         st = "S|%s|%s\r" % (pin, val)
