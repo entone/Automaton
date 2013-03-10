@@ -1,27 +1,29 @@
-class Event:
+import gevent
+import util
 
+class Event(object):
+
+    def __init__(self, *args, **kwargs):
+        gevent.spawn(self.run, *args, **kwargs)
+
+    def run(self, *args, **kwargs): return
+
+class EventDispatcher(object):
     def __init__(self):
-        self._handlers = []
+        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.handlers = []
 
-    def handle(self, handler):
-        self._handlers.append(handler)
+    def __iadd__(self, handler):
+        self.handlers.append(handler)
         return self
 
-    def unhandle(self, handler):
-        try:
-            self._handlers.remove(handler)
-        except:
-            raise ValueError("Handler is not handling this event, so cannot unhandle it.")
+    def __isub__(self, handler):
+        self.handlers.remove(handler)
         return self
 
-    def fire(self, *args, **kargs):
-        for handler in self._handlers:
-            handler(*args, **kargs)
-
-    def count(self):
-        return len(self._handlers)
-
-    __iadd__ = handle
-    __isub__ = unhandle
-    __call__ = fire
-    __len__  = count
+    def fire(self, *args, **kwargs):
+        for handler in self.handlers:
+            try:
+                handler(*args, **kwargs)
+            except Exception as e:
+                self.logger.exception(e)

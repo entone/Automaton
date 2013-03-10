@@ -1,16 +1,13 @@
 from node.sensor import Sensor
 
 class PH(Sensor):   
-    celcius = 30
     type="ph"
+    decorator=""
 
     def conversion(self, value):
-        val = float(value)/200
-        val = 2.5-val
-        temp = .257179+(.000941468*float(self.celcius))
-        return 7-(val/temp)
+        return value
 
     def set_temp(self, val):
-        self.celcius = val
+        return self.interface.interface_kit.serial(0, val)
 
 

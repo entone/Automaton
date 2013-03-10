@@ -1,11 +1,6 @@
 import settings
 import util
 
-class MockEvent(object):
-    def __init__(self, index, state):
-        self.index = index
-        self.state = state
-
 class Output(object):
     index = ""
     display = ""
@@ -24,16 +19,12 @@ class Output(object):
 
     def set_state(self, state):
         self.logger.debug("Setting Output: %s to: %s" % (self.json(), state))
-        try:
-            self.interface.interface_kit.setOutputState(self.index, state)
-            self.current_state = state
-        except Exception as e:
-            self.interface.interfaceKitOutputChanged(MockEvent(self.index, state))
-            self.logger.warning("Mock Event")
+        self.interface.digital(self.index, state)
+        self.current_state = state
         return
 
     def get_state(self):
-        return self.interface.interface_kit.getOutputState(self.index)
+        return self.current_state
 
     def json(self):
         return dict(

@@ -1,15 +1,18 @@
 from node.sensor import Sensor
 
 class Humidity(Sensor):
-    celcius = 30
-    decorator = "%"
+    voltage = 5.0
+    celcius = 25.0
     type="humidity"
+    decorator="%"
 
     def conversion(self, value):
-        val = ((.0004*float(self.celcius)+.149)*float(value))-(.0617*float(self.celcius)+ 24.436)
-        return val
+        volt = value/1023 * self.voltage
+        rh = 161.0*volt/self.voltage-25.8
+        true = rh/(1.0546-.0026*self.celcius)
+        return true
 
-    def set_temp(self, val):
-        self.celcius = val
+    def set_temp(self, value):
+    	self.celcius = value
 
 

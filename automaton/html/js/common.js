@@ -1,5 +1,5 @@
-var colors = ["#80DE03", "#C53437", "#6FDDFC", "#1D8480", "#E25618"];
-var decorators = {ph: "", temperature:"&deg;C",humidity:"%",light:"%", etape:"cm", ec:"ppm", dissolved_oxygen:"ppm"}
+var colors = ["#80DE03", "#C53437", "#6FDDFC", "#1D8480", "#E25618", "#36C4CE", "#FBC92C", "#F1477C", "#6FD6AD", "#FFCCC9", "#B9AB5C"];
+var decorators = {ph: "", temperature:"&deg;C",humidity:"%",light:"%", etape:"cm", ec:"&mu;s", tds:"ppm", salinity:"", do:"mg/L", do_percentage:"%", orp:"mV"}
 var offset = -(new Date().getTimezoneOffset()*60*1000);   
 var last_x = new Date().getTime()+offset;
 var daynode_height = 10;

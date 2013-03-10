@@ -25,7 +25,7 @@ class Subscriber(object):
         else:
             self.context = zmq.Context()
             self.sock = self.context.socket(zmq.SUB)
-            self.sock.connect("tcp://*:%s" % port)
+            self.sock.connect("tcp://0.0.0.0:%s" % port)
             self.sock.setsockopt(zmq.SUBSCRIBE, filter)
             runner = self.run
 

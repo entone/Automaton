@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import sys
 import logging
@@ -61,7 +62,12 @@ SENSORS = dict(
 	nitrite='ppm',
 	nitrate='ppm',
 	nitrogen='ppm',
-	dissolved_oxygen='ppm',
+	do='mg/L',
+	do_percentage='%',
+	ec='µs',
+	tds='ppm',
+	salinity='',
+	orp='mV',
 )
 
 #Cloud settings

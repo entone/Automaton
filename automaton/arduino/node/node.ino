@@ -17,34 +17,32 @@ AnalogSensor water_level = AnalogSensor(A4, 10);
 
 String input;
 
-void parse_serial(String command, int *args){
-  int numArgs = 0;
-  int beginIdx = 0;
-  int idx = command.indexOf(",");
+bool paused;
 
-  String arg;
-  char charBuffer[16];
+void parse_serial(String command, String *args){
+    int numArgs = 0;
+    int beginIdx = 0;
+    int idx = command.indexOf("|");
 
-  while (idx != -1){
-      arg = command.substring(beginIdx, idx);
-      arg.toCharArray(charBuffer, 16);
-  
-      // add error handling for atoi:
-      args[numArgs++] = atoi(charBuffer);
-      beginIdx = idx + 1;
-      idx = command.indexOf(",", beginIdx);
-  }
-  arg = command.substring(beginIdx);
-  arg.toCharArray(charBuffer, 16);
-  args[numArgs++] = atoi(charBuffer);
+    String arg;
+
+    while (idx != -1){
+        arg = command.substring(beginIdx, idx);
+        args[numArgs++] = arg;
+        beginIdx = idx + 1;
+        idx = command.indexOf("|", beginIdx);
+    }
+    arg = command.substring(beginIdx);
+    args[numArgs++] = arg;
 }
 
 void setup(){
+    paused = false;
     input.reserve(20);
     Serial.begin(9600);
     as.begin(38400);
-    as.start();
     delay(1000);
+    as.start();
     pinMode(LIGHTS, OUTPUT);
 }
 
@@ -56,24 +54,41 @@ void serialEvent() {
         input+=inChar;
         // if the incoming character is a newline, set a flag
         // so the main loop can do something about it:
-        if (inChar == '\r') {
-            int data[2];
+        if (inChar == '\r'){
+            String data[3];
             parse_serial(input, data);
-            digitalWrite(data[0], data[1]);
+            if(data[0] == "S"){
+                char pin[16];
+                data[1].toCharArray(pin, 16);
+                as.command(atoi(pin), data[2]);
+            }
+            if(data[0] == "D"){
+                char pin[16];
+                data[1].toCharArray(pin, 16);
+                char val[16];
+                data[2].toCharArray(val, 16);
+                digitalWrite(atoi(pin), atoi(val));
+            }
+            if(data[0] == "P"){
+                paused = true;
+            }
+            if(data[0] == "R"){
+                paused = false;
+            }
             input = "";
         } 
     }
 }
 
 void loop(){
-  Serial.print("@");
-  if(as.data_available()){
-    as.write();
-  }
-  temp.write();
-  humidity.write();
-  water_temp.write();
-  water_level.write();
-  Serial.print("!");
-  delay(100);
+    if(!paused){
+        if(as.data_available()){
+            as.write();
+        }
+        temp.write();
+        humidity.write();
+        water_temp.write();
+        water_level.write();
+    }
+    delay(100);
 }

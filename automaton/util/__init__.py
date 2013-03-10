@@ -47,9 +47,9 @@ def get_logger(name):
     logger.addHandler(handler)
     return logger
 
-def slugify(str):
-    str = unidecode.unidecode(str).lower()
-    return re.sub(r'\W+','-',str)
+def slugify(st):
+    st = unidecode.unidecode(unicode(st)).lower()
+    return re.sub(r'\W+','-',st)
 
 def encrypt_password(password, salt=False):
     algo="sha1"

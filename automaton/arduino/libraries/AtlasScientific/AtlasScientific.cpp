@@ -10,7 +10,7 @@ AtlasScientific::AtlasScientific(bool ph_active, bool ec_active, bool do_active,
 		active_channels[1] = ec_active;
 		active_channels[2] = do_active;
 		active_channels[3] = orp_active;
-		int _values[NUM_VALUES] = {0};
+		float _values[NUM_VALUES] = {0.00};
 		running = false;
 }
 
@@ -101,20 +101,20 @@ void AtlasScientific::_parse_serial(String command){
   	int idx = command.indexOf(",");
 
   	String arg;
-  	char charBuffer[16];
+  	char charBuffer[32];
 
 	while (idx != -1){
 		arg = command.substring(beginIdx, idx);
-		arg.toCharArray(charBuffer, 16);
+		arg.toCharArray(charBuffer, 32);
 
 		// add error handling for atoi:
-		_values[numArgs++] = atoi(charBuffer);
+		_values[numArgs++] = atof(charBuffer);
 		beginIdx = idx + 1;
 		idx = command.indexOf(",", beginIdx);
 	}
 	arg = command.substring(beginIdx);
-	arg.toCharArray(charBuffer, 16);
-	_values[numArgs++] = atoi(charBuffer);
+	arg.toCharArray(charBuffer, 32);
+	_values[numArgs++] = atof(charBuffer);
 }
 
 void AtlasScientific::_print(int output, int index){

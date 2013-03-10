@@ -32,6 +32,7 @@ function Node(obj){
     var tot = 0;
     for(var i in this.sensors){
         var s = this.sensors[i];
+        s.node = this.id;
         s.color = colors[tot];
         this.prefs[s.id] = {color:colors[tot], decorator:decorators[s.type]}
         this.last[s.id] = s.value;
@@ -252,7 +253,7 @@ Node.prototype.display = function(){
     for (var d in this.data){
         this.prefs[d].data = this.data[d]
         plots.push(this.prefs[d]);
-        document.getElementById(this.name+d+"_header").innerHTML = this.last[d].toFixed(2)+this.prefs[d].decorator;
+        document.getElementById(this.id+d+"_header").innerHTML = this.last[d].toFixed(2)+this.prefs[d].decorator;
     }
     $.plot($("#"+this.name), plots, {
         series: { lines: { show: true, fill: false},},

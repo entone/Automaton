@@ -1,9 +1,11 @@
 from node import Node
+from node.sensor import Sensor
 from node.sensor.temperature import Temperature
 from node.sensor.humidity import Humidity
 from node.sensor.ph import PH
 from node.sensor.light import Light
 from node.sensor.etape import ETape
+from node.sensor.dissolved_oxygen import DissolvedOxygen
 
 from node.output import Output
 from node.trigger import Trigger
@@ -14,27 +16,22 @@ import settings
 
 class Aquaponics(Node):
 
-    def __init__(self ,*args, **kwargs):        
-        water_temp = Temperature(0, 'Water Temperature', self, change=5)
-        ph = PH(1, 'PH', self, change=20)        
-        temp = Temperature(2, 'Temperature', self, change=5)
-        humidity = Humidity(3, 'Humidity', self, change=5)
-        level = ETape(7, 'Water Level', self, change=1)         
-        
-        
-        self.sensors = [water_temp, ph, temp, humidity, level]
-
-        plant_light = Output(0, 'Plant Light', self)
-        aqua_light = Output(1, 'Aqua Light', self)
-        self.outputs = [plant_light, aqua_light]
-
-        light_on = Clock((12,00), plant_light, True)
-        light_off = Clock((0, 1), plant_light, False)
-
-        aqua_light_on = Clock((12,00), aqua_light, True)
-        aqua_light_off = Clock((0, 1), aqua_light, False)
-
-        self.clocks = [light_on, light_off, aqua_light_on, aqua_light_off]
+    def __init__(self ,*args, **kwargs):
+        ph = PH('PH', self, [self.publish], change=.1)
+        ec = Sensor('EC', self, [self.publish], change=25, typ="ec")
+        tds = Sensor('TDS', self, [self.publish], change=10, typ="tds")
+        sal = Sensor('Salinity', self, [self.publish], change=1, typ="salinity")
+        do_per = Sensor('DO Percentage', self, [self.publish], change=.1, typ="do_percentage")
+        do = DissolvedOxygen('DO', self, [self.publish], change=.1, typ="do")
+        orp = Sensor('ORP', self, [self.publish], typ="orp")
+        humidity = Humidity('Humidity', self,[self.publish])
+        temp = Temperature('Temperature', self, [self.publish], 
+            updaters=[humidity.set_temp, ph.set_temp, do.set_temp], change=1
+        )
+        water_temp = Temperature('Water Temperature', self, [self.publish])
+        level = ETape('Water Level', self, [self.publish], change=100)
+                
+        self.sensors = [ph, ec, tds, sal, do_per, do, orp, temp, humidity, water_temp, level]
 
         super(Aquaponics, self).__init__(*args, **kwargs)
         

@@ -1,21 +1,11 @@
+# -*- coding: utf-8 -*-
+
 from node.sensor import Sensor
 
 class Temperature(Sensor):
-    decorator = "&deg;C"
     type="temperature"
+    decorator="˚C"
 
     def conversion(self, value):
-        base = float(5000)/1000
-        Tf = float(value)*base
-        Tf = Tf/10
-        Tc = float(Tf)-32
-        diff = float(5)/9
-        Tc = Tc*diff
-        self.do_set_temp(Tc)
-        return Tc
-
-    def do_set_temp(self, val):
-        for sensor in self.interface.sensors:
-            try:
-                sensor.set_temp(val)
-            except: pass
+        mV = value * 4.9
+        return (mV-500)/10

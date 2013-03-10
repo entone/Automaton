@@ -38,7 +38,7 @@ class AtlasScientific: public AltSoftSerial{
 		void _parse_serial(String command);
 		void _open_channel(int channel);
 		void _open_next_channel();
-		int _values[NUM_VALUES];
+		float _values[NUM_VALUES];
 };
 
 #endif

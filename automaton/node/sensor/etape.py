@@ -9,12 +9,9 @@ class ETape(Sensor):
     HEIGHT = 21
 
     def conversion(self, value):
-        self.logger.info("RAW: %s" % value)
         value = (1000/value) - 1
         value = self.RESISTOR/value
         val = int(value)
-        self.logger.info("Resistance: %s" % val)
         val = (self.MAX-val)/(self.MAX-self.MIN)
-        self.logger.info(val)
         return val*self.HEIGHT
 
