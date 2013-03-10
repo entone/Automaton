@@ -16,22 +16,24 @@
                         <div id="avg_waterlevel" class='graph span5'></div>
                     </div>                     
                 </div>
-                <div class="span4 webcam">            
-                    <img src="{{webcam}}" alt="">
-                    <h4 class='dashboard-title'>{{name}}</h4>
-                    % if not settings.IS_CLOUD or settings.IS_DEV:
-                        <p>
-                            <a href="/realtime/{{id}}" class='btn btn-primary dashboard-view-btn'>Realtime</a>
-                        </p>
-                    % endif        
-                    <ul class='legend clearfix dashboard-legend'>
-                        {{#sensors}}
-                            <li class='old_{{id}}' style="background-color:{{color}};">
-                                <span class='header'>{{display}}:<span class='info {{id}}' id='{{node}}{{id}}_header'>{{value}}{{{decorator}}}</span></span>
-                            </li>
-                        {{/sensors}}
-                    </ul>            
-                </div>                
+                <div class="span4">
+                    <div class='webcam'>
+                        <img src="{{webcam}}" alt="">
+                        <h4 class='dashboard-title'>{{name}}</h4>
+                        % if not settings.IS_CLOUD or settings.IS_DEV:
+                            <p>
+                                <a href="/realtime/{{id}}" class='btn btn-primary dashboard-view-btn'>Realtime</a>
+                            </p>
+                        % endif        
+                        <ul class='legend clearfix dashboard-legend'>
+                            {{#sensors}}
+                                <li class='old_{{id}}' style="background-color:{{color}};">
+                                    <span class='header'>{{display}}:<span class='info {{id}}' id='{{node}}{{id}}_header'>{{value}}{{{decorator}}}</span></span>
+                                </li>
+                            {{/sensors}}
+                        </ul>
+                    </div>
+                </div>               
             </div>
         </div>        
     </div>
