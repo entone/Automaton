@@ -6,6 +6,7 @@ from controllers.user import User
 from controllers.historical import Historical
 from controllers.node_settings import NodeSettings
 from controllers.manual_readings import ManualReadings
+from controllers.calibrate import Calibrate
 from controllers.static import Static
 
 urls = (
@@ -32,7 +33,9 @@ urls = (
     URL(r'^settings/?$', NodeSettings.index),
     URL(r'^settings/save/?$', NodeSettings.save),
     URL(r'^manual_readings/?$', ManualReadings.index),
-    URL(r'^manual_readings/save/?$', ManualReadings.save),
+    URL(r'^manual_readings/save/?$', ManualReadings.save),    
+    URL(r'^calibrate/?$', Calibrate.index),    
+    URL(r'^calibrate/node/(?P<node_id>[-\w.]+)/(?P<type>[-\w.]+)/?$', Calibrate.calibrate),
     URL(r'^static/(?P<file>[-\w.]+)/?$', Static.index),
     URL(r'^favico.ico/?$', Static.index),
 

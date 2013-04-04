@@ -340,3 +340,15 @@ div.output-btn.on span.t::after{
     background: linear-gradient(to bottom,  #f72500 0%,#00bbf4 100%); /* W3C */
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f72500', endColorstr='#00bbf4',GradientType=0 ); /* IE6-9 */
 }
+
+.calibrator{
+    width: 150px;
+    height: 100px;
+    border-radius: 10px;            
+    background-color: #ffffff;            
+    border: 1px solid #999999;            
+    margin-right: 15px;
+    margin-top: 15px;
+    padding: 20px;
+    text-align: center;
+}
