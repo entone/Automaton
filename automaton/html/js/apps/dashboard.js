@@ -41,12 +41,14 @@ Applications.Dashboard.prototype.init = function(){
             var s = loc.nodes[n].sensors[i];
             s.color = colors[tot];
             var sensor = sensors[s.type];
-            s.decorator = sensor.decorator;
-            this.prefs[s.id] = {color:colors[tot], decorator:decorators[s.type]}
-            this.last[s.id] = s.value;
-            this.data[s.id] = [];
-            this.h_data[s.id] = {data:[], color:colors[tot]};
-            tot++;
+            if(sensor){
+                s.decorator = sensor.decorator;
+                this.prefs[s.id] = {color:colors[tot], decorator:decorators[s.type]}
+                this.last[s.id] = s.value;
+                this.data[s.id] = [];
+                this.h_data[s.id] = {data:[], color:colors[tot]};
+                tot++;
+            }
         }
     }
     var template = document.getElementById('dashboard_template').innerHTML;
