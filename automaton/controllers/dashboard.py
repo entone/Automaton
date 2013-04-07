@@ -27,18 +27,20 @@ class Dashboard(DefaultController):
                 n.webcam = image
             avgs = self.get_sensor_averages(n)
             for sensor in n.sensors:
-                t = sensor._get('type')()
-                self.logger.info(t)
-                sensor.type = t.type
-                q = dict(
-                    node=n.id,
-                    sensor=sensor.id,
-                )
-                res = node.SensorValue.find(q, as_dict=True).sort('_id', -1).limit(1)
-                if res.count():
-                    sensor.value = "%.2f" % res[0].get('value')
-                else:
-                    sensor.value = 0
+                try:
+                    t = sensor._get('type')()
+                    self.logger.info(t)
+                    sensor.type = t.type
+                    q = dict(
+                        node=n.id,
+                        sensor=sensor.id,
+                    )
+                    res = node.SensorValue.find(q, as_dict=True).sort('_id', -1).limit(1)
+                    if res.count():
+                        sensor.value = "%.2f" % res[0].get('value')
+                    else:
+                        sensor.value = 0
+                except: pass
         return self.default_response("dashboard.html", image=image, averages=json.dumps(avgs, cls=ComplexEncoder))
 
     def get_sensor_averages(self, nod):
