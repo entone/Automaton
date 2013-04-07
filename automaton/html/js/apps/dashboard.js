@@ -58,6 +58,9 @@ Applications.Dashboard.prototype.init = function(){
     $.plot($("#avg_temp"), [{label:"Daily Average Temperature", data:averages['temperature'], color: colors[2]}], bar_options);    
     $.plot($("#avg_humidity"), [{label:"Daily Average Humidity", data:averages['humidity'], color: colors[3]}], bar_options);
     $.plot($("#avg_waterlevel"), [{label:"Daily Average Water Level", data:averages['water-level'], color: colors[4]}], bar_options);
+    $.plot($("#avg_do"), [{label:"Daily Average DO", data:averages['do'], color: colors[5]}], bar_options);
+    $.plot($("#avg_do-percentage"), [{label:"Daily Average DO Percentage", data:averages['do-percentage'], color: colors[6]}], bar_options);
+    $.plot($("#avg_orp"), [{label:"Daily Average ORP", data:averages['orp'], color: colors[7]}], bar_options);
     $(".graph").bind("plothover", function (event, pos, item) {
         if (item) {
             if (previousPoint != item.dataIndex) {
