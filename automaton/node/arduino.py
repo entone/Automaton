@@ -47,11 +47,12 @@ class Arduino(object):
         while(self.running):
             try:
                 data = self.sio.readline().rstrip()
+                self.logger.debug(data)
                 sensor, value = data.split(",")
                 sensor = int(sensor)
                 value = float(value)
                 diff = math.fabs(self.past_values[sensor]-value)
-                d = self.sensors[self.sensor_ids[sensor]]
+                d = self.sensors[self.sensor_ids[sensor]]                
                 if diff > d.change or (self.past_values[sensor] == 0 and diff > 0):
                     self.past_values[sensor] = value
                     val = d.do_conversion(value)
