@@ -47,7 +47,7 @@ class Arduino(object):
         while(self.running):
             try:
                 data = self.sio.readline().rstrip()
-                self.logger.debug(data)
+                self.logger.info(data)
                 sensor, value = data.split(",")
                 sensor = int(sensor)
                 value = float(value)
