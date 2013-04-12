@@ -19,5 +19,8 @@ class Calibrate(DefaultController):
     def index(self):
         return self.default_response("calibrate.html")
 
-    def calibrate(self, node_id, type):
-        return Response(json.dumps(dict(result="woot"), cls=ComplexEncoder))
+    def calibrate(self, node, type):
+    	rpc = RPC(port=settings.CLIENT_RPC)
+    	mes = dict(node=node, type=type, method='calibrate')
+        res = rpc.send(mes, settings.KEY)
+        return Response(json.dumps(res, cls=ComplexEncoder))

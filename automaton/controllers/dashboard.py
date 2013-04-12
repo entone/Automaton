@@ -23,7 +23,7 @@ class Dashboard(DefaultController):
             i_q = dict(node=n.id)
             image = node.Image.find(i_q, as_dict=True, fields={'filename':1}).sort('_id', -1).limit(1)
             if image.count():
-                image = settings.TIMELAPSE_URL+image[0].get('filename')
+                image = "/static/timelapse/"+image[0].get('filename')
                 n.webcam = image
             avgs = self.get_sensor_averages(n)
             for sensor in n.sensors:

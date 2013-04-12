@@ -35,7 +35,7 @@ urls = (
     URL(r'^manual_readings/?$', ManualReadings.index),
     URL(r'^manual_readings/save/?$', ManualReadings.save),    
     URL(r'^calibrate/?$', Calibrate.index),    
-    URL(r'^calibrate/node/(?P<node_id>[-\w.]+)/(?P<type>[-\w.]+)/?$', Calibrate.calibrate),
+    URL(r'^calibrate/node/(?P<node>[-\w.]+)/(?P<type>[-\w.]+)/?$', Calibrate.calibrate),
     URL(r'^static/(?P<file>[-\w.]+)/?$', Static.index),
     URL(r'^favico.ico/?$', Static.index),
 

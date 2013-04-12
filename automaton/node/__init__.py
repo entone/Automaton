@@ -150,8 +150,14 @@ class Node(object):
             output.set_state(ob.get('state'))
             return dict(state=output.current_state)
 
+    def calibrate(self, ob):
+        return self.interface_kit.calibrate(ob.get('type'))
+
     def digital(self, index, value):
-        self.interface_kit.digital(index, value)
+        return self.interface_kit.digital(index, value)
+
+    def serial(self, index, value):
+        return self.interface_ket.serial(index, value)
 
     def json(self, ob=None):
         return dict(

@@ -99,7 +99,7 @@ class Manager(object):
                 node.id = res.get('id')
                 success = node.call(method='set_id', message=mes)            
 
-            node.downloader = DownloadImage(node.id, "%s%s" % (node.webcam, settings.TIMELAPSE_PATH), settings.TIMELAPSE_SAVE_PATH, settings.TIMELAPSE_PERIOD, s3=True, cb=self.log_image)
+            node.downloader = DownloadImage(node.id, "%s%s" % (node.webcam, settings.TIMELAPSE_PATH), settings.TIMELAPSE_SAVE_PATH, settings.TIMELAPSE_PERIOD, s3=False, cb=self.log_image)
 
         return True
 
@@ -123,6 +123,18 @@ class Manager(object):
         mes = aes.encrypt(mes, settings.KEY)
         self.clients_pubsub.publish(mes)
         return True
+
+    def calibrate(self, obj):
+        node = None
+        for k,n in self.nodes.iteritems():
+            if n.id == obj.get('node'): 
+                node = n
+
+        self.logger.info(obj)
+        if node:
+            res = node.call('calibrate', obj)
+            return res
+        return
 
     def set_output_state(self, obj):
         node = self.get_node(obj.get('node'))

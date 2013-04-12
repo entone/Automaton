@@ -30,11 +30,13 @@ class DownloadImage(object):
                 if filename and self.cb: self.cb(filename, self.id)
             else:
                 try:
-                    name = self.path+self.id+str(now)+'.jpg'
+                    filename = "%s%s.jpg" % (self.id, str(now))
+                    name = self.path+filename
                     self.logger.info("Downloading: %s" % name)
                     urlretrieve(self.url, name)
+		    if filename and self.cb: self.cb(filename, self.id)
                 except IOError as er:
-                    print er
+                    self.logger.exception(er)
             gevent.sleep(self.secs)
 
     def to_s3(self):

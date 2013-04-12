@@ -72,18 +72,18 @@ SENSORS = dict(
 
 #Cloud settings
 
-CLOUD_API = "http://garden.entropealab.mine.nu/api/"
+CLOUD_API = "http://automaton/api/"
 
 #Timelapse Settings
 
-TIMELAPSE_PATH = "img/snapshot.cgi?size=3&quality=1"
-TIMELAPSE_SAVE_PATH = "/home/www/public/timelapse/"
+TIMELAPSE_PATH = "image/jpeg.cgi"
+TIMELAPSE_SAVE_PATH = "/home/automaton/dev/Automaton/automaton/html/timelapse/"
 TIMELAPSE_PERIOD = 60*60 #1 Hour
 TIMELAPSE_URL = "http://automaton.s3.amazonaws.com/"
 
 #Webcam Settings
 
-WEBCAM_VIDEO = "img/video.mjpeg"
+WEBCAM_VIDEO = "video/mjpg.cgi"
 
 #AWS Settings
 

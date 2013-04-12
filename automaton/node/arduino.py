@@ -68,6 +68,29 @@ class Arduino(object):
                 sensor.fire(message=sensor.json())
                 gevent.sleep(5)
 
+    def calibrate(self, type):
+        sensors = dict(
+            do=dict(
+                pin=2,
+                value='X'
+            ),
+            ph4=dict(
+                pin=0,
+                value='F'
+            ),
+            ph7=dict(
+                pin=0,
+                value='S'
+            ),
+            ph10=dict(
+                pin=0,
+                value='T'
+            )
+        )
+        s = sensors.get(type)
+        if s: return self.serial(s.get('pin'), s.get('value'))
+        return
+
     def digital(self, pin, val):
         val = 0 if val == False else 1
         st = "D|%s|%s\r" % (pin, val)

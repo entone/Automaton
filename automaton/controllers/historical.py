@@ -35,7 +35,7 @@ class Historical(DefaultController):
                     size = os.path.getsize(f)
                     if size > 1000:
                         mod = mod_date(f)
-                        filename = "%s%s" % (settings.TIMELAPSE_URL, name)
+                        filename = "%s%s" % ("/static/timelapse/", name)
                         obj = dict(mod=mod, file=filename)
                         if (frm and to) and mod >= frm and mod < to: 
                             da_files.append(obj)
@@ -74,7 +74,7 @@ class Historical(DefaultController):
         ret_images = []
         for img in images:
             ob = dict(
-                file="%s%s" %(settings.TIMELAPSE_URL, img.get('filename')),
+                file="%s%s" %("/static/timelapse/", img.get('filename')),
                 mod=img.get('timestamp'),
             )
             ret_images.append(ob)
