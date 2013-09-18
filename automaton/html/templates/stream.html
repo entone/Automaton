@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Automaton</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type='text/javascript'>
+        var graph = new WebSocket("ws://33.33.33.10:8000/stream/");
+        graph.onopen = function() {
+            console.log("Graph OPEN");
+        };
+
+        graph.onmessage = function(e){
+            console.log(e.data);
+            this.send('');
+        };
+    </script>
+</head>
+    <body>
+        <div id='content' class='container-fluid'></div>
+    </body>
+</html>
+
+
