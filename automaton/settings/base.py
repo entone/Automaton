@@ -3,7 +3,7 @@ import sys
 import logging
 import hashlib
 
-SERVER_NAME = "33.33.33.10:8000"
+SERVER_NAME = "automaton.dev"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.abspath(os.path.join(BASE_DIR, '..'))
 
