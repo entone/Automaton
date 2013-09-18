@@ -1,14 +1,14 @@
 import gevent
 import zmq.green as zmq
-import settings
+from automaton import settings
 import simplejson as json
 import util
 import base64
-from util import aes
-from util.pubsub import PubSub
-from util.rpc import RPC
-from util.jsontools import ComplexEncoder
-from loggers import Logger
+from automaton.util import aes
+from automaton.util.pubsub import PubSub
+from automaton.util.rpc import RPC
+from automaton.util.jsontools import ComplexEncoder
+from automaton.loggers import Logger
 
 
 class Manager(object):

@@ -1,5 +1,5 @@
 import os
-import settings
+from automaton import settings
 import base64
 from Crypto.Cipher import AES
 import hashlib

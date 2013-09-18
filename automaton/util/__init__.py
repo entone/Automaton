@@ -4,7 +4,7 @@ from logging.handlers import SysLogHandler
 import socket
 import fcntl
 import struct
-import settings
+from automaton import settings
 import sys
 import re
 import unidecode

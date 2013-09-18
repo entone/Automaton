@@ -1,9 +1,8 @@
 import simplejson as json
-import zmq.green as zmq
 import aes
-from util.jsontools import ComplexEncoder
-import settings
-import util
+from automaton.util.jsontools import ComplexEncoder
+from automaton import settings
+from automaton import util
 
 class RPC(object):
 

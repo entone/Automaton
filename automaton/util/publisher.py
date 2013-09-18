@@ -2,7 +2,7 @@ import gevent
 import zmq.green as zmq
 import simplejson as json
 from util.jsontools import ComplexEncoder
-import settings
+from automaton import settings
 import util
 
 class Publisher(object):

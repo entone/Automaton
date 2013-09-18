@@ -3,6 +3,7 @@ import sys
 import logging
 import hashlib
 
+SERVER_NAME = "33.33.33.10:8000"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.abspath(os.path.join(BASE_DIR, '..'))
 
@@ -10,8 +11,6 @@ TEMPLATE_DIRS = ["%s/html/templates" % PROJECT_DIR,]
 
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 LOG_LEVEL = logging.DEBUG
-
-logging.basicConfig(format=LOG_FORMAT, level=LOG_LEVEL)
 
 CLIENT_SUB = 5554
 CLIENT_PUB = 5555

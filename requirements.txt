@@ -1,6 +1,8 @@
--e git+https://github.com/entone/envy.git#egg=envy
--e git+https://github.com/entone/Humongolus.git#egg=Humongolus
-pyzmq
+flask
+gevent
+gevent-websocket
 simplejson
 pycrypto==2.6
 unidecode
+gunicorn
+-e git+https://github.com/entone/Humongolus.git#egg=Humongolus

@@ -1,10 +1,10 @@
 import gevent
 import zmq.green as zmq
-from util.subscriber import Subscriber
-from util.broadcast import Client
-from util import aes
-import settings
-import util
+from automaton.util.subscriber import Subscriber
+from automaton.util.broadcast import Client
+from automaton.util import aes
+from automaton import settings
+from automaton import util
 
 class PubSub(object):
 

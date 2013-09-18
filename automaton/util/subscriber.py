@@ -1,11 +1,10 @@
 import datetime
-import zmq.green as zmq
 import simplejson as json
 import gevent
-import util
-import settings
+from automaton import util
+from automaton import settings
 import gevent.socket as socket
-from util import aes
+from automaton.util import aes
 
 class Subscriber(object):
 
