@@ -1,18 +1,18 @@
-from node import Node
-from node.sensor import Sensor
-from node.sensor.temperature import Temperature
-from node.sensor.humidity import Humidity
-from node.sensor.ph import PH
-from node.sensor.light import Light
-from node.sensor.etape import ETape
-from node.sensor.dissolved_oxygen import DissolvedOxygen
+from automaton.node import Node
+from automaton.node.sensor import Sensor
+from automaton.node.sensor.temperature import Temperature
+from automaton.node.sensor.humidity import Humidity
+from automaton.node.sensor.ph import PH
+from automaton.node.sensor.light import Light
+from automaton.node.sensor.etape import ETape
+from automaton.node.sensor.dissolved_oxygen import DissolvedOxygen
 
-from node.output import Output
-from node.trigger import Trigger
-from node.trigger import Clock
-from node.trigger import PID
-from node.trigger import Repeater
-import settings
+from automaton.node.output import Output
+from automaton.node.trigger import Trigger
+from automaton.node.trigger import Clock
+from automaton.node.trigger import PID
+from automaton.node.trigger import Repeater
+from automaton import settings
 
 class Aquaponics(Node):
 

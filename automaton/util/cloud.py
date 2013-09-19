@@ -1,19 +1,19 @@
 import urllib
 import json
-import settings
-import util
-from util import aes
-from util.jsontools import ComplexEncoder
+import logging
+from automaton import settings
+from automaton.util import aes
+from automaton.util.jsontools import ComplexEncoder
 
 class Cloud(object):
 
     def __init__(self):
-        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.logger = logging.getLogger(__name__)
 
     def __getattr__(self, method):
         def call(payload=None):
             url = settings.CLOUD_API+method
-            self.logger.warning(url)
+            self.logger.debug(url)
             data = ""
             if payload: data = json.dumps(payload, cls=ComplexEncoder)
             enc = aes.encrypt(data, settings.KEY)

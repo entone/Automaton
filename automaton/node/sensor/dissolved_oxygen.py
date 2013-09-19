@@ -1,4 +1,4 @@
-from node.sensor import Sensor
+from automaton.node.sensor import Sensor
 
 class DissolvedOxygen(Sensor):
     type="do"

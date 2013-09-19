@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from node.sensor import Sensor
+from automaton.node.sensor import Sensor
 
 class Temperature(Sensor):
     type="temperature"

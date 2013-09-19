@@ -1,5 +1,5 @@
 import gevent
-import util
+import logging
 
 class Event(object):
 
@@ -10,7 +10,7 @@ class Event(object):
 
 class EventDispatcher(object):
     def __init__(self):
-        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.logger = logging.getLogger(__name__)
         self.handlers = []
 
     def __iadd__(self, handler):

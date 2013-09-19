@@ -1,5 +1,6 @@
-import settings
-import util
+from automaton import settings
+from automaton import util
+import logging
 
 class Input(object):
     index = ""
@@ -16,7 +17,7 @@ class Input(object):
         self.type = type
         self.interface = interface
         self.id = util.slugify(self.display)
-        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.logger = logging.getLogger(__name__)
 
     def do_conversion(self, val): 
         self.current_value = val

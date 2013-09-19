@@ -1,5 +1,6 @@
-import settings
-import util
+from automaton import settings
+from automaton import util
+import logging
 
 class Output(object):
     index = ""
@@ -10,7 +11,7 @@ class Output(object):
     current_state = False
 
     def __init__(self, index, display, interface):
-        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.logger = logging.getLogger(__name__)
         self.index = index
         self.display = display
         self.id = util.slugify(self.display)

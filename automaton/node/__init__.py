@@ -3,19 +3,20 @@ import sys
 import random
 import logging
 import base64
-import zmq.green as zmq
-from util.pubsub import PubSub
-from util.jsontools import ComplexEncoder
-from util import aes
-from loggers import Logger
-import settings
 import gevent
-import simplejson as json
-import util
 import sqlite3
-from arduino import Arduino
+import simplejson as json
+from gevent import socket
+from gevent.select import select
+from automaton.util.jsontools import ComplexEncoder
+from automaton.util import aes
+from automaton.util.broadcast.udpserver import UDPServer
+from automaton.loggers import Logger
+from automaton import settings
+from automaton.node.arduino import Arduino
 
-class Node(object):
+
+class Node(UDPServer):
 
     name = None
     id = None
@@ -29,22 +30,16 @@ class Node(object):
     interface_kit = None
     webcam=None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):        
         self.name = kwargs.get('name', 'Node')
+        super(Node, self).__init__(filter=self.name)
         self.webcam = kwargs.get('webcam', '')
         self.initializing = True
-        self.manager = PubSub(self, pub_port=settings.NODE_PUB, sub_port=settings.NODE_SUB, sub_filter=self.name)
-        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.manager = None
+        self.logger = logging.getLogger(__name__)
         self.initialize()
         self.interface_kit = Arduino(self.sensors)
-        self.run()
-
-    def run(self):
-        while True: 
-            self.set_output_state(dict(index=13, state=True))
-            gevent.sleep(1)
-            self.set_output_state(dict(index=13, state=False))
-            gevent.sleep(1)
+        while True: gevent.sleep(0)
 
     def initialize(self):
         self.db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)
@@ -60,44 +55,50 @@ class Node(object):
         c.close()
         while self.initializing:            
             self.logger.info("Waiting for manager")
-            json = dict(name=self.name, method='add_node')
+            json = dict(method='add_node')
             self.publish(json)
             gevent.sleep(1)
         return
+
+    def initialize_rpc(self, message, address):
+        settings.KEY = base64.urlsafe_b64decode(str(message.get('key')))
+        self.initializing = False
+        self.publish(dict(method='initialized'))
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 1048576)
+        sock.bind(('', message.get('port')))
+        while True:
+            self.logger.info("Waiting for message")
+            result = select([sock],[],[])
+            for s in result[0]:
+                msg, address = s.recvfrom(1048576)
+                msg = self.decrypt(msg)
+                msg = json.loads(msg)
+                try:
+                    res = getattr(self, msg.get("method"))(msg)
+                    sock.sendto(self.encrypt(res), address)
+                except Exception as e:
+                    self.logger.exception(e)
+            gevent.sleep(0)
+
+    def encrypt(self, message):
+        return aes.encrypt(json.dumps(message, cls=ComplexEncoder), settings.KEY)
+
+    def decrypt(self, message):
+        return aes.decrypt(message, settings.KEY)
 
     def publish(self, message):
         message['name'] = self.name
         message['node_id'] = self.id
         message['method'] = message.get('method', 'node_change')
         self.logger.info("Publishing: %s" % message)
-        self.manager.publish(aes.encrypt(json.dumps(message, cls=ComplexEncoder), settings.KEY))
+        self.broadcast(message)
         self.test_triggers(message)
 
     def test_triggers(self, message):
         for t in self.triggers:
             t.handle_event(message)
-
-    def initialize_rpc(self, obj, **kwargs):
-        rpc = zmq.Context()
-        rpc_socket = rpc.socket(zmq.REP)
-        rpc_socket.bind("tcp://*:%s" % obj.get('port'))
-        self.logger.info("RPC listening on: %s" % obj.get('port'))
-        settings.KEY = base64.urlsafe_b64decode(str(obj.get('key')))
-        self.logger.info("%s Initialized" % self.name)        
-        while True:                    
-            if self.initializing:
-                self.initializing = False
-                self.publish(dict(method='initialized'))
-
-            message = aes.decrypt(rpc_socket.recv(), settings.KEY)
-            ob = json.loads(message)
-            try:
-                res = getattr(self, ob.get("method"))(ob)
-                st = json.dumps(res, cls=ComplexEncoder)
-                rpc_socket.send(aes.encrypt(st, settings.KEY))
-            except Exception as e:
-                self.logger.exception(e)
-            gevent.sleep(0)
 
     def set_id(self, message):
         c = self.db.cursor()
@@ -108,7 +109,7 @@ class Node(object):
 
     def hello(self, obj):
         o = self.json()
-        self.logger.info(o)
+        self.logger.info("Hello: %s" % o)
         return o
 
     def get_sensor(self, index):

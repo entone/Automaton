@@ -1,6 +1,7 @@
-import settings
-import util
-from util.event import EventDispatcher
+from automaton import settings
+from automaton import util
+from automaton.util.event import EventDispatcher
+import logging
 
 class Sensor(EventDispatcher):
     display = ""
@@ -19,7 +20,7 @@ class Sensor(EventDispatcher):
         self.handlers = events if events else []
         self.updaters = updaters
         if typ: self.type = typ
-        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.logger = logging.getLogger(__name__)
 
     def do_conversion(self, value):
         self.value = self.conversion(value)

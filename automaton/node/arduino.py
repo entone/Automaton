@@ -3,8 +3,8 @@ import serial
 import gevent
 import math
 import random
+import logging
 import io
-import util
 
 class Arduino(object):
     running = True
@@ -23,7 +23,7 @@ class Arduino(object):
             self.sensor_ids.append(sensor.display)
             self.sensors[sensor.display] = sensor
         self.past_values = [0 for i in xrange(100)]
-        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.logger = logging.getLogger(__name__)
         try:
             self.try_serial()       
             gevent.spawn(self.run)

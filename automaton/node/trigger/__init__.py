@@ -1,10 +1,11 @@
-from util.subscriber import Subscriber
-from util.rpc import RPC
-from util import pid
+from automaton.util.subscriber import Subscriber
+from automaton.util.rpc import RPC
+from automaton.util import pid
 import gevent
 import datetime
-import settings
-import util
+from automaton import settings
+from automaton import util
+import logging
 
 class Clock(object):
     time = None
@@ -16,7 +17,7 @@ class Clock(object):
         self.output = output
         self.id = "clock_%s" % self.output.id
         self.state_change = state
-        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.logger = logging.getLogger(__name__)
         gevent.spawn(self.run)
 
     def run(self):
@@ -52,7 +53,7 @@ class Repeater(object):
         self.state = state
         self.padding = padding
         self.id = "repeater_%s" % self.output.id
-        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.logger = logging.getLogger(__name__)
         self.times = {}
         for t in xrange(0, 1440, self.every):
             h_on = t/60 if t else 0
@@ -108,7 +109,7 @@ class Trigger(object):
         self.id = "trigger_%s%s" % (self.input.id, self.output.id)
         self.state = state
         self.current_state = current_state
-        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.logger = logging.getLogger(__name__)
 
     def handle_event(self, ob, **kwargs):
         state_change = self.test_change(ob)
@@ -163,7 +164,7 @@ class PID(object):
         self.D = D
         self.pid = pid.PID(P,I,D)
         self.pid.setPoint(set_point)
-        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.logger = logging.getLogger(__name__)
         self.update = update
         self.check = check
         gevent.spawn(self.run)

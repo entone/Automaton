@@ -1,33 +1,34 @@
 import gevent
 import sqlite3
-import zmq.green as zmq
-from automaton import settings
-import simplejson as json
-import util
-import base64
-from automaton.util import aes
-from automaton.util.pubsub import PubSub
-from automaton.util.rpc import RPC
-from automaton.util.jsontools import ComplexEncoder
 import datetime
-from util.cloud import Cloud
-from util.download_image import DownloadImage
-from loggers import Logger, CloudLogger
+import simplejson as json
+import base64
+import logging
+from gevent import socket
+from gevent.select import select
+from automaton import settings
+from automaton.util.broadcast.udpserver import UDPServer
+from automaton.util import aes
+from automaton.util.jsontools import ComplexEncoder
+#from automaton.util.cloud import Cloud
+#from automaton.util.download_image import DownloadImage
+#from automaton.loggers import Logger, CloudLogger
 
 
-class Manager(object):
+class Manager(UDPServer):
     nodes = dict()
 
     def __init__(self):
+        super(Manager, self).__init__()
         self.nodes = dict()
-        self.clients_pubsub = PubSub(self, pub_port=settings.CLIENT_SUB, sub_port=settings.CLIENT_PUB, broadcast=False)
-        self.nodes_pubsub = PubSub(self, pub_port=settings.NODE_SUB, sub_port=settings.NODE_PUB, parse_message=self.parse_message)
-        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
-        self.cloud = Cloud()
-        self.register()        
+        #self.clients_pubsub = UDPServer()
+        #self.nodes_pubsub = PubSub(self, pub_port=settings.NODE_SUB, sub_port=settings.NODE_PUB, parse_message=self.parse_message)
+        self.logger = logging.getLogger(__name__)
+        #self.cloud = Cloud()
+        #self.register()        
         #Logger(self)
-        CloudLogger(self)
-        self.run()
+        #CloudLogger(self)
+        while True: gevent.sleep(0)
 
     def register(self):
         self.db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)
@@ -50,62 +51,55 @@ class Manager(object):
 
         c.close()
 
-    def add_node(self, obj, **kwargs):
+    def encrypt(self, message):
+        return aes.encrypt(json.dumps(message, cls=ComplexEncoder), settings.KEY)
+
+    def decrypt(self, message):
+        for k,n in self.nodes.iteritems():
+            try:
+                return n.parse_message(message)
+            except Exception as e:
+                self.logger.exception(e)
+        
+        try:
+            return aes.decrypt(message, settings.KEY)
+        except Exception as e:
+            self.logger.exception(e)
+            return message
+
+    def add_node(self, obj, address, **kwargs):
         rpc_port = settings.NODE_RPC+len(self.nodes.keys())
         key = aes.generate_key()
-        n = Node(name=obj.get('name'), address=obj.get('address'), port=rpc_port, pubsub=self.nodes_pubsub, key=key)
+        n = Node(name=obj.get('name'), address=address, port=rpc_port, key=key)
         self.nodes[n.name] = n
         n.publish(method='initialize_rpc', message=dict(port=rpc_port, key=base64.urlsafe_b64encode(key)), key=settings.KEY)        
         return True
 
-    def run(self):
-        rpc = zmq.Context()
-        rpc_socket = rpc.socket(zmq.REP)
-        rpc_socket.bind("tcp://*:%s" % settings.CLIENT_RPC)
-        self.logger.info("RPC listening on: %s" % settings.CLIENT_RPC)
-        while True: 
-            try:
-                self.logger.info("Waiting for RPC")
-                message = rpc_socket.recv()
-                self.logger.info("RPC Got: %s" % message)
-                message = aes.decrypt(message, settings.KEY)
-                ob = json.loads(message)
-                del message
-                res = getattr(self, ob.get("method"))(ob)
-                self.logger.info("Result: %s" % res)
-                st = json.dumps(res, cls=ComplexEncoder)
-                st = aes.encrypt(st, settings.KEY)
-                self.logger.info("Result: %s" % st)
-                rpc_socket.send(st)
-            except Exception as e:
-                rpc_socket.send("{'error':true}")
-                self.logger.exception(e)
-
-
     def get_node(self, name):
         return self.nodes.get(name)
 
-    def initialized(self, obj, **kwargs):
+    def initialized(self, obj, address, **kwargs):
         node = self.get_node(obj.get('name'))
         if node: 
             obj = node.call(method='hello')
             self.logger.info("Yeah!")
-            node.set_obj(obj)            
-            if not obj.get('id'):
-                obj['location_id'] = self.id
-                res = self.cloud.add_node(obj)
-                self.logger.info(res)
-                mes = dict(id=res.get('id'))
-                node.id = res.get('id')
-                success = node.call(method='set_id', message=mes)            
+            self.logger.info(obj)
+            node.set_obj(obj)  
+            #if not obj.get('id'):
+                #obj['location_id'] = self.id
+                #res = self.cloud.add_node(obj)
+                #self.logger.info(res)
+                #mes = dict(id=res.get('id'))
+                #node.id = res.get('id')
+                #success = node.call(method='set_id', message=mes)
 
-            node.downloader = DownloadImage(node.id, "%s%s" % (node.webcam, settings.TIMELAPSE_PATH), settings.TIMELAPSE_SAVE_PATH, settings.TIMELAPSE_PERIOD, s3=True, cb=self.log_image)
+            #node.downloader = DownloadImage(node.id, "%s%s" % (node.webcam, settings.TIMELAPSE_PATH), settings.TIMELAPSE_SAVE_PATH, settings.TIMELAPSE_PERIOD, s3=True, cb=self.log_image)
 
         return True
 
     def log_image(self, filename, id):
         ts = datetime.datetime.utcnow()
-        self.cloud.save_image(dict(timestamp=ts, location=self.id, node=id, filename=filename))
+        #self.cloud.save_image(dict(timestamp=ts, location=self.id, node=id, filename=filename))
 
     def get_nodes(self, obj):
         return [n.call('json') for k,n in self.nodes.iteritems()]
@@ -117,11 +111,11 @@ class Manager(object):
 
         return res
 
-    def node_change(self, obj):
-        obj['location_id'] = self.id
+    def node_change(self, obj, address):
+        #obj['location_id'] = self.id
         mes = json.dumps(obj, cls=ComplexEncoder)
         mes = aes.encrypt(mes, settings.KEY)
-        self.clients_pubsub.publish(mes)
+        #self.clients_pubsub.publish(mes)
         return True
 
     def set_output_state(self, obj):
@@ -145,15 +139,14 @@ class Manager(object):
 
 class Node(object):
 
-    def __init__(self, name, address, port, pubsub, key):
+    def __init__(self, name, address, port, key):
         self.name = name
         self.port = port
         self.address = address
-        self.pubsub = pubsub
+        self.pubsub = UDPServer(spawn=False)
         self.key = key
         self.id = None
-        self.rpc = RPC(address=self.address, port=self.port)
-        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))   
+        self.logger = logging.getLogger(__name__)
 
     def set_obj(self, obj):
         self.obj = obj
@@ -164,19 +157,32 @@ class Node(object):
         message = message if message else {}
         message['method'] = method
         self.logger.debug("Publishing: %s" % message)
-        message = json.dumps(message, cls=ComplexEncoder, encoding='utf-8')
+        message = json.dumps(message, cls=ComplexEncoder)
         message = aes.encrypt(message, key)
         st = self.name+message
-        self.pubsub.publish(st)
+        self.pubsub.broadcast(st)
         return True
 
     def call(self, method, message=None):
         message = message if message else {}
         message['name'] = self.name
         message['method']=  method
-        resp = self.rpc.send(message, self.key)
-        self.logger.debug("Response: %s" % resp)
-        return resp
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 1048576)
+        msg = aes.encrypt(json.dumps(message), self.key)
+        add = (self.address[0], self.port)
+        sock.sendto(msg, add)
+        while True:
+            result = select([sock],[],[])
+            for s in result[0]:
+                msg, address = s.recvfrom(1048576)
+                msg = self.parse_message(msg)
+                msg = json.loads(msg)
+                sock.close()
+                return msg
+
+            gevent.sleep(0)
 
     def parse_message(self, message):
         return aes.decrypt(message, self.key)

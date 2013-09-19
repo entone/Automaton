@@ -1,16 +1,16 @@
 import random
 import gevent
-import settings
-from node import Node
-from node.sensor.temperature import Temperature
-from node.sensor.humidity import Humidity
-from node.sensor.ph import PH
-from node.output import Output
-from node.input import Input
-from node.trigger import Trigger
-from node.trigger import Repeater
-from node.trigger import Clock
-from node.trigger import PID
+from automaton import settings
+from automaton.node import Node
+from automaton.node.sensor.temperature import Temperature
+from automaton.node.sensor.humidity import Humidity
+from automaton.node.sensor.ph import PH
+from automaton.node.output import Output
+from automaton.node.input import Input
+from automaton.node.trigger import Trigger
+from automaton.node.trigger import Repeater
+from automaton.node.trigger import Clock
+from automaton.node.trigger import PID
 
 class Test(Node):
 
@@ -53,8 +53,7 @@ class Test(Node):
         super(Test, self).__init__(*args, **kwargs)
         
     def run(self):
-        while True:
-            gevent.sleep(2)
+        while True:            
             self.temp.current_value = random.randint(0, 50)
             self.publish(self.temp.json())
 
@@ -69,6 +68,7 @@ class Test(Node):
 
             self.motion.current_value = not self.motion.current_value
             self.publish(self.motion.json())
+            gevent.sleep(2)
 
 
         

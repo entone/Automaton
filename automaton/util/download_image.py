@@ -4,8 +4,8 @@ from urllib import urlretrieve
 import urllib
 import time
 import gevent
-import util
-import settings
+from automaton import util
+from automaton import settings
 
 class DownloadImage(object):
 

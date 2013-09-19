@@ -1,13 +1,10 @@
 from flask import Flask
-from automaton.controllers.node import node
+from automaton.controllers.realtime import node
 from automaton import settings
 import logging
 import gevent.pywsgi
 
 logging.basicConfig(format=settings.LOG_FORMAT, level=settings.LOG_LEVEL)
-logger = logging.getLogger(__name__)
-handler = logging.handlers.SysLogHandler(facility=logging.handlers.SysLogHandler.LOG_SYSLOG)
-logger.addHandler(handler)
 
 def log_request(self):
     log = self.server.log
@@ -25,5 +22,6 @@ def create_app():
     app = Automaton(__name__)
     app.config.from_object('automaton.settings')
     app.register_blueprint(node)
+    handler = logging.handlers.SysLogHandler(facility=logging.handlers.SysLogHandler.LOG_SYSLOG)
     app.logger.addHandler(handler)
     return app
