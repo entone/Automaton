@@ -1,0 +1,14 @@
+<%inherit file="base.html"/>
+<%block name='js_app'>
+	<script type='text/javascript'>
+    	var averages = eval('(${averages})');
+    </script>
+    <script src="static/js/apps/dashboard.js"></script>    
+</%block>
+
+<%block name='content'>
+</%block>
+
+<%block name='templates'>
+    <%include file='mustache/dashboard.html'/>
+</%block>

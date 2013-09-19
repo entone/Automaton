@@ -12,36 +12,52 @@ import settings
 import gevent
 import simplejson as json
 import util
-#Phidget specific imports
-LIVE = True
-try:
-    from Phidgets.PhidgetException import PhidgetErrorCodes, PhidgetException
-    from Phidgets.Events.Events import AttachEventArgs, DetachEventArgs, ErrorEventArgs, InputChangeEventArgs, OutputChangeEventArgs, SensorChangeEventArgs
-    from Phidgets.Devices.InterfaceKit import InterfaceKit
-except:
-    LIVE = False
+import sqlite3
+from arduino import Arduino
 
 class Node(object):
 
     name = None
+    id = None
     sensors = []
     outputs = []
     inputs = []
     triggers = []
     clocks = []
     repeaters = []
+    pids = []
     interface_kit = None
+    webcam=None
 
-    def __init__(self, name, *args, **kwargs):
-        self.name = name
+    def __init__(self, *args, **kwargs):
+        self.name = kwargs.get('name', 'Node')
+        self.webcam = kwargs.get('webcam', '')
         self.initializing = True
-        if LIVE: self.interface_kit = InterfaceKit()
         self.manager = PubSub(self, pub_port=settings.NODE_PUB, sub_port=settings.NODE_SUB, sub_filter=self.name)
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
-        self.initialize()    
+        self.initialize()
+        self.interface_kit = Arduino(self.sensors)
         self.run()
 
+    def run(self):
+        while True: 
+            self.set_output_state(dict(index=13, state=True))
+            gevent.sleep(1)
+            self.set_output_state(dict(index=13, state=False))
+            gevent.sleep(1)
+
     def initialize(self):
+        self.db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)
+        c = self.db.cursor()
+        try:
+            c.execute('''CREATE TABLE node_registration (id text)''')
+        except Exception as e: pass
+        self.logger.info("Table Created")
+        c.execute("SELECT id FROM node_registration")
+        self.id = c.fetchone()        
+        if self.id: self.id = self.id[0]
+        self.logger.info("ID: %s" % self.id)
+        c.close()
         while self.initializing:            
             self.logger.info("Waiting for manager")
             json = dict(name=self.name, method='add_node')
@@ -51,7 +67,9 @@ class Node(object):
 
     def publish(self, message):
         message['name'] = self.name
+        message['node_id'] = self.id
         message['method'] = message.get('method', 'node_change')
+        self.logger.info("Publishing: %s" % message)
         self.manager.publish(aes.encrypt(json.dumps(message, cls=ComplexEncoder), settings.KEY))
         self.test_triggers(message)
 
@@ -79,10 +97,19 @@ class Node(object):
                 rpc_socket.send(aes.encrypt(st, settings.KEY))
             except Exception as e:
                 self.logger.exception(e)
-            gevent.sleep(.1)
+            gevent.sleep(0)
+
+    def set_id(self, message):
+        c = self.db.cursor()
+        c.execute("INSERT INTO node_registration VALUES (?)", (message.get('id'),))
+        self.db.commit()
+        c.close()
+        return True
 
     def hello(self, obj):
-        return self.json()
+        o = self.json()
+        self.logger.info(o)
+        return o
 
     def get_sensor(self, index):
         for sensor in self.sensors:
@@ -103,14 +130,14 @@ class Node(object):
         return False
 
     def get_sensor_values(self, ob):
-        res = {}
+        res = {"id":self.id}
         for sensor in self.sensors:
             res[sensor.id] = sensor.json()
 
         return res
 
     def get_output_values(self):
-        res = {}
+        res = {"id":self.id}
         for output in self.outputs:
             res[ouput.id] = output.json()
 
@@ -119,116 +146,27 @@ class Node(object):
     def set_output_state(self, ob):
         output = self.get_output(ob.get('index'))
         if output:
-            self.logger.info("%s: turning %s to %s index: %s" % (self.name, ob.get('type'), ob.get('state'), output.index))
+            self.logger.info("%s: turning %s to %s index: %s" % (self.name, output.display, ob.get('state'), output.index))
             output.set_state(ob.get('state'))
             return dict(state=output.current_state)
 
+    def digital(self, index, value):
+        self.interface_kit.digital(index, value)
+
     def json(self, ob=None):
         return dict(
+            id=self.id,
             name=self.name,
+            webcam=self.webcam,
             sensors=[s.json() for s in self.sensors],
             outputs=[o.json() for o in self.outputs],
             inputs=[i.json() for i in self.inputs],
             triggers=[t.json() for t in self.triggers],
             repeaters=[r.json() for r in self.repeaters],
             clocks=[c.json() for c in self.clocks],
+            pids=[p.json() for p in self.pids],        
             cls=self.__class__.__name__
         )
 
     def __conform__(self, protocol):
         return json.dumps(self.json(), cls=ComplexEncoder)
-
-    def displayDeviceInfo(self):pass
-        
-    #Event Handler Callback Functions
-    def inferfaceKitAttached(self, e):
-        attached = e.device
-        self.logger.info("InterfaceKit %i Attached!" % (attached.getSerialNum()))
-
-    def interfaceKitDetached(self, e):
-        detached = e.device
-        self.logger.info("InterfaceKit %i Detached!" % (detached.getSerialNum()))
-
-    def interfaceKitError(self, e):
-        try:
-            if e.eCode not in (36866,):
-                source = e.device
-                self.logger.info("InterfaceKit %i: Phidget Error %i: %s" % (source.getSerialNum(), e.eCode, e.description))
-        except PhidgetException as e:
-            self.logger.exception(e)
-
-    def interfaceKitInputChanged(self, e):
-        input = self.get_input(e.index)
-        if not input: return
-        val = input.do_conversion(e.value)
-        ob = input.json()
-        self.publish(ob)
-        self.logger.info("%s Input: %s" % (input.display, val))
-
-    def interfaceKitSensorChanged(self, e):
-        sensor = self.get_sensor(e.index)
-        if not sensor: return
-        val = sensor.do_conversion(float(e.value)) if sensor else 0
-        ob = sensor.json()
-        self.publish(ob)
-        self.logger.info("%s Sensor: %s" % (sensor.display, val))
-
-    def interfaceKitOutputChanged(self, e):
-        output = self.get_output(e.index)
-        if not output: return
-        output.current_state = e.state
-        ob = output.json()
-        self.publish(ob)
-        self.logger.info("%s Output: %s" % (output.display, output.current_state))
-
-
-    def run(self):
-        if LIVE: self.init_kit()
-        while True: gevent.sleep(.1)
-
-    def init_kit(self):
-        try:
-            self.interface_kit.setOnAttachHandler(self.inferfaceKitAttached)
-            self.interface_kit.setOnDetachHandler(self.interfaceKitDetached)
-            self.interface_kit.setOnErrorhandler(self.interfaceKitError)
-            self.interface_kit.setOnInputChangeHandler(self.interfaceKitInputChanged)
-            self.interface_kit.setOnOutputChangeHandler(self.interfaceKitOutputChanged)
-            self.interface_kit.setOnSensorChangeHandler(self.interfaceKitSensorChanged)
-        except PhidgetException as e:
-            self.logger.exception(e)
-            
-        self.logger.info("Opening phidget object....")
-
-        try:
-            self.interface_kit.openPhidget()
-        except PhidgetException as e:
-            self.logger.exception(e)
-            
-        self.logger.info("Waiting for attach....")
-
-        try:
-            self.interface_kit.waitForAttach(10000)
-        except PhidgetException as e:
-            self.logger.exception(e)
-            try:
-                self.interface_kit.closePhidget()
-            except PhidgetException as e:
-                self.logger.exception(e)
-                self.logger.info("Exiting....")
-                exit(1)
-            self.logger.info("Exiting....")
-        else:
-            self.displayDeviceInfo()
-
-        self.logger.info("Initializing Sensors")
-        for i in range(self.interface_kit.getSensorCount()):
-            try:
-                sensor = self.get_sensor(i)
-                if sensor:
-                    self.logger.info("Setting Up: %s" % sensor.display)
-                    self.logger.info("Change: %s" % sensor.change)
-                    self.logger.info("Data Rate: %s" % sensor.data_rate)
-                    self.interface_kit.setSensorChangeTrigger(i, sensor.change)
-                    self.interface_kit.setDataRate(i, sensor.data_rate)
-            except PhidgetException as e:
-                self.logger.exception(e)

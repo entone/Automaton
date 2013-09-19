@@ -1,4 +1,5 @@
 import gevent
+import sqlite3
 import zmq.green as zmq
 from automaton import settings
 import simplejson as json
@@ -8,7 +9,10 @@ from automaton.util import aes
 from automaton.util.pubsub import PubSub
 from automaton.util.rpc import RPC
 from automaton.util.jsontools import ComplexEncoder
-from automaton.loggers import Logger
+import datetime
+from util.cloud import Cloud
+from util.download_image import DownloadImage
+from loggers import Logger, CloudLogger
 
 
 class Manager(object):
@@ -19,15 +23,39 @@ class Manager(object):
         self.clients_pubsub = PubSub(self, pub_port=settings.CLIENT_SUB, sub_port=settings.CLIENT_PUB, broadcast=False)
         self.nodes_pubsub = PubSub(self, pub_port=settings.NODE_SUB, sub_port=settings.NODE_PUB, parse_message=self.parse_message)
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
-        Logger(self)
+        self.cloud = Cloud()
+        self.register()        
+        #Logger(self)
+        CloudLogger(self)
         self.run()
+
+    def register(self):
+        self.db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)
+        c = self.db.cursor()
+        try:
+            c.execute('''CREATE TABLE registration (id text)''')
+        except Exception as e: pass
+        self.logger.info("Table Created")
+        c.execute("SELECT id FROM registration")
+        self.id = c.fetchone()
+        self.logger.info(self.id)     
+        if not self.id:
+            res = self.cloud.register_location()
+            c.execute("INSERT INTO registration VALUES (?)", (res.get('id'),))
+            self.id = res.get('id')
+            self.db.commit()
+            self.logger.info(self.id)
+        else:
+            self.id = self.id[0]
+
+        c.close()
 
     def add_node(self, obj, **kwargs):
         rpc_port = settings.NODE_RPC+len(self.nodes.keys())
         key = aes.generate_key()
         n = Node(name=obj.get('name'), address=obj.get('address'), port=rpc_port, pubsub=self.nodes_pubsub, key=key)
         self.nodes[n.name] = n
-        n.publish(method='initialize_rpc', message=dict(port=rpc_port, key=base64.urlsafe_b64encode(key)), key=settings.KEY)
+        n.publish(method='initialize_rpc', message=dict(port=rpc_port, key=base64.urlsafe_b64encode(key)), key=settings.KEY)        
         return True
 
     def run(self):
@@ -42,6 +70,7 @@ class Manager(object):
                 self.logger.info("RPC Got: %s" % message)
                 message = aes.decrypt(message, settings.KEY)
                 ob = json.loads(message)
+                del message
                 res = getattr(self, ob.get("method"))(ob)
                 self.logger.info("Result: %s" % res)
                 st = json.dumps(res, cls=ComplexEncoder)
@@ -61,21 +90,35 @@ class Manager(object):
         if node: 
             obj = node.call(method='hello')
             self.logger.info("Yeah!")
-            node.set_obj = obj
+            node.set_obj(obj)            
+            if not obj.get('id'):
+                obj['location_id'] = self.id
+                res = self.cloud.add_node(obj)
+                self.logger.info(res)
+                mes = dict(id=res.get('id'))
+                node.id = res.get('id')
+                success = node.call(method='set_id', message=mes)            
+
+            node.downloader = DownloadImage(node.id, "%s%s" % (node.webcam, settings.TIMELAPSE_PATH), settings.TIMELAPSE_SAVE_PATH, settings.TIMELAPSE_PERIOD, s3=True, cb=self.log_image)
 
         return True
+
+    def log_image(self, filename, id):
+        ts = datetime.datetime.utcnow()
+        self.cloud.save_image(dict(timestamp=ts, location=self.id, node=id, filename=filename))
 
     def get_nodes(self, obj):
         return [n.call('json') for k,n in self.nodes.iteritems()]
 
     def get_sensor_values(self):
-        res = dict()
+        res = dict(location_id=self.id, nodes=[])
         for k, n in self.nodes.iteritems():
-            res[k] = n.call('get_sensor_values')
+            res['nodes'].append(n.call('get_sensor_values'))
 
         return res
 
     def node_change(self, obj):
+        obj['location_id'] = self.id
         mes = json.dumps(obj, cls=ComplexEncoder)
         mes = aes.encrypt(mes, settings.KEY)
         self.clients_pubsub.publish(mes)
@@ -108,7 +151,9 @@ class Node(object):
         self.address = address
         self.pubsub = pubsub
         self.key = key
-        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
+        self.id = None
+        self.rpc = RPC(address=self.address, port=self.port)
+        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))   
 
     def set_obj(self, obj):
         self.obj = obj
@@ -118,7 +163,7 @@ class Node(object):
         key = key if key else self.key
         message = message if message else {}
         message['method'] = method
-        self.logger.info("Publishing: %s" % message)
+        self.logger.debug("Publishing: %s" % message)
         message = json.dumps(message, cls=ComplexEncoder, encoding='utf-8')
         message = aes.encrypt(message, key)
         st = self.name+message
@@ -126,12 +171,11 @@ class Node(object):
         return True
 
     def call(self, method, message=None):
-        r = RPC(address=self.address, port=self.port)
         message = message if message else {}
         message['name'] = self.name
         message['method']=  method
-        resp = r.send(message, self.key)
-        self.logger.info("Response: %s" % resp)
+        resp = self.rpc.send(message, self.key)
+        self.logger.debug("Response: %s" % resp)
         return resp
 
     def parse_message(self, message):

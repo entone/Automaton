@@ -1,52 +1,51 @@
 import settings
 import util
+from util.event import EventDispatcher
 
-class Sensor(object):
-    index = ""
+class Sensor(EventDispatcher):
     display = ""
+    change = 5
+    value = 0
+    type=""
+    decorator=""
     id = ""
-    change = 2
-    data_rate = 64
-    current_value = 0
-    interface = None
-    decorator = ""
-    type = ""
 
-    def __init__(self, index, display, interface, change=2, data_rate=64):
-        self.index = index
+    def __init__(self, display, interface, events=None, change=5, updaters=None, typ=None):
+        super(Sensor, self).__init__()
         self.display = display
-        self.id = util.slugify(display)
-        self.change = change
-        self.data_rate = data_rate
+        self.id = util.slugify(self.display)
         self.interface = interface
+        self.change = change
+        self.handlers = events if events else []
+        self.updaters = updaters
+        if typ: self.type = typ
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
 
-    def do_conversion(self, val): 
-        self.current_value = self.conversion(float(val))
-        return self.current_value
+    def do_conversion(self, value):
+        self.value = self.conversion(value)
+        if self.updaters: self.do_update()
+        return self.value
+
+    def do_update(self):
+        for i in self.updaters:
+            try:
+                i(self.value)
+            except Exception as e:
+                self.logger.warning(e)
+
+    def conversion(self, value):
+        return value
 
     def get_value(self):
-        try:
-            val = self.interface.interface_kit.getSensorValue(self.index)
-            return self.do_conversion(val)
-        except Exception as e:
-            self.logger.error("No value for: %s" % self.__class__.__name__)
-
-        return None
-
-    def conversion(self, val):
-        return val
+        return self.value
 
     def json(self):
         return dict(
-            index=self.index,
             id=self.id,
             display=self.display,
-            type=self.type,      
-            node=self.interface.name,
-            value=self.current_value,
+            type=self.type,
+            value=self.value,
             change=self.change,
-            data_rate=self.data_rate,
             decorator=self.decorator,
             cls=self.__class__.__name__
         )

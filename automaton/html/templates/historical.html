@@ -1,0 +1,45 @@
+<%inherit file="base.html"/>
+<%block name='js_app'>
+    <script src="static/js/apps/historical.js"></script>
+    <script src="static/js/bootstrap-datepicker.js"></script>
+    <script src="static/js/event.js"></script>
+    <script src="static/js/timelapse.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/datepicker.css">    
+</%block>
+
+<%block name='content'>
+    <h1>Historical</h1>
+    <p>Download sensor data from any node for any timeframe</p>
+    <form class="form-inline historical-form" method="POST" action="/historical/csv">
+        <select id="node">
+        % for node in session.location.nodes:
+            <option value="${node.id}">${node.name}</option>
+        % endfor
+        </select>
+        <div class="btn-group" data-toggle="buttons-radio">
+            <button type="button" class="btn get-csv" id="hour" data-loading-text="Loading...">Last Hour</button>
+            <button type="button" class="btn get-csv" id="day" data-loading-text="Loading...">Last Day</button>
+            <button type="button" class="btn get-csv" id="week" data-loading-text="Loading...">Last Week</button>
+            <button type="button" class="btn get-csv" id="month" data-loading-text="Loading...">Last Month</button>
+            <a href="#" class="btn" id='custom_range'>Custom</a>
+        </div>
+        <div id="custom_content">
+            <div class="input-append date" data-date="12-12-2012" data-date-format="mm-dd-yyyy">
+                <input class="span2" size="16" type="text" placeholder="From" id="from" readonly>
+                <span class="add-on"><i class="icon-th"></i></span>
+            </div>
+            <p></p>            
+            <div class="input-append date" data-date="12-12-2012" data-date-format="mm-dd-yyyy">
+                <input class="span2" size="16" type="text" placeholder="To" id="to" readonly>
+                <span class="add-on"><i class="icon-th"></i></span>
+            </div>
+            <p></p>
+            <button type="submit" class="btn get-csv" id="custom" data-loading-text="Loading...">View</button>
+        </div>
+    </form>    
+    <div id="timelapse"></div>    
+</%block>
+
+<%block name='templates'>
+    <%include file='mustache/timelapse.html'/>
+</%block>

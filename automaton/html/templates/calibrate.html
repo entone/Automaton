@@ -1,0 +1,21 @@
+<%inherit file="base.html"/>
+<%block name='js_app'>
+    <script src="static/js/apps/calibrate.js"></script>
+</%block>
+
+<%block name='content'>
+    <h1>Calibrate</h1>
+    <form class="form-inline calibration-form" method="POST" action="/calibrate/do">
+        <select id="node">
+        % for node in session.location.nodes:
+            <option value="${node.id}">${node.name}</option>
+        % endfor
+        </select>
+        <div class="btn-group" data-toggle="buttons-radio">
+            <button type="button" class="btn calibrate" id="do" data-loading-text="Calibrating...">Dissolved Oxygen</button>
+            <button type="button" class="btn calibrate" id="ph4" data-loading-text="Calibrating...">PH 4</button>
+            <button type="button" class="btn calibrate" id="ph7" data-loading-text="Calibrating...">PH 7</button>
+            <button type="button" class="btn calibrate" id="ph10" data-loading-text="Calibrating...">PH 10</button>
+        </div>
+    </form>   
+</%block>

@@ -3,10 +3,8 @@ body{
 }
 
 .node-frame{
-    width: 40%;
-    margin: 20px;
-    float:left;
-    min-width: 300px;
+    width: 66%;
+    margin: auto;
 }
 
 .node{
@@ -18,9 +16,9 @@ body{
 
 div.header{
     font-weight: bold;
-    width: 100%;
-    padding-top: 10px;
-    padding-bottom: 5px;
+    width: 100%;    
+    height: 30px;
+    padding-top: 6px;
     background-color: #eeeeee;
     border-top-left-radius: 15px;
     border-top-right-radius: 15px;            
@@ -30,62 +28,19 @@ div.header{
     position:relative;
 }
 
-div.video_overlay{
-    position:absolute;
-    opacity:0;
-    top:20%;
-    left:15%;
-    width: 70%;
-    height: 60%;
-    background-color: #ffffff;
-    box-shadow: 5px 5px 20px #dddddd;
-    border: 2px solid #cccccc;
-    border-radius: 15px;
-    transition: opacity .25s ease-in-out;
-    -moz-transition: opacity .25s ease-in-out;
-    -webkit-transition: opacity .25s ease-in-out;
-}
-
-div.video_overlay > video{
-    position:relative;
-    border: 2px solid #dddddd;
-    margin-left: 5%;
-    margin-top:8%;
-    width: 90%;
-}
-
-div.video_overlay_show{
-    opacity: 1;
-}
-
-span.video_close{
-    position: absolute;
-    right: 10px;
-    top: 3px;
-    font-weight:bold;
-    size:13px;
-    text-shadow: 1px 1px 3px #999999;
-    cursor: pointer;
-}
-
 span.header-title{
     margin-left: 20px;
 }
 
-span.video{
-    position:absolute;            
-    right: 20px;
-    cursor: pointer;
+a.video-btn{
+    margin-right: 10px;
+    margin-top: 4px;
 }
 
 .graph-holder{            
     padding-bottom: 10px;
     border: 2px solid #cccccc;
     width: 100%;
-}
-
-.graph{
-    margin-left: 10px;
 }
 
 .historical_graph{
@@ -95,6 +50,22 @@ span.video{
 .day_graph{
     margin-left: 35px;
     border: 2px solid #cccccc;
+}
+
+.dashboard-view-btn{
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.webcam{
+    position:relative;
+    padding-right: 22px;
+}
+
+.webcam img{
+    border: 10px solid #999999;
+    border-radius: 10px;
 }
 
 h3{
@@ -108,6 +79,14 @@ h3{
     line-height: 15px
 }
 
+h4.dashboard-title{
+    position:absolute;
+    left: 20px;
+    top: 5px;
+    color: white;
+    background-color: #C53437;
+}
+
 .legend{            
     margin:0px;
     padding:0px;
@@ -117,13 +96,21 @@ h3{
     font-size: 11px;
 }
 
+.dashboard-legend{
+    position:absolute;
+    left: 10px;
+    bottom: 20px;
+    margin-left: 10px;
+
+}
+
 .legend li{
     float:left;
     padding: 8px;
     background-color: #cccccc;
     margin-bottom: 6px;
     border-radius: 6px;
-    box-shadow: 2px 2px 5px #888;
+    box-shadow: 2px 2px 5px #000;
     margin-right: 10px;
     line-height: 8px;
 }
@@ -178,7 +165,7 @@ div.input_btn.on{
     box-shadow: 0px 0px 5px #97fc00;
 }
 
-div.controls{
+div.node > div.controls{
     width: 100%; 
     border: 2px solid #cccccc;
     border-top: none;
@@ -245,17 +232,123 @@ div.output-btn.on{
 
 div.output-btn.on span.t::after{
     content:'on';
-}        
-
-.clearfix:after {
-    content: ".";
-    display: block;
-    clear: both;
-    visibility: hidden;
-    line-height: 0;
-    height: 0;
 }
- 
-.clearfix {
-    display: block;
+
+.play-pause{
+    position:absolute;
+    left: 10px;
+    top: 10px;
+}
+
+#custom_content{
+    display:none;
+}
+
+#graph{
+    height: 200px;
+    margin-top: 5px;
+    margin-right: 15px;
+}
+
+.graph{
+    height: 200px;
+    margin-top: 5px;
+    margin-right: 15px;   
+}
+
+#downloader{
+    position:absolute;
+    right: 10px;
+    top: 10px;
+    display:none;
+}
+
+.dropdown-menu{
+    z-index: 1012;
+}
+
+.hide{
+    display: none;
+}
+
+@media screen and (max-width: 980px) {
+    .node-frame{
+        width: 92%;
+        margin: auto;
+    }
+}
+
+.progress_holder{
+    position: relative;
+    height: 10px;
+    border: 2px solid #ffffff;
+}
+
+.progress_bar{
+    position:absolute;
+    left:0px;
+    top:0px;
+    width: 1%;
+    height: 100%;
+    background-color: #cccccc;
+}
+
+.loading_bar{
+    position:absolute;
+    left:0px;
+    top:0px;
+    width: 0%;
+    height: 100%;
+    background-color: #eeeeee;
+}
+
+#time_display{
+    position:absolute;
+    top: 50px;
+    left: 10px;
+    background-color: #FFFFFF;
+    opacity: .75;
+    padding: 2px;
+}
+
+
+.thumbnail{
+    position:relative;
+}
+
+.settings .thumbnail{
+    padding: 15px;
+}
+
+.settings button.last{
+    margin-bottom: 30px;
+}
+
+.marker{
+    display:none;
+}
+
+.temp{
+    width: 10%;
+    height: 200px;
+    background: #f72500; /* Old browsers */
+    background: -moz-linear-gradient(top,  #f72500 0%, #00bbf4 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f72500), color-stop(100%,#00bbf4)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #f72500 0%,#00bbf4 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #f72500 0%,#00bbf4 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #f72500 0%,#00bbf4 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #f72500 0%,#00bbf4 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f72500', endColorstr='#00bbf4',GradientType=0 ); /* IE6-9 */
+}
+
+.calibrator{
+    width: 150px;
+    height: 100px;
+    border-radius: 10px;            
+    background-color: #ffffff;            
+    border: 1px solid #999999;            
+    margin-right: 15px;
+    margin-top: 15px;
+    padding: 20px;
+    text-align: center;
 }

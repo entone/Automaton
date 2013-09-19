@@ -6,3 +6,5 @@ pycrypto==2.6
 unidecode
 gunicorn
 -e git+https://github.com/entone/Humongolus.git#egg=Humongolus
+boto
+pyserial

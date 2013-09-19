@@ -1,0 +1,49 @@
+<script type='text/x-mustache' id='node_template'>
+    <div class='node-frame'>
+        <div class='node'>
+            <div class='header'>
+                <span class='header-title'>{{name}}</span>
+                <a href="#video" role="button" class="pull-right video-btn" data-toggle="modal"><img src='/static/img/video.png' /></a>
+            </div>
+            <div class='graph-holder'>
+                <ul class='legend clearfix'>
+                    {{#sensors}}
+                        <li class='old_{{id}}' style="background-color:{{color}};">
+                            <span class='header'>{{display}}:<span class='info {{id}}' id='{{node}}{{id}}_header'></span></span>
+                        </li>
+                    {{/sensors}}
+                </ul>
+                <div class='graph' id="{{name}}" style="width:90%;height:300px;"></div>
+                <h3>Timers</h3>
+                <div class='day_graph' id="day_{{name}}" style="width:85%;height:40px"></div>
+            </div>
+            <div class='inputs clearfix'>
+                {{#inputs}}
+                <div class='input' id='{{parent_id}}{{id}}'>
+                    <div class='input_label'>{{display}}</div>
+                    <div class='input_btn'></div>
+                </div>
+                {{/inputs}}
+            </div>  
+            <div class='controls clearfix'>
+                {{#outputs}}
+                <div class='toggle' id='{{parent_id}}{{id}}'>
+                    <div class='output-label'>{{display}}</div>
+                    <div class='output-btn'><span class='t'></span></div>
+                </div>
+                {{/outputs}}
+            </div>            
+            <div id="video" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                    <h3>Video</h3>
+                </div>
+                <div class="modal-body">
+                    <img src="{{webcam}}" />
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+</script>

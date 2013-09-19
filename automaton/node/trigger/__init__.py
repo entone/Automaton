@@ -14,6 +14,7 @@ class Clock(object):
     def __init__(self, time, output, state):
         self.time = time
         self.output = output
+        self.id = "clock_%s" % self.output.id
         self.state_change = state
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         gevent.spawn(self.run)
@@ -30,6 +31,7 @@ class Clock(object):
 
     def json(self):
         return dict(
+            id=self.id,
             time=self.time,
             output=self.output.display,
             state_change=self.state_change,
@@ -49,6 +51,7 @@ class Repeater(object):
         self.output = output
         self.state = state
         self.padding = padding
+        self.id = "repeater_%s" % self.output.id
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         self.times = {}
         for t in xrange(0, 1440, self.every):
@@ -67,7 +70,7 @@ class Repeater(object):
     def run(self):
         while True:
             now = datetime.datetime.utcnow()
-            self.logger.debug("Now: %s" % now)            
+            self.logger.debug("Now: %s" % now)         
             time = "%i:%i" % (now.hour, now.minute)
             self.logger.debug(time)
             t = self.times.get(time)
@@ -76,6 +79,7 @@ class Repeater(object):
 
     def json(self):
         return dict(
+            id=self.id,
             run_for=self.run_for,
             every=self.every,
             output=self.output.display,
@@ -101,6 +105,7 @@ class Trigger(object):
         self.min = min
         self.max = max
         self.output = output
+        self.id = "trigger_%s%s" % (self.input.id, self.output.id)
         self.state = state
         self.current_state = current_state
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
@@ -133,6 +138,7 @@ class Trigger(object):
 
     def json(self):
         return dict(
+            id=self.id,
             input=self.input.type,
             min=self.min,
             max=self.max,
@@ -146,12 +152,16 @@ class PID(object):
     output = None
     state = True
 
-    def __init__(self, input, output, state, set_point, update=60, check=30, P=2.0, I=0.0, D=1.0, Derivator=0, Integrator=0, Integrator_max=500, Integrator_min=-500):
+    def __init__(self, input, output, state, set_point, update=60, check=30, P=2.0, I=0.0, D=1.0):
         self.input = input
         self.output = output
+        self.id = "pid_%s%s" % (self.input.id, self.output.id)
         self.state = state
         self.set_point = set_point
-        self.pid = pid.PID(3.0,0.4,1.2)
+        self.P = P
+        self.I = I
+        self.D = D
+        self.pid = pid.PID(P,I,D)
         self.pid.setPoint(set_point)
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         self.update = update
@@ -182,9 +192,14 @@ class PID(object):
 
     def json(self):
         return dict(
+            id=self.id,
             input=self.input.type,
-            set_point=self.set_point,
             output=self.output.type,
-            current_state=self.current_state,
+            set_point=self.set_point,
+            update=self.update,
+            check=self.check,
+            proportional=self.P,
+            integral=self.I,
+            derivative=self.D,
             cls=self.__class__.__name__
         )

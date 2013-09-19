@@ -14,20 +14,20 @@ from node.trigger import PID
 
 class Test(Node):
 
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         #Output
-        self.plant_light = Output(0, 'Foilage', 'plant_light', self)
-        self.fan = Output(1, 'Fan', 'fan', self)
-        self.pump = Output(2, 'Pump', 'pump', self)
-        self.subpump = Output(3, 'SubPump', 'subpump', self)
-        self.laser = Output(4, 'Laser', 'laser', self)
+        self.plant_light = Output(0, 'Foilage', self)
+        self.fan = Output(1, 'Fan', self)
+        self.pump = Output(2, 'Pump', self)
+        self.subpump = Output(3, 'SubPump', self)
+        self.laser = Output(4, 'Laser', self)
         self.outputs = [self.plant_light, self.fan, self.pump, self.subpump, self.laser,]
 
         #Sensors
-        self.temp = Temperature(0, 'Temperature', 'temp', self, change=2)        
-        self.humidity = Humidity(1, 'Humidity', 'humidity', self, change=10)
-        self.ph = PH(2, 'PH', 'ph', self, change=20)
-        self.temp2 = Temperature(3, 'Temperature 2', 'water_temp', self, change=2)
+        self.temp = Temperature(0, 'Temperature', self, change=2)        
+        self.humidity = Humidity(1, 'Humidity', self, change=10)
+        self.ph = PH(2, 'PH', self, change=20)
+        self.temp2 = Temperature(3, 'Water Temperature', self, change=2)
         self.sensors = [self.temp, self.humidity, self.ph, self.temp2]
         #Inputs
         self.motion = Input(0, 'Motion Detector', 'motion_detector', self)
@@ -45,17 +45,21 @@ class Test(Node):
         #Triggers
         trig = Trigger(input=self.temp, output=self.fan, min=30, max=float('inf'), state=True, current_state=False)
         motion = Trigger(input=self.motion, output=self.laser, min=True, max=None, state=True, current_state=False)
-        #pid = PID(input=self.temp, output=self.fan, state=True, set_point=27, P=3.0, I=0.4, D=1.2)
+        pid = PID(input=self.temp, output=self.fan, state=True, set_point=27, P=3.0, I=0.4, D=1.2)
+        self.pids = [pid,]
 
         self.triggers = [trig, motion]
 
-        super(Test, self).__init__(name, *args, **kwargs)
+        super(Test, self).__init__(*args, **kwargs)
         
     def run(self):
         while True:
             gevent.sleep(2)
             self.temp.current_value = random.randint(0, 50)
             self.publish(self.temp.json())
+
+            self.temp2.current_value = random.randint(0, 50)
+            self.publish(self.temp2.json())
             
             self.humidity.current_value = random.randint(0, 100)
             self.publish(self.humidity.json())
@@ -64,7 +68,9 @@ class Test(Node):
             self.publish(self.ph.json())
 
             self.motion.current_value = not self.motion.current_value
-            self.publish(self.motion.json())            
+            self.publish(self.motion.json())
+
+
         
 
 

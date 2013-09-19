@@ -1,0 +1,11 @@
+<script type='text/x-mustache' id='pid_template'>
+    <li class='span6'>
+        <div class='thumbnail'>
+            <h4>{{input}}</h4>
+            <div class='setting pid' data-id='{{id}}'>
+                <p>Keep {{input}} at</p>
+                <input class='set_point' type='number' id='set_point__{{id}}' step=.1 value='{{set_point}}'/><p>using {{output}}</p>
+            </div>
+        </div>
+    </li>
+</script>

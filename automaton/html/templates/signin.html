@@ -1,0 +1,42 @@
+<%inherit file="base.html"/>
+<%block name='js_app'>
+    <script src="static/js/apps/signin.js"></script>
+</%block>
+
+<%block name='nav'>
+    
+</%block>
+
+<%block name='content'>
+    <div class="alert alert-block hide" id="sessionended">
+        <h4>Session Ended</h4>
+        You&apos;re session has ended, please log back in.
+    </div>
+    <div class="alert alert-block bad-login hide">
+        <h4>Oops!</h4>
+        Maybe you mistyped your password...?
+    </div>
+    <div class="alert alert-block all-fields hide">
+        <h4>Oops!</h4>
+        All fields are required
+    </div>
+    <form class="form-horizontal" id='signin_form'>
+        <div class="control-group">
+            <label class="control-label" for="email">Email</label>
+            <div class="controls">
+                <input type="email" id="email" name='email' placeholder="Email">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="password">Password</label>
+            <div class="controls">
+                <input type="password" id="password" name='password' placeholder="Password">
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <button type="submit" class="btn">Sign In</button>
+            </div>            
+        </div>        
+    </form>
+</%block>
