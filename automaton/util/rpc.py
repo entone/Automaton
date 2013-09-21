@@ -1,26 +1,30 @@
 import simplejson as json
-import aes
+from gevent import socket
+from gevent.select import select
 from automaton.util.jsontools import ComplexEncoder
 from automaton import settings
 from automaton import util
+from automaton.util import aes
 
 class RPC(object):
 
-    port = 6666
+    def __init__(self, address, port):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 1048576)        
+        self.address = (self.address[0], self.port)
 
-    def __init__(self, address='0.0.0.0', port=6666):
-        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
-        self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.REQ)
-        self.socket.connect("tcp://%s:%s" % (address, port))
-
-    def send(self, ob, key):
-        self.logger.info("Calling: %s" % ob)
-        st = aes.encrypt(json.dumps(ob, cls=ComplexEncoder), key)
-        self.socket.send(st)
-        mes = self.socket.recv()
-        res = aes.decrypt(mes, key)
-        return json.loads(res)
+    def send(self, message, key):
+        msg = aes.encrypt(json.dumps(message, cls=ComplexEncoder), key)
+        self.sock.sendto(msg, self.address)
+        while True:
+            result = select([self.sock],[],[])
+            for s in result[0]:
+                msg, address = s.recvfrom(1048576)
+                msg = self.parse_message(msg)
+                msg = json.loads(msg)
+                self.sock.close()
+                return msg
         
 
     

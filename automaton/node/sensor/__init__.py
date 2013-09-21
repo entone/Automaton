@@ -23,9 +23,12 @@ class Sensor(EventDispatcher):
         self.logger = logging.getLogger(__name__)
 
     def do_conversion(self, value):
-        self.value = self.conversion(value)
-        if self.updaters: self.do_update()
-        return self.value
+        try:
+            self.value = self.conversion(value)
+            if self.updaters: self.do_update()
+            return self.value
+        except Exception as e:
+            self.logger.exception(e)
 
     def do_update(self):
         for i in self.updaters:

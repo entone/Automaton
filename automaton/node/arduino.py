@@ -66,7 +66,7 @@ class Arduino(object):
             for key, sensor in self.sensors.iteritems():
                 sensor.do_conversion(random.randint(0, 100))
                 sensor.fire(message=sensor.json())
-                gevent.sleep(5)
+                gevent.sleep(1000)
 
     def digital(self, pin, val):
         val = 0 if val == False else 1

@@ -19,16 +19,33 @@ class Manager(UDPServer):
     nodes = dict()
 
     def __init__(self):
-        super(Manager, self).__init__()
+        super(Manager, self).__init__(port=settings.NODE_SUB)
         self.nodes = dict()
-        #self.clients_pubsub = UDPServer()
-        #self.nodes_pubsub = PubSub(self, pub_port=settings.NODE_SUB, sub_port=settings.NODE_PUB, parse_message=self.parse_message)
+        self.clients_pubsub = UDPServer(port=settings.CLIENT_SUB, spawn=False)
         self.logger = logging.getLogger(__name__)
         #self.cloud = Cloud()
         #self.register()        
         #Logger(self)
         #CloudLogger(self)
-        while True: gevent.sleep(0)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 1048576)
+        sock.bind(('', settings.CLIENT_RPC))
+        while True:
+            self.logger.info("Waiting for message")
+            result = select([sock],[],[])
+            for s in result[0]:
+                msg, address = s.recvfrom(1048576)
+                msg = self.decrypt(msg)
+                msg = json.loads(msg)
+                try:
+                    res = getattr(self, msg.get("method"))(msg)
+                    self.logger.info("GOT RPC RESULT: %s" % res)
+                    print address
+                    sock.sendto(self.encrypt(res), address)
+                except Exception as e:
+                    self.logger.exception(e)
+            gevent.sleep(0)
 
     def register(self):
         self.db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)
@@ -97,12 +114,16 @@ class Manager(UDPServer):
 
         return True
 
+
+
     def log_image(self, filename, id):
         ts = datetime.datetime.utcnow()
         #self.cloud.save_image(dict(timestamp=ts, location=self.id, node=id, filename=filename))
 
     def get_nodes(self, obj):
-        return [n.call('json') for k,n in self.nodes.iteritems()]
+        obj = [n.call('json') for k,n in self.nodes.iteritems()]
+        self.logger.info("NODES: %s" % obj)
+        return obj
 
     def get_sensor_values(self):
         res = dict(location_id=self.id, nodes=[])
@@ -113,9 +134,9 @@ class Manager(UDPServer):
 
     def node_change(self, obj, address):
         #obj['location_id'] = self.id
-        mes = json.dumps(obj, cls=ComplexEncoder)
-        mes = aes.encrypt(mes, settings.KEY)
-        #self.clients_pubsub.publish(mes)
+        self.logger.info("Node Change: %s" % obj)
+        obj = self.encrypt(obj)
+        self.clients_pubsub.broadcast(obj)
         return True
 
     def set_output_state(self, obj):
@@ -143,7 +164,7 @@ class Node(object):
         self.name = name
         self.port = port
         self.address = address
-        self.pubsub = UDPServer(spawn=False)
+        self.pubsub = UDPServer(port=settings.NODE_SUB, spawn=False)
         self.key = key
         self.id = None
         self.logger = logging.getLogger(__name__)
@@ -167,6 +188,7 @@ class Node(object):
         message = message if message else {}
         message['name'] = self.name
         message['method']=  method
+        self.logger.info("Calling: %s" % message)
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 1048576)

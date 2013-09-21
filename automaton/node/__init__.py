@@ -32,14 +32,14 @@ class Node(UDPServer):
 
     def __init__(self, *args, **kwargs):        
         self.name = kwargs.get('name', 'Node')
-        super(Node, self).__init__(filter=self.name)
+        super(Node, self).__init__(filter=self.name, port=settings.NODE_SUB)
         self.webcam = kwargs.get('webcam', '')
         self.initializing = True
         self.manager = None
         self.logger = logging.getLogger(__name__)
         self.initialize()
         self.interface_kit = Arduino(self.sensors)
-        while True: gevent.sleep(0)
+        while True: gevent.sleep(1)
 
     def initialize(self):
         self.db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)
@@ -62,12 +62,12 @@ class Node(UDPServer):
 
     def initialize_rpc(self, message, address):
         settings.KEY = base64.urlsafe_b64decode(str(message.get('key')))
-        self.initializing = False
-        self.publish(dict(method='initialized'))
+        self.initializing = False        
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 1048576)
         sock.bind(('', message.get('port')))
+        self.publish(dict(method='initialized'))
         while True:
             self.logger.info("Waiting for message")
             result = select([sock],[],[])
@@ -75,8 +75,11 @@ class Node(UDPServer):
                 msg, address = s.recvfrom(1048576)
                 msg = self.decrypt(msg)
                 msg = json.loads(msg)
+                self.logger.info("Running: %s" % msg)
+                print address
                 try:
                     res = getattr(self, msg.get("method"))(msg)
+                    self.logger.info("Ran: %s" % res)
                     sock.sendto(self.encrypt(res), address)
                 except Exception as e:
                     self.logger.exception(e)

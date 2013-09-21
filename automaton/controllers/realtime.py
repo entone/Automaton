@@ -5,10 +5,11 @@ import random
 import datetime
 import simplejson as json
 import sqlite3
+import logging
 from automaton import util
 import automaton.models.node as node_models
 from automaton.util.jsontools import ComplexEncoder
-from automaton.util.subscriber import Subscriber
+from automaton.util.broadcast.udpserver import UDPServer
 from automaton.util.rpc import RPC
 from automaton.util import aes
 from automaton.util.decorators import level
@@ -19,23 +20,71 @@ node = Blueprint(
     template_folder='../html/templates/'
 )
 
-@node.route('/', methods=['GET'])
-def display():
-    return render_template("stream.html");
+class ClientServer(UDPServer):
+
+    def decrypt(self, message):
+        try:
+            return aes.decrypt(message, settings.KEY)
+        except Exception as e:
+            self.logger.exception(e)
+            return message
+
+    def encrypt(self, message):
+        try:
+            return aes.encrypt(message, settings.KEY)
+        except Exception as e:
+            self.logger.exception(e)
+            return message
+
+    def node_change(self, *args, **kwargs): pass
+
+@node.route('/')
+def display(id=None):
+    location = Location()
+    manager = ClientServer(spawn=False, port=settings.CLIENT_RPC)
+    res = manager.rpc(json.dumps(dict(method='get_nodes')), ('', settings.CLIENT_RPC))
+    current_app.logger.info(res)
+    """
+    if id:
+        for node in res:
+            self.logger.info("Node ID: %s" % node.get('id'))
+            if node.get('id') == id:
+                node['webcam'] = "%s%s" % (node.get('webcam'), settings.WEBCAM_VIDEO)
+                n = Node(node)
+                location.nodes.append(n)
+    else:
+        location.nodes = res
+    home = self.request.env.get('HTTP_HOST')
+    self.logger.debug("Got Nodes: %s" % location)
+    sensors = {str(value._id): value.json() for value in node_models.Sensor.find()}
+    return Response(render_template("node.html", values=json.dumps(location.json(), cls=ComplexEncoder), 
+        url=home, settings=settings, session=self.session, location=location,
+        sensors=json.dumps(sensors, cls=ComplexEncoder)))
+    """
 
 @node.route('/stream/')
 def stream():
-    try:
-        ws = request.environ['wsgi.websocket']
-        current_app.logger.info(ws)
-    except Exception as e:
-        current_app.logger.exception(e)    
-    while True:
+    ws = request.environ['wsgi.websocket']
+    current_app.logger.info(ws)
+
+    conn = ClientServer(port=settings.CLIENT_SUB)
+    running = True
+    
+    def write_back(message, address):
         try:
-            ws.send(json.dumps({"int":random.randint(1, 10000)}))
+            ws.send(json.dumps(message, cls=ComplexEncoder))
         except Exception as e:
-            return Response()
-        gevent.sleep(1)
+            logging.exception(e)
+            conn.close()
+            running = False
+
+    conn+= write_back
+    
+    while running: gevent.sleep(1)
+    return Response()
+
+
+
 
 class Location(object):
     nodes = []
