@@ -10,13 +10,14 @@ from gevent import socket
 from gevent.select import select
 from automaton.util.jsontools import ComplexEncoder
 from automaton.util import aes
-from automaton.util.broadcast.udpserver import UDPServer
+from automaton.util.broadcast import BroadcastClient, BroadcastServer
+from automaton.util.rpc import RPCClient, RPCServer
 from automaton.loggers import Logger
 from automaton import settings
 from automaton.node.arduino import Arduino
 
 
-class Node(UDPServer):
+class Node(object):
 
     name = None
     id = None
@@ -31,15 +32,21 @@ class Node(UDPServer):
     webcam=None
 
     def __init__(self, *args, **kwargs):        
+        self.logger = logging.getLogger(__name__)
         self.name = kwargs.get('name', 'Node')
-        super(Node, self).__init__(filter=self.name, port=settings.NODE_SUB)
+        self.manager = BroadcastClient(port=settings.NODE_SUB, filter=self.name, key=settings.KEY)        
+        self.init_server = BroadcastServer(port=settings.NODE_SUB, key=settings.KEY)
+        self.logger.debug("Starting")
+        self.init_server+= self.handle_init
         self.webcam = kwargs.get('webcam', '')
         self.initializing = True
-        self.manager = None
-        self.logger = logging.getLogger(__name__)
         self.initialize()
         self.interface_kit = Arduino(self.sensors)
-        while True: gevent.sleep(1)
+        self.running = True
+        while self.running: gevent.sleep(1)
+
+    def handle_init(self, message, address):
+        getattr(self, message.get("method"))(message, address)
 
     def initialize(self):
         self.db = sqlite3.connect("automaton.db", detect_types=sqlite3.PARSE_DECLTYPES)
@@ -47,56 +54,37 @@ class Node(UDPServer):
         try:
             c.execute('''CREATE TABLE node_registration (id text)''')
         except Exception as e: pass
-        self.logger.info("Table Created")
+        self.logger.debug("Table Created")
         c.execute("SELECT id FROM node_registration")
-        self.id = c.fetchone()        
+        self.id = c.fetchone()
         if self.id: self.id = self.id[0]
         self.logger.info("ID: %s" % self.id)
         c.close()
-        while self.initializing:            
+        while self.initializing:
             self.logger.info("Waiting for manager")
             json = dict(method='add_node')
-            self.publish(json)
+            self.publish(message=json, add_filter=False)
             gevent.sleep(1)
         return
 
     def initialize_rpc(self, message, address):
-        settings.KEY = base64.urlsafe_b64decode(str(message.get('key')))
-        self.initializing = False        
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 1048576)
-        sock.bind(('', message.get('port')))
-        self.publish(dict(method='initialized'))
-        while True:
-            self.logger.info("Waiting for message")
-            result = select([sock],[],[])
-            for s in result[0]:
-                msg, address = s.recvfrom(1048576)
-                msg = self.decrypt(msg)
-                msg = json.loads(msg)
-                self.logger.info("Running: %s" % msg)
-                print address
-                try:
-                    res = getattr(self, msg.get("method"))(msg)
-                    self.logger.info("Ran: %s" % res)
-                    sock.sendto(self.encrypt(res), address)
-                except Exception as e:
-                    self.logger.exception(e)
-            gevent.sleep(0)
+        settings.KEY = base64.urlsafe_b64decode(str(message.get('key')))        
+        self.initializing = False
+        self.init_server.close()
+        self.logger.debug("RPC Port: %s" % message.get('port'))
+        self.rpc_server = RPCServer(address[0], port=message.get('port'), key=settings.KEY, callback=self.rpc_callback)
+        self.publish(dict(method='initialized'), add_filter=False)
+        self.manager.key = settings.KEY
+        
+    def rpc_callback(self, msg, address):
+        return getattr(self, msg.get("method"))(msg)
 
-    def encrypt(self, message):
-        return aes.encrypt(json.dumps(message, cls=ComplexEncoder), settings.KEY)
-
-    def decrypt(self, message):
-        return aes.decrypt(message, settings.KEY)
-
-    def publish(self, message):
+    def publish(self, message, add_filter=True):
         message['name'] = self.name
         message['node_id'] = self.id
         message['method'] = message.get('method', 'node_change')
         self.logger.info("Publishing: %s" % message)
-        self.broadcast(message)
+        self.manager.publish(message, close=False, add_filter=add_filter)
         self.test_triggers(message)
 
     def test_triggers(self, message):

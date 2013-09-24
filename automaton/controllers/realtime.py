@@ -9,8 +9,8 @@ import logging
 from automaton import util
 import automaton.models.node as node_models
 from automaton.util.jsontools import ComplexEncoder
-from automaton.util.broadcast.udpserver import UDPServer
-from automaton.util.rpc import RPC
+from automaton.util.broadcast import BroadcastServer
+from automaton.util.rpc import RPCClient
 from automaton.util import aes
 from automaton.util.decorators import level
 
@@ -19,31 +19,13 @@ node = Blueprint(
     __name__,
     template_folder='../html/templates/'
 )
-
-class ClientServer(UDPServer):
-
-    def decrypt(self, message):
-        try:
-            return aes.decrypt(message, settings.KEY)
-        except Exception as e:
-            self.logger.exception(e)
-            return message
-
-    def encrypt(self, message):
-        try:
-            return aes.encrypt(message, settings.KEY)
-        except Exception as e:
-            self.logger.exception(e)
-            return message
-
-    def node_change(self, *args, **kwargs): pass
-
 @node.route('/')
 def display(id=None):
     location = Location()
-    manager = ClientServer(spawn=False, port=settings.CLIENT_RPC)
-    res = manager.rpc(json.dumps(dict(method='get_nodes')), ('', settings.CLIENT_RPC))
+    manager = RPCClient(address='', port=settings.CLIENT_RPC, key=settings.KEY)
+    res = manager.send(dict(method='get_nodes'))
     current_app.logger.info(res)
+    return render_template('stream.html')
     """
     if id:
         for node in res:
@@ -67,7 +49,7 @@ def stream():
     ws = request.environ['wsgi.websocket']
     current_app.logger.info(ws)
 
-    conn = ClientServer(port=settings.CLIENT_SUB)
+    conn = BroadcastServer(port=settings.CLIENT_SUB, key=settings.KEY)
     running = True
     
     def write_back(message, address):

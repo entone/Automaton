@@ -1,11 +1,10 @@
-from automaton.util.subscriber import Subscriber
-from automaton.util.rpc import RPC
-from automaton.util import pid
 import gevent
 import datetime
+import logging
+from automaton.util import pid
 from automaton import settings
 from automaton import util
-import logging
+
 
 class Clock(object):
     time = None

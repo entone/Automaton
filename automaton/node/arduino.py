@@ -64,9 +64,9 @@ class Arduino(object):
     def run_test(self):
         while(self.running):
             for key, sensor in self.sensors.iteritems():
+                gevent.sleep(1)
                 sensor.do_conversion(random.randint(0, 100))
-                sensor.fire(message=sensor.json())
-                gevent.sleep(1000)
+                sensor.fire(message=sensor.json())                
 
     def digital(self, pin, val):
         val = 0 if val == False else 1
