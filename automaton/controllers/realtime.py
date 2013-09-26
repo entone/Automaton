@@ -1,4 +1,5 @@
-from flask import current_app, request, Blueprint, render_template, Response
+from flask import current_app, request, Blueprint, Response
+from flask.ext.mako import render_template
 import gevent
 from automaton import settings
 import random
@@ -19,14 +20,12 @@ node = Blueprint(
     __name__,
     template_folder='../html/templates/'
 )
+
 @node.route('/')
 def display(id=None):
     location = Location()
     manager = RPCClient(address='', port=settings.CLIENT_RPC, key=settings.KEY)
     res = manager.send(dict(method='get_nodes'))
-    current_app.logger.info(res)
-    return render_template('stream.html')
-    """
     if id:
         for node in res:
             self.logger.info("Node ID: %s" % node.get('id'))
@@ -36,15 +35,14 @@ def display(id=None):
                 location.nodes.append(n)
     else:
         location.nodes = res
-    home = self.request.env.get('HTTP_HOST')
-    self.logger.debug("Got Nodes: %s" % location)
-    sensors = {str(value._id): value.json() for value in node_models.Sensor.find()}
-    return Response(render_template("node.html", values=json.dumps(location.json(), cls=ComplexEncoder), 
-        url=home, settings=settings, session=self.session, location=location,
+    home = request.environ.get('HTTP_HOST')
+    current_app.logger.debug("Got Nodes: %s" % location)
+    sensors = {}#{str(value._id): value.json() for value in node_models.Sensor.find()}
+    return Response(render_template("node.html", values=json.dumps({'nodes':res}), 
+        url=home, settings=settings, location=location,
         sensors=json.dumps(sensors, cls=ComplexEncoder)))
-    """
 
-@node.route('/stream/')
+@node.route('/graph/')
 def stream():
     ws = request.environ['wsgi.websocket']
     current_app.logger.info(ws)

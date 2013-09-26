@@ -7,10 +7,10 @@
     <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-responsive.min.css">
     <link rel="stylesheet" type="text/css" href="/static/css/styles.css">
     <script type='text/javascript'>
+        var Applications = {};
         var loc = eval('(${values})');
         var sensors = eval('(${sensors})');
-        var url = "${url}";
-        var Applications = {};
+        var url = "${url}";        
         var now = new Date();
         var today = (now.getMonth()+1)+"-"+now.getDate()+"-"+now.getFullYear();
     </script>    
@@ -67,7 +67,7 @@
                                                     <b class="caret"></b>
                                                 </a>
                                                 <ul class="dropdown-menu">
-                                                    % for n in session.location.nodes:
+                                                    % for n in location.nodes:
                                                         <li>
                                                             <a href="/realtime/${n.id}">${n.name}</a>
                                                         </li>
