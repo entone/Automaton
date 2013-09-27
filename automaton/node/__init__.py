@@ -58,7 +58,12 @@ class Node(object):
         if self.id: self.id = self.id[0]
         self.logger.info("ID: %s" % self.id)
         c.close()
-        while self.initializing:            
+        count = 0
+        while self.initializing:         
+            if count == 30:
+                self.logger.warning("Manager not responding. Moving on")
+                return
+            count = count+1
             self.logger.info("Waiting for manager")
             json = dict(name=self.name, method='add_node')
             self.publish(json)
