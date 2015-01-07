@@ -12,17 +12,17 @@ var bar_options = {
         minTickSize: [1, "day"],
     },
     grid:{
-        color: "ffffff",
-        backgroundColor: "eeeeee",
+        color: "#000000",
+        backgroundColor: "#eeeeee",
         borderWidth: 3,
-        borderColor: "dddddd",
+        borderColor: "#dddddd",
         hoverable: true,
     },
     legend:{
         backgroundColor:"#FFFFFF",
         position: "nw",
     },
-}; 
+};
 
 Applications.Dashboard = function(){
     this.prefs = {};
@@ -34,7 +34,7 @@ Applications.Dashboard = function(){
 Applications.Dashboard.prototype = new App();
 Applications.Dashboard.constructor = Applications.Dashboard;
 
-Applications.Dashboard.prototype.init = function(){    
+Applications.Dashboard.prototype.init = function(){
     for(var n in loc.nodes){
         var tot = 0;
         for(var i in loc.nodes[n].sensors){
@@ -54,10 +54,10 @@ Applications.Dashboard.prototype.init = function(){
     var template = document.getElementById('dashboard_template').innerHTML;
     var output = Mustache.to_html(template, {nodes:loc.nodes});
     document.getElementById('content').innerHTML+= output;
-    console.log(averages['ph']);    
+    console.log(averages['ph']);
     $.plot($("#avg_watertemp"), [{label:"Daily Average Water Temperature", data:averages['water-temperature'], color: colors[0]}], bar_options);
     $.plot($("#avg_ph"), [{label:"Daily Average PH", data:averages['ph'], color: colors[1]}], bar_options);
-    $.plot($("#avg_temp"), [{label:"Daily Average Temperature", data:averages['temperature'], color: colors[2]}], bar_options);    
+    $.plot($("#avg_temp"), [{label:"Daily Average Temperature", data:averages['temperature'], color: colors[2]}], bar_options);
     $.plot($("#avg_humidity"), [{label:"Daily Average Humidity", data:averages['humidity'], color: colors[3]}], bar_options);
     $.plot($("#avg_waterlevel"), [{label:"Daily Average Water Level", data:averages['water-level'], color: colors[4]}], bar_options);
     $.plot($("#avg_do"), [{label:"Daily Average DO", data:averages['do'], color: colors[5]}], bar_options);
@@ -67,7 +67,7 @@ Applications.Dashboard.prototype.init = function(){
         if (item) {
             if (previousPoint != item.dataIndex) {
                 previousPoint = item.dataIndex;
-                
+
                 $("#tooltip").remove();
                 var x = item.datapoint[0].toFixed(2),
                     y = item.datapoint[1].toFixed(2);
@@ -76,7 +76,7 @@ Applications.Dashboard.prototype.init = function(){
         }
         else {
             $("#tooltip").remove();
-            previousPoint = null;            
+            previousPoint = null;
         }
     });
 }

@@ -37,10 +37,11 @@ Applications.Node.prototype.init = function(){
     }
 
     this.run();
-    
-    this.graph = new WebSocket("ws://"+url+"/graph/");    
+    var ws_url = url+"/graph/";
+    console.log("WS Connection: "+ ws_url);
+    this.graph = new WebSocket(ws_url);
     var that = this;
-    
+
     this.graph.onopen = function() {
         console.log("Graph OPEN");
         this.send('hi');
@@ -71,7 +72,7 @@ Applications.Node.prototype.run = function(){
     for(var i in this.node_objs){
         for(var d in this.node_objs[i].data){
             this.node_objs[i].data[d] = [];
-        }                    
+        }
     }
     var that = this;
     this.inter = setInterval(function(){
@@ -93,4 +94,3 @@ window.onresize = function(ev){
 }
 
 window.application = Applications.Node;
-

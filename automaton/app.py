@@ -1,19 +1,19 @@
 try:
     import logging
     import signal
-    from envy.wsgi import WSGI    
+    from envy.wsgi import WSGI
     from models.user import Session
     from pymongo.connection import Connection
-    import humongolus as orm    
+    import humongolus as orm
     from models.node import Sensor
-    import settings    
+    import settings
     from urls import urls
 
     logging.basicConfig(format=settings.LOG_FORMAT, level=settings.LOG_LEVEL)
 
     server_settings = dict(
-        template_dirs=settings.TEMPLATE_DIRS, 
-        session_key='automaton_session', 
+        template_dirs=settings.TEMPLATE_DIRS,
+        session_key='automaton_session',
         session_cls=Session,
         session_end_redirect='/signin?sessionended=true',
     )
@@ -30,7 +30,8 @@ try:
             try:
                 s.save()
             except Exception as e:
-                logging.warning("%s already instantiated" % k)
+                pass
+                #logging.warning("%s already instantiated" % k)
 
     wsgi = WSGI(urls, server_settings)
 
@@ -48,7 +49,7 @@ def log_request(self):
 
 import gevent
 gevent.pywsgi.WSGIHandler.log_request = log_request
-gevent.signal(signal.SIGQUIT, gevent.shutdown)
+#gevent.signal(signal.SIGQUIT, gevent.shutdown)
 
 def serve(env, start_response):
     try:

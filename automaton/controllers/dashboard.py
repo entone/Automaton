@@ -17,13 +17,13 @@ class Dashboard(DefaultController):
     @level(0)
     def index(self):
         home = self.request.env.get('HTTP_HOST')
-        self.logger.info("Nodes: %s" % self.session.location.nodes)        
+        self.logger.info("Nodes: %s" % self.session.location.nodes)
         for n in self.session.location.nodes:
             self.logger.warn("N: %s" % len(n.sensors))
             i_q = dict(node=n.id)
             image = node.Image.find(i_q, as_dict=True, fields={'filename':1}).sort('_id', -1).limit(1)
             if image.count():
-                image = settings.TIMELAPSE_URL+image[0].get('filename')
+                image = settings.TIMELAPSE_URL+image[0].filename
                 n.webcam = image
             avgs = self.get_sensor_averages(n)
             for sensor in n.sensors:
@@ -52,9 +52,9 @@ class Dashboard(DefaultController):
                 "value":1,
                 "_id":0,
                 "timestamp":1,
-                "day":{ 
-                    "year":{"$year":"$timestamp"}, 
-                    "month":{"$month":"$timestamp"}, 
+                "day":{
+                    "year":{"$year":"$timestamp"},
+                    "month":{"$month":"$timestamp"},
                     "day":{"$dayOfMonth":"$timestamp"},
                 }
             }
@@ -78,7 +78,3 @@ class Dashboard(DefaultController):
         self.logger.info(result)
 
         return result
-            
-
-
-

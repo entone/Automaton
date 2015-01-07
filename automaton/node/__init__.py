@@ -36,11 +36,13 @@ class Node(object):
         self.manager = PubSub(self, pub_port=settings.NODE_PUB, sub_port=settings.NODE_SUB, sub_filter=self.name)
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         self.initialize()
-        self.interface_kit = Arduino(self.sensors)
+        try:
+            self.interface_kit = Arduino(self.sensors)
+        except:pass
         self.run()
 
     def run(self):
-        while True: 
+        while True:
             self.set_output_state(dict(index=13, state=True))
             gevent.sleep(1)
             self.set_output_state(dict(index=13, state=False))
@@ -54,12 +56,12 @@ class Node(object):
         except Exception as e: pass
         self.logger.info("Table Created")
         c.execute("SELECT id FROM node_registration")
-        self.id = c.fetchone()        
+        self.id = c.fetchone()
         if self.id: self.id = self.id[0]
         self.logger.info("ID: %s" % self.id)
         c.close()
         count = 0
-        while self.initializing:         
+        while self.initializing:
             if count == 30:
                 self.logger.warning("Manager not responding. Moving on")
                 return
@@ -88,8 +90,8 @@ class Node(object):
         rpc_socket.bind("tcp://*:%s" % obj.get('port'))
         self.logger.info("RPC listening on: %s" % obj.get('port'))
         settings.KEY = base64.urlsafe_b64decode(str(obj.get('key')))
-        self.logger.info("%s Initialized" % self.name)        
-        while True:                    
+        self.logger.info("%s Initialized" % self.name)
+        while True:
             if self.initializing:
                 self.initializing = False
                 self.publish(dict(method='initialized'))
@@ -146,7 +148,7 @@ class Node(object):
         for output in self.outputs:
             res[ouput.id] = output.json()
 
-        return res    
+        return res
 
     def set_output_state(self, ob):
         output = self.get_output(ob.get('index'))
@@ -169,7 +171,7 @@ class Node(object):
             triggers=[t.json() for t in self.triggers],
             repeaters=[r.json() for r in self.repeaters],
             clocks=[c.json() for c in self.clocks],
-            pids=[p.json() for p in self.pids],        
+            pids=[p.json() for p in self.pids],
             cls=self.__class__.__name__
         )
 

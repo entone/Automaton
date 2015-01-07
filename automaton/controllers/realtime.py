@@ -29,7 +29,7 @@ class Location(object):
 
 class Node(object):
 
-    def __init__(self, obj):        
+    def __init__(self, obj):
         self.obj = obj
         for k,v in obj.iteritems(): setattr(self, k, v)
 
@@ -42,7 +42,7 @@ class Realtime(DefaultController):
     def display(self, id=None):
         location = Location()
         self.rpc = RPC(port=settings.CLIENT_RPC, address='127.0.0.1')
-        res = self.rpc.send(dict(method='get_nodes'), settings.KEY)        
+        res = self.rpc.send(dict(method='get_nodes'), settings.KEY)
         if id:
             for node in res:
                 self.logger.info("Node ID: %s" % node.get('id'))
@@ -52,10 +52,10 @@ class Realtime(DefaultController):
                     location.nodes.append(n)
         else:
             location.nodes = res
-        home = self.request.env.get('HTTP_HOST')
+        home = settings.WEBSOCKET_ENDPOINT
         self.logger.debug("Got Nodes: %s" % location)
         sensors = {str(value._id): value.json() for value in node_models.Sensor.find()}
-        return Response(self.render("node.html", values=json.dumps(location.json(), cls=ComplexEncoder), 
+        return Response(self.render("node.html", values=json.dumps(location.json(), cls=ComplexEncoder),
             url=home, settings=settings, session=self.session, location=location,
             sensors=json.dumps(sensors, cls=ComplexEncoder)))
 
@@ -80,7 +80,7 @@ class Realtime(DefaultController):
                 return False
         sub = Subscriber(callback=write_out, port=settings.CLIENT_SUB, broadcast=False, spawn=False, parse_message=self.parse_message)
         return Response('')
-    
+
     def parse_message(self, message):
         return aes.decrypt(message, settings.KEY)
 
@@ -91,4 +91,3 @@ class Realtime(DefaultController):
         mes['method'] = 'set_output_state'
         res = rpc.send(mes, settings.KEY)
         return Response(json.dumps(res, cls=ComplexEncoder))
-

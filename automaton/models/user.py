@@ -13,7 +13,7 @@ class Password(field.Char):
             algo, salt, hash = val.split("$")
             if algo == "sha1": return val
         except Exception as e:
-            self.logger.exception(e)   
+            self.logger.exception(e)
         return util.encrypt_password(val)
 
 class UserLocation(orm.EmbeddedDocument):
@@ -58,11 +58,12 @@ class Session(orm.Document):
 
         except Exception as e:
             self.logger.info("Session is gone")
+            print "test"
             if id: raise SessionEnd()
             raise e
-        if self.user:
+        if self._get('user'):
             try:
-                self.user_obj = self._get('user')()
+                self.user_obj = self.user
                 self.location = self.user_obj.locations[0]._get('location')()
             except Exception as e:
                 self.logger.exception(e)
@@ -75,7 +76,7 @@ class Session(orm.Document):
             self.logger.info("Logging Out")
             response.cookie('automaton_session', "")
             return True
-        else:     
+        else:
             res = super(Session, self).save()
             self.logger.info("Session ID: %s" % self._id)
             response.cookie('automaton_session', self._id)

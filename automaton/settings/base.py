@@ -8,7 +8,7 @@ from pymongo.connection import Connection
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.abspath(os.path.join(BASE_DIR, '..'))
 
-TEMPLATE_DIRS = ["%s/html/templates" % PROJECT_DIR,]
+TEMPLATE_DIRS = ["%s/html" % PROJECT_DIR, "%s/html/templates" % PROJECT_DIR,]
 
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 LOG_LEVEL = logging.INFO
@@ -72,7 +72,8 @@ SENSORS = dict(
 
 #Cloud settings
 
-CLOUD_API = "http://garden.entropealab.mine.nu/api/"
+CLOUD_API = "http://localhost/api/"
+WEBSOCKET_ENDPOINT = "ws://localhost"
 
 #Timelapse Settings
 

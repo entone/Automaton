@@ -10,7 +10,7 @@ class Input(object):
     decorator = ""
     type = ""
 
-    def __init__(self, index, display, type, interface):
+    def __init__(self, index, display, interface):
         self.index = index
         self.display = display
         self.type = type
@@ -18,7 +18,7 @@ class Input(object):
         self.id = util.slugify(self.display)
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
 
-    def do_conversion(self, val): 
+    def do_conversion(self, val):
         self.current_value = val
         return self.current_value
 
@@ -30,7 +30,7 @@ class Input(object):
             id=self.id,
             index=self.index,
             display=self.display,
-            type=self.type,      
+            type=self.type,
             node=self.interface.name,
             value=self.current_value,
             decorator=self.decorator,

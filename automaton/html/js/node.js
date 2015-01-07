@@ -68,12 +68,12 @@ function Node(obj){
     */
 }
 
-Node.prototype.display_day = function(){            
+Node.prototype.display_day = function(){
     var that = this;
     document.getElementById("day_"+that.name).innerHTML = "";
     var c = document.createElement("canvas");
     var prev = null;
-    c.addEventListener('mousemove', function(e){                
+    c.addEventListener('mousemove', function(e){
         for(var i in that.nodes){
             var n = that.nodes[i];
             if(n.hit_test(e.offsetX, e.offsetY)){
@@ -93,20 +93,20 @@ Node.prototype.display_day = function(){
     })
     var total_wid = $("#day_"+that.name).width();
     c.width = parseInt(total_wid);
-    c.height = 40;            
-    var wid = parseInt(total_wid)/1440;            
+    c.height = 40;
+    var wid = parseInt(total_wid)/1440;
     function draw(){
         that.nodes = [];
         var rows = 0;
         var cxt =  c.getContext("2d");
         cxt.clearRect(0, 0, 575, 40);
-        for(var re in that.repeaters){                    
+        for(var re in that.repeaters){
             var r = that.repeaters[re];
             var pad = r.padding*wid;
             var p = new DayNode(0, 0, pad, daynode_height, "#dddddd");
             p.draw(c);
             var cur_wid=pad;
-            for(var i=0; i<1440; i+=r.every){                        
+            for(var i=0; i<1440; i+=r.every){
                 var w = wid*r.run_for;
                 var on = new DayNode(cur_wid, rows*daynode_height, w, daynode_height, colors[rows], {name:r.output, start:i+r.padding, end:(i+r.padding)+r.run_for});
                 on.draw(c);
@@ -115,7 +115,7 @@ Node.prototype.display_day = function(){
                 var o_w = (r.every-r.run_for)*wid;
                 var off = new DayNode(cur_wid, rows*daynode_height, o_w, daynode_height, "#dddddd");
                 off.draw(c);
-                cur_wid+=o_w;                        
+                cur_wid+=o_w;
             }
             rows++;
         }
@@ -133,12 +133,12 @@ Node.prototype.display_day = function(){
                 var cur = t+(offset/1000/60);
                 cur = cur < 0 ? 1440+cur : cur;
                 ends[clock.output] = [cur, clock.output];
-            }                    
+            }
         }
 
         for(var tt in ons){
             var o = ons[tt][0];
-            var of = ends[tt][0];                    
+            var of = ends[tt][0];
             var w_on = wid*o;
             var w_off = wid*of;
             ob = {name:ons[tt][1], start:o, end:of};
@@ -176,7 +176,7 @@ Node.prototype.display_historical = function(){
             if(n[3]){
                 var da = new Date(n[0]).getTime()+offset;
                 oldest = da < oldest ? da : oldest;
-                newest = da > newest ? da : newest;                
+                newest = da > newest ? da : newest;
                 this.h_data[n[4]].data.push([da, n[3]]);
             }
         }catch(e){
@@ -197,7 +197,7 @@ Node.prototype.display_historical = function(){
     console.log(plots);
     $.plot($("#historical_"+this.name), plots, {
         series: { lines: { show: true, fill: false},points:{show:true}},
-        yaxis: { 
+        yaxis: {
             min: 0,
             max: 100,
         },
@@ -223,17 +223,17 @@ Node.prototype.enable_rollover = function(){
         if (item) {
             if (previousPoint != item.dataIndex) {
                 previousPoint = item.dataIndex;
-                
+
                 $("#tooltip").remove();
                 var x = item.datapoint[0].toFixed(2),
                     y = item.datapoint[1].toFixed(2);
-                
+
                 showTooltip(item.pageX, item.pageY, y);
             }
         }
         else {
             $("#tooltip").remove();
-            previousPoint = null;            
+            previousPoint = null;
         }
     });
 }
@@ -257,7 +257,7 @@ Node.prototype.display = function(){
     }
     $.plot($("#"+this.name), plots, {
         series: { lines: { show: true, fill: false},},
-        yaxis: { 
+        yaxis: {
             min: 0,
             max: 100,
         },
@@ -267,10 +267,10 @@ Node.prototype.display = function(){
             minTickSize: [5, "second"],
         },
         grid:{
-            color: "ffffff",
-            backgroundColor: "eeeeee",
+            color: "#000000",
+            backgroundColor: "#eeeeee",
             borderWidth: 3,
-            borderColor: "dddddd",
+            borderColor: "#dddddd",
         }
     });
 }

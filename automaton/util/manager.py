@@ -24,7 +24,7 @@ class Manager(object):
         self.nodes_pubsub = PubSub(self, pub_port=settings.NODE_SUB, sub_port=settings.NODE_PUB, parse_message=self.parse_message)
         self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
         self.cloud = Cloud()
-        self.register()        
+        self.register()
         #Logger(self)
         CloudLogger(self)
         self.run()
@@ -38,7 +38,7 @@ class Manager(object):
         self.logger.info("Table Created")
         c.execute("SELECT id FROM registration")
         self.id = c.fetchone()
-        self.logger.info(self.id)     
+        self.logger.info(self.id)
         if not self.id:
             res = self.cloud.register_location()
             c.execute("INSERT INTO registration VALUES (?)", (res.get('id'),))
@@ -55,7 +55,7 @@ class Manager(object):
         key = aes.generate_key()
         n = Node(name=obj.get('name'), address=obj.get('address'), port=rpc_port, pubsub=self.nodes_pubsub, key=key)
         self.nodes[n.name] = n
-        n.publish(method='initialize_rpc', message=dict(port=rpc_port, key=base64.urlsafe_b64encode(key)), key=settings.KEY)        
+        n.publish(method='initialize_rpc', message=dict(port=rpc_port, key=base64.urlsafe_b64encode(key)), key=settings.KEY)
         return True
 
     def run(self):
@@ -63,7 +63,7 @@ class Manager(object):
         rpc_socket = rpc.socket(zmq.REP)
         rpc_socket.bind("tcp://*:%s" % settings.CLIENT_RPC)
         self.logger.info("RPC listening on: %s" % settings.CLIENT_RPC)
-        while True: 
+        while True:
             try:
                 self.logger.info("Waiting for RPC")
                 message = rpc_socket.recv()
@@ -87,17 +87,17 @@ class Manager(object):
 
     def initialized(self, obj, **kwargs):
         node = self.get_node(obj.get('name'))
-        if node: 
+        if node:
             obj = node.call(method='hello')
             self.logger.info("Yeah!")
-            node.set_obj(obj)            
+            node.set_obj(obj)
             if not obj.get('id'):
                 obj['location_id'] = self.id
                 res = self.cloud.add_node(obj)
                 self.logger.info(res)
                 mes = dict(id=res.get('id'))
                 node.id = res.get('id')
-                success = node.call(method='set_id', message=mes)            
+                success = node.call(method='set_id', message=mes)
 
             node.downloader = DownloadImage(node.id, "%s%s" % (node.webcam, settings.TIMELAPSE_PATH), settings.TIMELAPSE_SAVE_PATH, settings.TIMELAPSE_PERIOD, s3=True, cb=self.log_image)
 
@@ -126,7 +126,8 @@ class Manager(object):
 
     def set_output_state(self, obj):
         node = self.get_node(obj.get('node'))
-        res = node.call('set_output_state', obj)
+        if obj.get('index'):
+            res = node.call('set_output_state', obj)
 
     def parse_message(self, message):
         for k,n in self.nodes.iteritems():
@@ -153,7 +154,7 @@ class Node(object):
         self.key = key
         self.id = None
         self.rpc = RPC(address=self.address, port=self.port)
-        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))   
+        self.logger = util.get_logger("%s.%s" % (self.__module__, self.__class__.__name__))
 
     def set_obj(self, obj):
         self.obj = obj

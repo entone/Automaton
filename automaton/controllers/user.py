@@ -18,6 +18,7 @@ class User(DefaultController):
         return self.default_response('signin.html')
 
     def signup(self):
+        print self.session
         return self.default_response('signup.html')
 
     def signout(self):
@@ -61,9 +62,3 @@ class User(DefaultController):
             return Response(json.dumps(dict(success=True)))
         except Exception as e:
             return Response(json.dumps(dict(error=e)))
-
-
-
-
-
-

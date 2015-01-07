@@ -5,7 +5,7 @@ Applications.Historical.constructor = Applications.Historical;
 var marker = null;
 var static_markers = [];
 
-Applications.Historical.prototype.init = function(){    
+Applications.Historical.prototype.init = function(){
     var content = $('#custom_content').html()
     $('#custom_range').popover({html:true,placement:'bottom', content:content});
     var that = this;
@@ -22,29 +22,29 @@ Applications.Historical.prototype.init = function(){
                 return false;
             });
         }, 500);
-    });    
-    this.bind_dl_buttons(); 
-    $("#hour").click();    
+    });
+    this.bind_dl_buttons();
+    $("#hour").click();
 }
 
 Applications.Historical.prototype.bind_dl_buttons = function(){
     var that = this;
-    $(".get-csv").click(function(){        
+    $(".get-csv").click(function(){
         try{
-            that.timelapse.pause();            
+            that.timelapse.pause();
         }catch(e){}
         delete that.timelapse;
         delete that.graph_data;
         $("#graph").html("");
-        $("#timelapse").html("");        
-        $("#downloader").hide();        
+        $("#timelapse").html("");
+        $("#downloader").hide();
         $(this).button('loading');
         $(this).button('toggle');
         var id = $(this).attr('id');
         var node = $("#node").val();
-        that.fetch_data(node, id, this);        
+        that.fetch_data(node, id, this);
         return false;
-    });    
+    });
 }
 
 Applications.Historical.prototype.fetch_data = function(node, id, ele){
@@ -66,9 +66,9 @@ Applications.Historical.prototype.fetch_data = function(node, id, ele){
 
 Applications.Historical.prototype.draw_timelapse = function(res, ele){
     try{
-        this.timelapse.pause();    
+        this.timelapse.pause();
         delete this.timelapse;
-    }catch(e){}    
+    }catch(e){}
     var template = $('#timelapse_template').html();
     var obj = {object:"window.app.timelapse"}
     if(res.result.images.length){
@@ -88,9 +88,9 @@ Applications.Historical.prototype.draw_timelapse = function(res, ele){
     static_markers = res.result.markers;
     var that = this;
     var a = {};
-    a.update_percent = function(percent){   
+    a.update_percent = function(percent){
         $('#loading_bar').css('width',percent+'%');
-    }   
+    }
     $('#progress_holder').click(function(e){
         that.timelapse.goto(e)
     });
@@ -120,7 +120,7 @@ Applications.Historical.prototype.update_time_display = function(image){
     }
 }
 
-Applications.Historical.prototype.draw_graph = function(res, ele){    
+Applications.Historical.prototype.draw_graph = function(res, ele){
     if(!this.graph_data){
         for(var sensor in res.result.data){
             var ar = res.result.data[sensor].data;
@@ -131,9 +131,9 @@ Applications.Historical.prototype.draw_graph = function(res, ele){
         this.graph_data = res.result.data;
     }
     this.graph = $.plot($("#graph"), this.graph_data, {
-        series: { 
-            lines: { 
-                show: true, 
+        series: {
+            lines: {
+                show: true,
                 fill: false
             },
             points:{
@@ -141,7 +141,7 @@ Applications.Historical.prototype.draw_graph = function(res, ele){
                 fill:true,
             }
         },
-        yaxis: { 
+        yaxis: {
             min: 0,
             max: 100,
         },
@@ -151,24 +151,24 @@ Applications.Historical.prototype.draw_graph = function(res, ele){
             minTickSize: [10, "minute"],
         },
         grid:{
-            color: "ffffff",
-            backgroundColor: "eeeeee",
+            color: "#000000",
+            backgroundColor: "#eeeeee",
             borderWidth: 3,
-            borderColor: "dddddd",
+            borderColor: "#dddddd",
             hoverable: true,
             markings: this.markings,
         },
         legend:{
             backgroundColor:"#FFFFFF",
             position: "nw",
-        },        
+        },
     });
     if(res){
         this.enable_rollover();
-        $('#custom_range').popover('hide');    
+        $('#custom_range').popover('hide');
         $(ele).button('reset');
-        this.enable_download();    
-    }    
+        this.enable_download();
+    }
     var that = this;
     $.each(static_markers, function(i, el){
         var o = that.graph.pointOffset({x: el[0]+offset, y: 100});
@@ -210,17 +210,17 @@ Applications.Historical.prototype.enable_rollover = function(){
         if (item) {
             if (previousPoint != item.dataIndex) {
                 previousPoint = item.dataIndex;
-                
+
                 $("#tooltip").remove();
                 var x = item.datapoint[0].toFixed(2),
                     y = item.datapoint[1].toFixed(2);
-                
+
                 showTooltip(item.pageX, item.pageY, y);
             }
         }
         else {
             $("#tooltip").remove();
-            previousPoint = null;            
+            previousPoint = null;
         }
     });
 }

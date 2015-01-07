@@ -1,79 +1,70 @@
-import random
-import gevent
-import settings
 from node import Node
+from node.sensor import Sensor
 from node.sensor.temperature import Temperature
 from node.sensor.humidity import Humidity
 from node.sensor.ph import PH
+from node.sensor.light import Light
+from node.sensor.etape import ETape
+from node.sensor.dissolved_oxygen import DissolvedOxygen
+
 from node.output import Output
-from node.input import Input
 from node.trigger import Trigger
-from node.trigger import Repeater
 from node.trigger import Clock
 from node.trigger import PID
+from node.trigger import Repeater
+from node.input import Input
+import settings
+import gevent
+import random
 
 class Test(Node):
 
-    def __init__(self, *args, **kwargs):
-        #Output
-        self.plant_light = Output(0, 'Foilage', self)
-        self.fan = Output(1, 'Fan', self)
-        self.pump = Output(2, 'Pump', self)
-        self.subpump = Output(3, 'SubPump', self)
-        self.laser = Output(4, 'Laser', self)
-        self.outputs = [self.plant_light, self.fan, self.pump, self.subpump, self.laser,]
+    def __init__(self ,*args, **kwargs):
+        self.ph = PH('PH', self, [self.publish], change=.1)
+        self.tds = Sensor('TDS', self, [self.publish], change=10, typ="tds")
+        self.do = DissolvedOxygen('DO', self, [self.publish], change=.1, typ="do")
+        self.humidity = Humidity('Humidity', self,[self.publish])
+        self.temp = Temperature('Temperature', self, [self.publish],
+            updaters=[self.humidity.set_temp, self.ph.set_temp, self.do.set_temp], change=1
+        )
+        self.water_temp = Temperature('Water Temperature', self, [self.publish])
+        self.level = ETape('Water Level', self, [self.publish], change=100)
 
-        #Sensors
-        self.temp = Temperature(0, 'Temperature', self, change=2)        
-        self.humidity = Humidity(1, 'Humidity', self, change=10)
-        self.ph = PH(2, 'PH', self, change=20)
-        self.temp2 = Temperature(3, 'Water Temperature', self, change=2)
-        self.sensors = [self.temp, self.humidity, self.ph, self.temp2]
-        #Inputs
-        self.motion = Input(0, 'Motion Detector', 'motion_detector', self)
-        self.inputs = [self.motion]
-        #Repeaters
-        pump_repeater = Repeater(self.pump, run_for=15, every=60, state=True)
-        subpump_repeater = Repeater(self.subpump, run_for=15, every=60, state=True, padding=2)
-        self.repeaters = [pump_repeater, subpump_repeater]
-        #Clocks
-        light_on = Clock(time=(12,0), output=self.plant_light, state=True)
-        light_off = Clock(time=(0,0), output=self.plant_light, state=False)         
-        pump2_on = Clock(time=(10,0), output=self.subpump, state=True) 
-        pump2_off = Clock(time=(20,0), output=self.subpump, state=False) 
-        self.clocks = [light_on, light_off, pump2_on, pump2_off]
-        #Triggers
-        trig = Trigger(input=self.temp, output=self.fan, min=30, max=float('inf'), state=True, current_state=False)
-        motion = Trigger(input=self.motion, output=self.laser, min=True, max=None, state=True, current_state=False)
-        pid = PID(input=self.temp, output=self.fan, state=True, set_point=27, P=3.0, I=0.4, D=1.2)
-        self.pids = [pid,]
+        self.lights = Output(None, "Lights", self)
+        self.test = Output(None, "Debug", self)
 
-        self.triggers = [trig, motion]
+        self.lights_detected = Input(None, "Light Detected", self)
+
+        self.outputs = [self.lights, self.test]
+        self.inputs = [self.lights_detected,]
+
+        self.clocks = [Clock([13,0], self.lights, True), Clock([1,0], self.lights, False)]
+        self.sensors = [self.ph, self.tds, self.do, self.temp, self.humidity, self.water_temp, self.level]
 
         super(Test, self).__init__(*args, **kwargs)
-        
+
+
     def run(self):
         while True:
             gevent.sleep(2)
-            self.temp.current_value = random.randint(0, 50)
-            self.publish(self.temp.json())
-
-            self.temp2.current_value = random.randint(0, 50)
-            self.publish(self.temp2.json())
-            
-            self.humidity.current_value = random.randint(0, 100)
-            self.publish(self.humidity.json())
-
-            self.ph.current_value = random.randint(0, 14)
+            self.ph.do_conversion(random.randint(3, 14))
             self.publish(self.ph.json())
 
-            self.motion.current_value = not self.motion.current_value
-            self.publish(self.motion.json())
+            self.tds.do_conversion(random.randint(0, 50))
+            self.publish(self.tds.json())
 
+            self.humidity.do_conversion(random.randint(1000, 1023))
+            self.publish(self.humidity.json())
 
-        
+            self.temp.do_conversion(random.randint(100, 160))
+            self.publish(self.temp.json())
 
+            self.water_temp.do_conversion(random.randint(100, 160))
+            self.publish(self.water_temp.json())
 
+            self.level.do_conversion(random.randint(5,35))
+            self.publish(self.level.json())
 
-
-
+            val = random.randint(0,1)
+            self.lights_detected.do_conversion(val)
+            self.publish(self.lights_detected.json())

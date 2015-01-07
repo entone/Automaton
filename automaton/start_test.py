@@ -1,3 +1,3 @@
 from node.test import Test
 
-aq = Test(name='Lettuce', webcam='http://cam1.entropealab.mine.nu/img/video.mjpeg')
+aq = Test(name='Lettuce', webcam='http://192.168.1.9/')
